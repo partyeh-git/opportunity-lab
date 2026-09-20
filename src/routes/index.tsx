@@ -4,9 +4,7 @@ import {
   ArrowRightLeft,
   BarChart3,
   ChevronRight,
-  FlaskConical,
   Gauge,
-  LayoutDashboard,
   Menu,
   Newspaper,
   Search,
@@ -18,7 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BacktestLab } from "@/components/backtest-lab";
+import { PlayerResearch } from "@/components/player-research";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
@@ -42,8 +40,9 @@ export const Route = createFileRoute("/")({
 });
 
 const navItems = [
-  ["Overview", LayoutDashboard],
-  ["Projection checks", FlaskConical],
+  ["Players", Search],
+  ["Start / Sit", ArrowRightLeft],
+  ["Rankings", BarChart3],
   ["Weekly Projections", BarChart3],
   ["My Leagues", Trophy],
   ["Trades", ArrowRightLeft],
@@ -53,7 +52,7 @@ const navItems = [
 type Screen = (typeof navItems)[number][0];
 
 function Index() {
-  const [screen, setScreen] = useState<Screen>("Projection checks");
+  const [screen, setScreen] = useState<Screen>("Players");
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground lg:flex">
@@ -86,7 +85,7 @@ function Index() {
           <div className="flex items-center gap-4">
             <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground md:flex">
               <span className="h-2 w-2 rounded-full bg-warning" />
-              Early testing
+              Fantasy football
             </span>
             <ThemeToggle />
           </div>
@@ -94,10 +93,10 @@ function Index() {
         <div className="mx-auto max-w-[1480px] px-4 py-6 md:px-8 lg:px-10 lg:py-8">
           <div className="mb-5 flex items-center gap-2 text-xs font-medium text-muted-foreground sm:hidden">
             <span className="h-2 w-2 rounded-full bg-warning" />
-            Early testing · Final test still to come
+            Fantasy football · Final test still to come
           </div>
-          {screen === "Projection checks" ? (
-            <BacktestLab />
+          {screen === "Players" ? (
+            <PlayerResearch />
           ) : screen === "My Leagues" ? (
             <MyLeagues />
           ) : (
@@ -132,7 +131,7 @@ function Sidebar({
         <div className="flex h-20 items-center justify-between border-b border-sidebar-foreground/10 px-6">
           <Button
             variant="ghost"
-            onClick={() => onSelect("Projection checks")}
+            onClick={() => onSelect("Players")}
             className="h-auto gap-3 p-0 text-left text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground"
           >
             <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
@@ -171,7 +170,7 @@ function Sidebar({
           <div className="flex items-start gap-3">
             <ShieldCheck className="mt-0.5 h-4 w-4 text-sidebar-foreground" />
             <p className="text-xs leading-5 text-sidebar-muted">
-              Research draft
+              Your fantasy workspace
               <br />
               <span className="text-sidebar-foreground">League lookup stays in your browser</span>
             </p>
@@ -335,117 +334,36 @@ function EmptyConnection() {
 }
 
 function FutureScreen({ screen }: { screen: Screen }) {
-  if (screen === "Overview")
-    return (
-      <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <section className="border-b pb-8 lg:col-span-2">
-          <p className="text-xs font-bold uppercase text-primary">Private research workspace</p>
-          <h2 className="mt-2 max-w-3xl font-display text-4xl font-semibold">
-            Make fewer claims. Make better decisions.
-          </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Opportunity Lab is being built around measured evidence, visible uncertainty, and
-            league-specific context.
-          </p>
-        </section>
-        <div className="rounded-lg border bg-card p-6">
-          <FlaskConical className="text-primary" />
-          <h3 className="mt-8 font-display text-2xl font-semibold">Projection checks</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            See what helped in our 2023 and 2024 tests. The 2025 season is reserved for a final
-            check.
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <Trophy className="text-warning" />
-          <h3 className="mt-8 font-display text-2xl font-semibold">League context</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Optional read-only Sleeper lookup is ready.
-          </p>
-        </div>
-      </div>
-    );
-  const isTrade = screen === "Trades";
-  const isFaab = screen === "Waivers & FAAB";
-  const isNews = screen === "News & Roles";
-  return (
-    <div className="space-y-7">
-      <section className="border-b pb-7">
-        <p className="text-xs font-bold uppercase text-primary">Designed for later integration</p>
-        <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{screen}</h2>
-        <p className="mt-3 text-sm text-muted-foreground">Projection engine integration pending</p>
-      </section>
-      {isTrade && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Placeholder
-            title="Your side"
-            copy="Select players and picks after roster data is available."
-          />
-          <Placeholder
-            title="Their side"
-            copy="No trade values or recommendations are generated yet."
-          />
-          <div className="rounded-lg border bg-card p-5 lg:col-span-2">
-            <h3 className="font-semibold">Future evaluation checklist</h3>
-            <div className="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                "Legal lineup improvement",
-                "Required roster drops",
-                "Bye-week effects",
-                "Keeper surplus",
-              ].map((x) => (
-                <span key={x} className="rounded-md bg-muted p-3">
-                  {x}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      {isFaab && (
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            ["Expected acquisition cost", "Market estimate"],
-            ["Value to your roster", "League-specific gain"],
-            ["Recommended bid / ceiling", "Decision boundary"],
-          ].map(([a, b]) => (
-            <div key={a} className="rounded-lg border bg-card p-5">
-              <p className="text-xs uppercase text-muted-foreground">{b}</p>
-              <p className="mt-8 font-display text-xl font-semibold">{a}</p>
-              <p className="mt-2 text-sm text-warning">Unset until modeled</p>
-            </div>
-          ))}
-          <div className="rounded-lg border bg-card p-5 md:col-span-3">
-            <h3 className="font-semibold">Keeper rules — draft specification</h3>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Optional up to 3 keepers. Drafted players cost one round earlier with a three-year
-              maximum; edge cases require clarification. Waiver keepers cost the final draft pick,
-              then eighth, then fourth.
-            </p>
-          </div>
-        </div>
-      )}
-      {isNews && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Placeholder
-            title="Injury & availability"
-            copy="High-impact reports will show source, time, confidence, and expiry."
-          />
-          <Placeholder
-            title="Usage & strategy"
-            copy="Weaker coach comments remain clearly separated, sourced, timed, and expirable."
-          />
-        </div>
-      )}
-      {!isTrade && !isFaab && !isNews && (
-        <Placeholder
-          title="No rankings displayed"
-          copy="This screen will remain empty until reproducible projection outputs are connected."
-        />
-      )}
-    </div>
-  );
+  const copy: Partial<Record<Screen, [string, string]>> = {
+    "Start / Sit": [
+      "Compare your options",
+      "Start/sit recommendations are not available yet. Browse Players to check player details and Sleeper status.",
+    ],
+    Rankings: [
+      "Fantasy rankings",
+      "Rankings are not available yet. No outside fantasy rankings are used.",
+    ],
+    "Weekly Projections": [
+      "Player projections",
+      "Weekly points, projected stats, and outcome ranges are not available yet.",
+    ],
+    Trades: [
+      "Evaluate a trade",
+      "Personalized trade values are not available yet. Visit My Leagues to look up scoring and lineup requirements.",
+    ],
+    "Waivers & FAAB": [
+      "Find your next pickup",
+      "League availability and personalized bid recommendations are not available yet.",
+    ],
+    "News & Roles": [
+      "Follow player availability",
+      "Sourced injury and usage reports are not available yet. Sleeper status fields are available in Players.",
+    ],
+  };
+  const [title, description] = copy[screen] ?? [screen, "No results available."];
+  return <Placeholder title={title} copy={description} />;
 }
+
 function Placeholder({ title, copy }: { title: string; copy: string }) {
   return (
     <div className="grid min-h-[240px] place-items-center rounded-lg border border-dashed bg-card p-7 text-center">
