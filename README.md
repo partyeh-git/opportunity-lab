@@ -14,7 +14,9 @@ Open the local URL shown in the terminal.
 ## Implemented
 
 - Interactive 2023 and 2024 Full PPR backtest results using only the supplied measured values
-- Model comparison table, MAE chart, bootstrap intervals, methodology, and limitations
+- Plain-English projection checks: average points missed, modest improvements, worked scoring example, and next steps
+- Expandable technical metrics, diagnostic uncertainty ranges, methodology, and limitations
+- Dark mode by default, with an accessible light/dark toggle and a saved browser preference
 - Browser-only, read-only Sleeper username lookup with explicit season selection
 - Designed empty states for weekly projections, trades, waivers/FAAB, and news/roles
 - Responsive desktop and mobile workspace
