@@ -76,7 +76,7 @@ function BacktestLab() {
       <Stat label="Scoring" value="Full PPR" note="4 pt pass TD · −2 INT" />
     </section>
 
-    <section className="grid gap-6 xl:grid-cols-[1.35fr_1fr]">
+    <section className="grid gap-6 2xl:grid-cols-[1.35fr_1fr]">
       <div className="overflow-hidden rounded-lg border bg-card">
         <div className="flex items-center justify-between border-b px-5 py-4"><div><h3 className="font-semibold">Model comparison</h3><p className="text-xs text-muted-foreground">Lower error is better; positive bias means overprojection.</p></div><span className="rounded-sm bg-muted px-2 py-1 text-xs font-semibold">{season}</span></div>
         <div className="overflow-x-auto"><table className="w-full min-w-[620px] text-sm"><thead><tr className="border-b bg-muted/55 text-left text-xs uppercase text-muted-foreground"><th className="px-5 py-3 font-semibold">Model</th><th className="px-4 py-3 text-right font-semibold">MAE</th><th className="px-4 py-3 text-right font-semibold">RMSE</th><th className="px-5 py-3 text-right font-semibold">Bias</th></tr></thead><tbody>{data.models.map((model) => <tr key={model.key} className="border-b last:border-0"><td className="px-5 py-4"><div className="flex items-center gap-2 font-semibold">{model.label}{model.mae === bestMae && <span className="rounded-sm bg-success-soft px-1.5 py-0.5 text-[10px] uppercase text-success">Lowest</span>}</div><p className="mt-1 text-xs text-muted-foreground">{model.description}</p></td><td className="px-4 py-4 text-right font-mono">{model.mae.toFixed(6)}</td><td className="px-4 py-4 text-right font-mono">{model.rmse.toFixed(6)}</td><td className="px-5 py-4 text-right font-mono">+{model.bias.toFixed(6)}</td></tr>)}</tbody></table></div>
