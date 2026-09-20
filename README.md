@@ -1,29 +1,30 @@
-# Welcome to your Lovable project
+# Opportunity Lab
 
-This project was built with [Lovable](https://lovable.dev).
+A private, frontend-only fantasy-football research workspace for transparent model evaluation and future league analysis.
 
-## Build with Lovable
-
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Run locally
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install
+bun run dev
 ```
 
-## Built with
+Open the local URL shown in the terminal.
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+## Implemented
+
+- Interactive 2023 and 2024 Full PPR backtest results using the supplied measured values
+- Model comparison table, MAE chart, bootstrap intervals, methodology, and limitations
+- Browser-only, read-only Sleeper username lookup with explicit season selection
+- Designed empty states for weekly projections, trades, waivers/FAAB, and news/roles
+- Responsive desktop and mobile workspace
+
+## Not implemented
+
+There is no production projection engine, trade evaluator, FAAB model, news feed, database, paid data, AI integration, or cloud backend. League data is fetched directly from Sleeper's public API and is not persisted.
+
+## Development workflow
+
+This repository must be connected to GitHub before any subsequent changes. The initial Lovable design build is the sole allowed build prompt. After this initial design, make all design, UI, data, logic, integration, and bug-fix changes through the connected GitHub repository unless Aryeh explicitly authorizes an exception.
+
+The static experiment data is isolated in `src/data/backtest-results.ts` so a separately reproducible Python projection pipeline can replace it later.
