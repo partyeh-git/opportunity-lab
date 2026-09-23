@@ -17,7 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlayerResearch } from "@/components/player-research";
-import { Rankings, Trades } from "@/components/rankings-trades";
+import { Trades } from "@/components/rankings-trades";
+import { PersonalRankings } from "@/components/personal-rankings";
+import { LeagueProvider } from "@/components/league-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
@@ -37,7 +39,11 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
+  component: () => (
+    <LeagueProvider>
+      <Index />
+    </LeagueProvider>
+  ),
 });
 
 const navItems = [
@@ -45,6 +51,7 @@ const navItems = [
   ["Start / Sit", ArrowRightLeft],
   ["Rankings", BarChart3],
   ["Weekly Projections", BarChart3],
+  ["DST Streamers", ShieldCheck],
   ["My Leagues", Trophy],
   ["Trades", ArrowRightLeft],
   ["Waivers & FAAB", WalletCards],
@@ -99,9 +106,11 @@ function Index() {
           {screen === "Players" ? (
             <PlayerResearch />
           ) : screen === "Rankings" ? (
-            <Rankings />
+            <PersonalRankings />
           ) : screen === "Weekly Projections" ? (
-            <Rankings weeklyOnly />
+            <PersonalRankings weeklyOnly />
+          ) : screen === "DST Streamers" ? (
+            <PersonalRankings defensesOnly />
           ) : screen === "Trades" ? (
             <Trades />
           ) : screen === "My Leagues" ? (
