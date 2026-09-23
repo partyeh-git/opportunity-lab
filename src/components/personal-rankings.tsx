@@ -6,7 +6,7 @@ import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/
 import playersSnapshot from "@/data/rankings-current.json";
 import { ProjectionDetails } from "@/components/projection-details";
 
-const projectionById = new Map(playersSnapshot.players.map((p) => [p.id,p]));
+const projectionById = new Map(playersSnapshot.players.map((p) => [p.id, p]));
 
 const genericSettings = { rec: 1, pass_int: -2 };
 const labelFor = (position: string) =>
@@ -34,7 +34,9 @@ export function PersonalRankings({
 }) {
   const league = useLeague();
   const [genericPpr, setGenericPpr] = useState<"full" | "half">("full");
-  const [horizon, setHorizon] = useState<"week" | "ros">(weeklyOnly || defensesOnly ? "week" : "ros");
+  const [horizon, setHorizon] = useState<"week" | "ros">(
+    weeklyOnly || defensesOnly ? "week" : "ros",
+  );
   const [position, setPosition] = useState("All");
   const [search, setSearch] = useState("");
   const [availability, setAvailability] = useState("All");
@@ -56,13 +58,15 @@ export function PersonalRankings({
   const allRostered = useMemo(() => new Set(rosters.flatMap((r) => r.players ?? [])), [rosters]);
   const rosterLoaded = !!myRoster && !!league.selected;
   const statusOf = (entry: ResearchEntry) =>
-    !rosterLoaded
-      ? "—"
-      : myIds.has(entry.sleeperId)
-        ? "My roster"
-        : allRostered.has(entry.sleeperId)
-          ? "Other roster"
-          : "Available";
+    !entry.sleeperId
+      ? "Unmatched player ID"
+      : !rosterLoaded
+        ? "—"
+        : myIds.has(entry.sleeperId)
+          ? "My roster"
+          : allRostered.has(entry.sleeperId)
+            ? "Other roster"
+            : "Available";
   const impacts = useMemo(() => {
     if (!rosterLoaded) return new Map<string, number>();
     const slots = league.selected!.roster_positions;
@@ -152,9 +156,10 @@ export function PersonalRankings({
             <strong>Early-season estimate:</strong> {playersSnapshot.candidateCount} modeled players
             plus 32 DSTs, using NFL statistics through Week {playersSnapshot.dataThroughWeek}.
             Recent usage is blended with prior-season history. Separate defensive adjustments apply
-            to rushing, receiving, and passing by position. Remaining points sum each future matchup,
-            excluding byes. Injuries and future role changes are not yet modeled; unobserved players
-            are omitted. These are experimental estimates, not calibrated outcome ranges.
+            to rushing, receiving, and passing by position. Remaining points sum each future
+            matchup, excluding byes. Injuries and future role changes are not yet modeled;
+            unobserved players are omitted. These are experimental estimates, not calibrated outcome
+            ranges.
           </>
         )}
       </div>
@@ -272,7 +277,9 @@ export function PersonalRankings({
                   {entry.position !== "DEF" && entry.lastObservedWeek < 2 && (
                     <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
                   )}
-                  {projectionById.has(entry.id) && <ProjectionDetails player={projectionById.get(entry.id)!} />}
+                  {projectionById.has(entry.id) && (
+                    <ProjectionDetails player={projectionById.get(entry.id)!} />
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold tabular-nums">
                   {(effectiveHorizon === "week"

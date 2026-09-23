@@ -20,7 +20,9 @@ const points = (
   settings?: Record<string, number>,
 ) =>
   settings
-    ? horizon === "week" ? scorePlayer(player, settings) : scoreRemainingGames(player, settings)
+    ? horizon === "week"
+      ? scorePlayer(player, settings)
+      : scoreRemainingGames(player, settings)
     : horizon === "week"
       ? scoring === "full"
         ? player.weekFull
@@ -49,11 +51,11 @@ function Caveat({ trades = false }: { trades?: boolean }) {
   return (
     <div className="rounded-lg border border-warning/30 bg-warning-soft/50 p-4 text-sm leading-6">
       <strong>Early-season estimate.</strong> Based on NFL player stats through Week 2;{" "}
-      {snapshot.candidateCount} players with observed {snapshot.season} opportunities. This
-      version blends recent usage with prior-season workloads and applies separate defensive
-      adjustments by position and play type. Current injuries and likely lineup changes are not
-      included. Players without current-season opportunities are omitted. Rest-of-season totals sum
-      the remaining matchups, excluding byes; future roles and availability remain uncertain.
+      {snapshot.candidateCount} players with observed {snapshot.season} opportunities. This version
+      blends recent usage with prior-season workloads and applies separate defensive adjustments by
+      position and play type. Current injuries and likely lineup changes are not included. Players
+      without current-season opportunities are omitted. Rest-of-season totals sum the remaining
+      matchups, excluding byes; future roles and availability remain uncertain.
       {trades && " Trade comparisons also depend on who would fill each vacated roster spot."}
     </div>
   );
@@ -227,11 +229,10 @@ function surplus(
   scoring: Scoring,
   settings?: Record<string, number>,
 ) {
-  return (
-    Math.max(
-      0,
-      points(player, scoring, "ros", settings) - replacementPoints(player.position, league, scoring, settings),
-    )
+  return Math.max(
+    0,
+    points(player, scoring, "ros", settings) -
+      replacementPoints(player.position, league, scoring, settings),
   );
 }
 
@@ -500,8 +501,8 @@ export function Trades() {
           ? "20th QB, 20th RB, 30th WR, and 10th TE"
           : "12th QB, 24th RB, 36th WR, and 12th TE"}{" "}
         in this covered player pool, ordered by remaining-season points. Values use the sum of
-        future matchups and are clamped at zero. Only public NFL statistics are used; no league roster or trade input is
-        saved.
+        future matchups and are clamped at zero. Only public NFL statistics are used; no league
+        roster or trade input is saved.
       </p>
     </div>
   );

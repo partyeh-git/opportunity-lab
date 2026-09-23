@@ -28,8 +28,7 @@ def build(data_dir, existing_path, output, season, week):
         current_game = p['week']
         old = identities.get(p['id'],{})
         row = {k:p[k] for k in ('id','name','position','team','lastObservedWeek','remainingGames','workloadEvidence')}
-        if old.get('sleeperId'):
-            row['sleeperId'] = old['sleeperId']
+        row['sleeperId'] = old.get('sleeperId','')
         row.update(opponent=current_game['opponent'] if current_game else 'BYE',
             projected=public_stats(current_game['stats'] if current_game else dict.fromkeys(STATS,0.)),
             neutralProjected=public_stats(p['base']),
@@ -46,7 +45,7 @@ def build(data_dir, existing_path, output, season, week):
     payload = dict(season=season,week=week,dataThroughWeek=week-1,
         generatedAt=datetime.now(timezone.utc).isoformat(),model=CONFIG['model'],
         source='nflverse weekly player statistics and schedule; no external rankings',
-        candidateCount=len(rows),methodology=CONFIG,sourceHashes=hashes,
+        candidateCount=len(rows),unmappedIdentityCount=sum(not p['sleeperId'] for p in rows),methodology=CONFIG,sourceHashes=hashes,
         modelHash=hashlib.sha256(Path(__file__).with_name('model.py').read_bytes()).hexdigest(),players=rows)
     Path(output).parent.mkdir(parents=True,exist_ok=True)
     Path(output).write_text(json.dumps(payload,separators=(',',':')),encoding='utf-8')
