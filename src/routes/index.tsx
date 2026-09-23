@@ -106,11 +106,11 @@ function Index() {
           {screen === "Players" ? (
             <PlayerResearch />
           ) : screen === "Rankings" ? (
-            <PersonalRankings />
+            <PersonalRankings key="rankings" />
           ) : screen === "Weekly Projections" ? (
-            <PersonalRankings weeklyOnly />
+            <PersonalRankings key="weekly" weeklyOnly />
           ) : screen === "DST Streamers" ? (
-            <PersonalRankings defensesOnly />
+            <PersonalRankings key="dst" defensesOnly />
           ) : screen === "Trades" ? (
             <Trades />
           ) : screen === "My Leagues" ? (
