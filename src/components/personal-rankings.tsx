@@ -157,12 +157,24 @@ export function PersonalRankings({
             plus 32 DSTs, using NFL statistics through Week {playersSnapshot.dataThroughWeek}.
             Recent usage is blended with prior-season history. Separate defensive adjustments apply
             to rushing, receiving, and passing by position. Remaining points sum each future
-            matchup, excluding byes. Injuries and future role changes are not yet modeled;
-            unobserved players are omitted. These are experimental estimates, not calibrated outcome
-            ranges.
+            matchup, excluding byes. Confirmed absences contribute zero; other estimates assume the
+            player plays. Uncertain injuries and returns are labeled below. Teammate workload
+            changes use observed roles where available. Unobserved players are omitted; outcome
+            ranges are not calibrated.
           </>
         )}
       </div>
+      {!defensesOnly && (
+        <p className="text-xs leading-5 text-muted-foreground">
+          Injury check:{" "}
+          {playersSnapshot.availabilitySummary.reviewedAt.slice(0, 16).replace("T", " ")} UTC.{" "}
+          {playersSnapshot.availabilitySummary.confirmedOutPlayers} confirmed absences in the
+          modeled player pool. The injury-report feed currently ends at Week{" "}
+          {playersSnapshot.availabilitySummary.latestInjuryReportWeek}; selected official team and
+          NFL updates supplement it. No flag means availability is unconfirmed, not that the player
+          has been cleared. Saved snapshot; refresh before lineup decisions.
+        </p>
+      )}
       <section className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4">
         {!league.selected && (
           <div className="inline-flex rounded-md border bg-background p-1">
@@ -271,6 +283,12 @@ export function PersonalRankings({
                 <td className="px-4 py-3 tabular-nums text-muted-foreground">{index + 1}</td>
                 <td className="px-4 py-3 font-semibold">
                   {entry.name}
+                  {projectionById.get(entry.id)?.availability?.state !== "unverified" &&
+                    projectionById.get(entry.id)?.availability && (
+                      <span className="ml-2 inline-block rounded border border-warning/40 px-2 py-0.5 text-xs font-medium text-warning">
+                        {projectionById.get(entry.id)!.availability.label}
+                      </span>
+                    )}
                   <span className="ml-2 text-xs font-normal text-muted-foreground">
                     {entry.position === "DEF" ? defenseTiers.get(entry.id) : entry.position}
                   </span>

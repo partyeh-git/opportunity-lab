@@ -1,5 +1,24 @@
 type DetailPlayer = {
   position: string;
+  availability?: {
+    state: string;
+    label: string;
+    reportedStatus: string;
+    injury: string;
+    outWeeks: number[];
+    note: string;
+    reviewedAt: string;
+    sources: { title: string; url: string; publishedDate?: string; retrievedAt: string }[];
+  };
+  roleAdjustments?: {
+    week: number;
+    opportunity: string;
+    added: number;
+    absentPlayers: string[];
+    evidenceGames: number;
+    observedWorkload: number;
+    note: string;
+  }[];
   workloadEvidence: {
     recentGames: number;
     recentWeight: number;
@@ -10,7 +29,13 @@ type DetailPlayer = {
     string,
     { factor: number; weightedOpportunities: number; reliability: number }
   >;
-  weeklyForecasts: { week: number; opponent: string; full: number; half: number }[];
+  weeklyForecasts: {
+    week: number;
+    opponent: string;
+    full: number;
+    half: number;
+    availability?: string;
+  }[];
 };
 
 export function ProjectionDetails({ player }: { player: DetailPlayer }) {
@@ -33,6 +58,53 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
   return (
     <details className="mt-2 max-w-lg text-xs font-normal text-muted-foreground">
       <summary className="cursor-pointer text-primary">Why this projection?</summary>
+      {player.availability && (
+        <div className="my-3 space-y-2 rounded-md border p-3 leading-5">
+          <p className="font-semibold text-foreground">
+            {player.availability.label}
+            {player.availability.injury && ` · ${player.availability.injury}`}
+          </p>
+          <p>{player.availability.note}</p>
+          {player.availability.outWeeks.length > 0 && (
+            <p>
+              Confirmed missed weeks: {player.availability.outWeeks.join(", ")}. These games
+              contribute zero points. Later points assume a return and are not a confirmed recovery
+              forecast.
+            </p>
+          )}
+          {player.availability.sources.map((s) => (
+            <p key={s.url}>
+              <a href={s.url} target="_blank" rel="noreferrer" className="text-primary underline">
+                {s.title}
+              </a>
+              {s.publishedDate && ` · published ${s.publishedDate}`}
+            </p>
+          ))}
+          <p>
+            Checked {player.availability.reviewedAt.slice(0, 16).replace("T", " ")} UTC. This is a
+            saved snapshot, not a live injury feed.
+          </p>
+        </div>
+      )}
+      {!!player.roleAdjustments?.length && (
+        <div className="my-3 space-y-2 rounded-md border p-3 leading-5">
+          <p className="font-semibold text-foreground">Workload changes from teammate absences</p>
+          {player.roleAdjustments.map((a) => (
+            <p key={`${a.week}-${a.opportunity}`}>
+              Week {a.week}: +{a.added.toFixed(1)}{" "}
+              {a.opportunity === "attempts" ? "pass attempts" : a.opportunity} with{" "}
+              {a.absentPlayers.join(", ")} out.
+              {a.evidenceGames > 0
+                ? ` Based on ${a.evidenceGames} observed game${a.evidenceGames === 1 ? "" : "s"} during the absence, moderated for the small sample. Only the increase beyond the existing estimate is added.`
+                : ` ${a.note}`}
+            </p>
+          ))}
+          <p>
+            These role adjustments are provisional. Unassigned workload is not automatically awarded
+            to other players.
+          </p>
+        </div>
+      )}
       <p className="my-2 leading-5">
         {player.workloadEvidence.priorAvailable
           ? `Recent usage has ${(player.workloadEvidence.recentWeight * 100).toFixed(0)}% weight; the rest comes from prior-season usage${player.workloadEvidence.changedTeam ? ", discounted because the player changed teams" : ""}.`
@@ -58,7 +130,9 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
         turnover risk.
       </p>
       <table className="my-2 w-full text-left">
-        <caption className="mb-1 text-left">Remaining schedule · full / half PPR</caption>
+        <caption className="mb-1 text-left">
+          Remaining schedule · full / half PPR · conditional on playing except confirmed absences
+        </caption>
         <thead>
           <tr>
             <th>Week</th>
@@ -69,7 +143,10 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
         <tbody>
           {player.weeklyForecasts.map((g) => (
             <tr key={g.week}>
-              <td>{g.week}</td>
+              <td>
+                {g.week}
+                {g.availability === "out" ? " · Out" : ""}
+              </td>
               <td>{g.opponent}</td>
               <td>
                 {g.full.toFixed(1)} / {g.half.toFixed(1)}
@@ -80,7 +157,10 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
       </table>
       <p className="leading-5">
         Byes are excluded. Future defensive effects fade toward average; workload stays at the
-        current role estimate. Injury availability and future role changes are not yet modeled.
+        current role estimate except for the explained absence adjustments. Unresolved injuries,
+        workload limits on return, and the effect of a quarterback change on receivers are not
+        quantified. These totals are conditional scenarios, not probability-weighted availability
+        forecasts.
       </p>
     </details>
   );

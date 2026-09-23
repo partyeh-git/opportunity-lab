@@ -37,6 +37,20 @@ for (const p of snapshot.players) {
   assert.ok(Math.abs(scoreRemainingGames(p, { rec: 1 }) - p.rosFull) < 0.002);
   assert.ok(Math.abs(scoreRemainingGames(p, { rec: 0.5 }) - p.rosHalf) < 0.002);
   assert.ok(Math.abs(scoreProjectedStats(p.projected, { rec: 1 }) - p.weekFull) < 0.002);
+  for (const game of p.weeklyForecasts) {
+    if (game.availability === "out") {
+      assert.ok(Object.values(game.projected).every((value) => value === 0));
+      assert.equal(scoreProjectedStats(game.projected, { rec: 2, pass_td: 6 }), 0);
+    }
+  }
+}
+assert.equal(
+  snapshot.availabilitySummary.confirmedOutPlayers,
+  snapshot.players.filter((p) => p.availability.state === "confirmed_out").length,
+);
+for (const allocation of snapshot.availabilitySummary.allocations) {
+  assert.ok(allocation.allocated <= allocation.vacated + 1e-9);
+  assert.ok(allocation.unallocated >= -1e-9);
 }
 const weekly = [...snapshot.players].sort((a, b) => b.weekFull - a.weekFull).map((p) => p.id);
 const ros = [...snapshot.players].sort((a, b) => b.rosFull - a.rosFull).map((p) => p.id);

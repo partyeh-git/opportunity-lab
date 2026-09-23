@@ -53,7 +53,8 @@ function Caveat({ trades = false }: { trades?: boolean }) {
       <strong>Early-season estimate.</strong> Based on NFL player stats through Week 2;{" "}
       {snapshot.candidateCount} players with observed {snapshot.season} opportunities. This version
       blends recent usage with prior-season workloads and applies separate defensive adjustments by
-      position and play type. Current injuries and likely lineup changes are not included. Players
+      position and play type. Confirmed missed games contribute zero; unresolved injuries and return
+      dates remain conditional on playing. Selected teammate role changes are included. Players
       without current-season opportunities are omitted. Rest-of-season totals sum the remaining
       matchups, excluding byes; future roles and availability remain uncertain.
       {trades && " Trade comparisons also depend on who would fill each vacated roster spot."}
@@ -490,8 +491,8 @@ export function Trades() {
           )}
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             These are estimated surplus fantasy points, not auction dollars. The comparison omits
-            injuries, bye-week lineup needs, keeper costs, and draft picks. A multi-player side also
-            needs open roster spots.
+            unresolved injury risk, bye-week lineup needs, keeper costs, and draft picks. A
+            multi-player side also needs open roster spots.
           </p>
         </section>
       )}
