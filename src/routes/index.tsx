@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlayerResearch } from "@/components/player-research";
+import { Rankings, Trades } from "@/components/rankings-trades";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
@@ -93,10 +94,16 @@ function Index() {
         <div className="mx-auto max-w-[1480px] px-4 py-6 md:px-8 lg:px-10 lg:py-8">
           <div className="mb-5 flex items-center gap-2 text-xs font-medium text-muted-foreground sm:hidden">
             <span className="h-2 w-2 rounded-full bg-warning" />
-            Fantasy football · Final test still to come
+            Fantasy football research
           </div>
           {screen === "Players" ? (
             <PlayerResearch />
+          ) : screen === "Rankings" ? (
+            <Rankings />
+          ) : screen === "Weekly Projections" ? (
+            <Rankings weeklyOnly />
+          ) : screen === "Trades" ? (
+            <Trades />
           ) : screen === "My Leagues" ? (
             <MyLeagues />
           ) : (
@@ -338,18 +345,6 @@ function FutureScreen({ screen }: { screen: Screen }) {
     "Start / Sit": [
       "Compare your options",
       "Start/sit recommendations are not available yet. Browse Players to check player details and Sleeper status.",
-    ],
-    Rankings: [
-      "Fantasy rankings",
-      "Rankings are not available yet. No outside fantasy rankings are used.",
-    ],
-    "Weekly Projections": [
-      "Player projections",
-      "Weekly points, projected stats, and outcome ranges are not available yet.",
-    ],
-    Trades: [
-      "Evaluate a trade",
-      "Personalized trade values are not available yet. Visit My Leagues to look up scoring and lineup requirements.",
     ],
     "Waivers & FAAB": [
       "Find your next pickup",
