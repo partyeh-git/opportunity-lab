@@ -3,6 +3,7 @@ import { ArrowLeftRight, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import snapshot from "@/data/rankings-2026-week3.json";
+import { ProjectionDetails } from "@/components/projection-details";
 
 type Player = (typeof snapshot.players)[number];
 type Scoring = "full" | "half";
@@ -37,10 +38,10 @@ function Caveat({ trades = false }: { trades?: boolean }) {
     <div className="rounded-lg border border-warning/30 bg-warning-soft/50 p-4 text-sm leading-6">
       <strong>Early-season estimate.</strong> Based on NFL player stats through Week 2;{" "}
       {snapshot.candidateCount} players with observed 2026 opportunities and a Week 3 game. This
-      version does not account for current injuries, likely lineup changes, or defense matchup
-      adjustments. Players without observed attempts, carries, or targets are omitted.
-      Rest-of-season totals repeat the current weekly rate over scheduled remaining games; they are
-      especially uncertain.
+      version blends recent usage with prior-season workloads and applies separate defensive
+      adjustments by position and play type. Current injuries and likely lineup changes are not
+      included. Players without current-season opportunities are omitted. Rest-of-season totals sum
+      the remaining matchups, excluding byes; future roles and availability remain uncertain.
       {trades && " Trade comparisons also depend on who would fill each vacated roster spot."}
     </div>
   );
@@ -75,7 +76,7 @@ function statLine(player: Player) {
 
 export function Rankings({ weeklyOnly = false }: { weeklyOnly?: boolean }) {
   const [scoring, setScoring] = useState<Scoring>("full");
-  const [horizon, setHorizon] = useState<"week" | "ros">("week");
+  const [horizon, setHorizon] = useState<"week" | "ros">(weeklyOnly ? "week" : "ros");
   const [position, setPosition] = useState("All");
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(50);
@@ -165,6 +166,7 @@ export function Rankings({ weeklyOnly = false }: { weeklyOnly?: boolean }) {
                   {p.lastObservedWeek < 2 && (
                     <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
                   )}
+                  <ProjectionDetails player={p} />
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {p.team} vs {p.opponent}
@@ -196,17 +198,17 @@ function replacementPoints(position: string, league: League, scoring: Scoring) {
   const n = replacements[league][position] ?? 1;
   const sorted = allPlayers
     .filter((p) => p.position === position)
-    .sort((a, b) => points(b, scoring, "week") - points(a, scoring, "week"));
+    .sort((a, b) => points(b, scoring, "ros") - points(a, scoring, "ros"));
   const replacement = sorted[Math.min(n, sorted.length) - 1];
-  return replacement ? points(replacement, scoring, "week") : 0;
+  return replacement ? points(replacement, scoring, "ros") : 0;
 }
 
 function surplus(player: Player, league: League, scoring: Scoring) {
   return (
     Math.max(
       0,
-      points(player, scoring, "week") - replacementPoints(player.position, league, scoring),
-    ) * player.remainingGames
+      points(player, scoring, "ros") - replacementPoints(player.position, league, scoring),
+    )
   );
 }
 
@@ -417,8 +419,8 @@ export function Trades() {
         {league === "ballerz"
           ? "20th QB, 20th RB, 30th WR, and 10th TE"
           : "12th QB, 24th RB, 36th WR, and 12th TE"}{" "}
-        in this covered player pool. Values are clamped at zero and multiplied by remaining
-        scheduled games. Only public NFL statistics are used; no league roster or trade input is
+        in this covered player pool, ordered by remaining-season points. Values use the sum of
+        future matchups and are clamped at zero. Only public NFL statistics are used; no league roster or trade input is
         saved.
       </p>
     </div>

@@ -1,0 +1,28 @@
+{
+  "model": "sample_aware_matchup_v1",
+  "status": "experimental; fixed parameters before historical comparison",
+  "created": "2026-09-22",
+  "development": 2023,
+  "validation": 2024,
+  "historical_evaluation_weeks": [2, 18],
+  "player_prior_games": 4,
+  "changed_team_prior_games": 2,
+  "team_prior_games": 4,
+  "previous_season_defense_weight": 0.25,
+  "future_defense_decay_per_week": 0.9,
+  "defense_factor_bounds": [0.8, 1.2],
+  "defense_pseudo_opportunities": {
+    "catch": 100, "receiving": 150, "rushing": 150,
+    "passing": 250, "receiving_td": 250, "rushing_td": 300,
+    "passing_td": 400, "interceptions": 400
+  },
+  "evaluation_policy": "Compare fixed candidate and baseline on identical prior-selected players, retaining zero outcomes. Report early-season and full-window point MAE, workload error, and week-level differences. Do not tune on 2024 or 2025. Do not claim statistical significance or calibrated uncertainty from these fixed-weight experiments.",
+  "limitations": [
+    "Prior strengths are transparent heuristics, not fitted optimal weights.",
+    "No verified current injury feed, snap/routes, red-zone locations, coaching, weather, or designed-run/scramble split.",
+    "Future workload is held at the current sample-aware role estimate; only schedule and fading defensive effects vary by future week.",
+    "Previous-season defensive information is discounted for continuity uncertainty; personnel continuity is not explicitly modeled.",
+    "Players with no current-season usage are not covered; players without prior-season history lack a player-specific volume prior.",
+    "Historical data may include subsequent stat corrections."
+  ]
+}
