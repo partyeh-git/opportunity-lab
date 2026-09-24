@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, GripVertical, Info } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -44,6 +45,17 @@ const lineupSlots = (slots?: string[]) => [
     (slots ?? DEFAULT_LINEUP).filter((slot) => !["BN", "IR", "TAXI", "RESERVE"].includes(slot)),
   ),
 ];
+
+/** Official game designations, shown as the familiar red letter next to a player's name. */
+const INJURY_LETTER: Record<string, string> = {
+  Questionable: "Q",
+  Doubtful: "D",
+  Out: "O",
+  IR: "IR",
+  PUP: "PUP",
+  Sus: "SUS",
+};
+type InjuryInfo = { status: string; body: string | null; practice: string | null };
 
 type SortKey = "manual" | "model" | "value" | "points" | "ros" | "impact" | "name";
 type Sort = { key: SortKey; reversed: boolean };
@@ -135,6 +147,24 @@ export function PersonalRankings({
   } | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [cardId, setCardId] = useState("");
+  // Current designations, refreshed by the notes job several times a day (public/injuries.json).
+  // If that file can't load, fall back to the status saved with the projections.
+  const injuries = useQuery({
+    queryKey: ["injuries"],
+    queryFn: async () => {
+      const response = await fetch("/injuries.json");
+      if (!response.ok) throw new Error("No injury file");
+      return (await response.json()) as { players: Record<string, InjuryInfo> };
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+  const injuryOf = (entry: ResearchEntry): InjuryInfo | null => {
+    if (injuries.data) return injuries.data.players[entry.sleeperId] ?? null;
+    const saved = projectionById.get(entry.id)?.availability;
+    return saved && INJURY_LETTER[saved.reportedStatus]
+      ? { status: saved.reportedStatus, body: saved.injury || null, practice: null }
+      : null;
+  };
   // The Weekly tab and the overall Rankings tab are separate boards; each has one horizon.
   const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : "ros";
   const settings = useMemo(
@@ -808,12 +838,27 @@ export function PersonalRankings({
                     ) : (
                       entry.name
                     )}
-                    {projectionById.get(entry.id)?.availability?.state !== "unverified" &&
-                      projectionById.get(entry.id)?.availability && (
-                        <span className="ml-2 inline-block rounded border border-warning/40 px-2 py-0.5 text-xs font-medium text-warning">
-                          {projectionById.get(entry.id)!.availability.label}
+                    {(() => {
+                      const injury = injuryOf(entry);
+                      const letter = injury && INJURY_LETTER[injury.status];
+                      if (!letter) return null;
+                      const detail = [
+                        injury.status,
+                        injury.body,
+                        injury.practice && `Practice: ${injury.practice}`,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ");
+                      return (
+                        <span
+                          title={detail}
+                          aria-label={detail}
+                          className="ml-1.5 inline-block rounded-sm bg-red-600 px-1.5 py-0.5 align-middle text-[11px] font-bold leading-none text-white"
+                        >
+                          {letter}
                         </span>
-                      )}
+                      );
+                    })()}
                     <span
                       className={`ml-2 inline-block -skew-x-6 rounded-sm px-1.5 py-0.5 text-[11px] font-bold ${positionChip[entry.position] ?? "bg-muted text-muted-foreground"}`}
                     >

@@ -1,10 +1,13 @@
 name: Archive player notes
 
-# Sleeper's public feed only keeps each player's 10 newest notes, so save new ones daily
-# to build a full-season history for the player card. Display only; never a model input.
+# Sleeper's public feed only keeps each player's 10 newest notes, so save new ones regularly
+# to build a full-season history for the player card, and refresh each ranked player's injury
+# designation (Q / D / O / IR) for the rankings. Display only; never a model input.
 on:
   schedule:
     - cron: "0 11 * * *" # daily, 7am Eastern
+    - cron: "0 21 * * *" # daily, 5pm Eastern (after Friday's final injury reports)
+    - cron: "45 15 * * 0" # Sunday 11:45am Eastern, before the early games
   workflow_dispatch:
 
 permissions:
@@ -24,15 +27,16 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/archive-notes.mjs
-      - name: Commit new notes
+      - run: node scripts/injury-status.mjs
+      - name: Commit changes
         run: |
-          git add public/notes
+          git add public/notes public/injuries.json
           if git diff --cached --quiet; then
-            echo "No new notes."
+            echo "No new notes or injury changes."
             exit 0
           fi
           git config user.name "notes-archiver"
           git config user.email "notes-archiver@users.noreply.github.com"
-          git commit -m "Archive new player notes"
+          git commit -m "Update player notes and injury designations"
           git pull --rebase origin main
           git push origin HEAD:main
