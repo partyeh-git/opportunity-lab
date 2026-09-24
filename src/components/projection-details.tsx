@@ -27,6 +27,12 @@ type DetailPlayer = {
     recentWeight: number;
     priorAvailable: boolean;
     changedTeam: boolean;
+    /** Phase B fix 2: recent snap share blended into targets and carries. */
+    roleBlend?: {
+      snapShareLast2: number;
+      targets?: { model: number; blended: number };
+      carries?: { model: number; blended: number };
+    };
   };
   matchupFactors: Record<
     string,
@@ -109,6 +115,21 @@ export function ProjectionDetails({
             ? `${(usage.recentWeight * 100).toFixed(0)}% this season, the rest last season${usage.changedTeam ? " (new team, discounted)" : ""}.`
             : "no prior-season data, so extra uncertain."}
         </p>
+        {usage.roleBlend && (
+          <p>
+            <span className="text-foreground">Snap role:</span>{" "}
+            {Math.round(usage.roleBlend.snapShareLast2 * 100)}% of snaps over his last 2 games
+            {(["carries", "targets"] as const)
+              .flatMap((k) => {
+                const v = usage.roleBlend![k];
+                return v && Math.abs(v.blended - v.model) >= 0.3
+                  ? [` · ${k} ${v.model.toFixed(1)} → ${v.blended.toFixed(1)}`]
+                  : [];
+              })
+              .join("")}
+            .
+          </p>
+        )}
         <p>
           <span className="text-foreground">Matchup:</span>{" "}
           {matchup.length

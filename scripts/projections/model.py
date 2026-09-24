@@ -9,6 +9,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from roles import blend, role_inputs
+
 CONFIG = json.loads(Path(__file__).with_name('protocol.json').read_text())
 POSITIONS = ('QB', 'RB', 'WR', 'TE')
 STATS = ['attempts', 'completions', 'passing_yards', 'passing_tds', 'passing_interceptions',
@@ -101,7 +103,61 @@ def apply_matchup(base, defense, position, defenses, weeks_ahead=0):
     return adjusted, factors
 
 
-def forecast(stats, schedule, season, cutoff_week, include_ros=True):
+VOLUME = ('attempts', 'carries', 'targets')
+# Workload options. Defaults reproduce sample_aware_matchup_v1 exactly; Phase B fix 2
+# candidates are evaluated through these switches before any default changes.
+DEFAULT_WORKLOAD = dict(window=4, decay=.8, prior_games=None, changed_team_prior_games=None,
+                        skip_absences=False, skip_short_games=False, context=None,
+                        reconcile_active_only=False, volume_override=None, role_blend=None)
+
+
+def game_context(games):
+    """Pregame expected margin and implied points per (game_id, team), from the betting line only."""
+    g = games[games.game_type.eq('REG')]
+    home = dict(zip(zip(g.game_id, g.home_team), zip(g.spread_line, (g.total_line+g.spread_line)/2)))
+    away = dict(zip(zip(g.game_id, g.away_team), zip(-g.spread_line, (g.total_line-g.spread_line)/2)))
+    return {**home, **away}
+
+
+def player_window(own, team_game_ids, position, wl):
+    """Recent volume from the team's games so far, most recent weighted most.
+
+    Optional: skip games a regular missed (not zero-usage games), skip games cut short
+    (unusually low usage followed by a missed game), and express each game at a neutral
+    game script using that game's pregame line. Returns (volume dict, games of evidence).
+    """
+    rows = own.set_index('game_id')
+    vol = rows[list(VOLUME)].reindex(team_game_ids)
+    played = vol.notna().all(axis=1)
+    total = vol.sum(axis=1, min_count=1)
+    regular = played.any() and total[played].mean() >= 5
+    keep = pd.Series(True, index=vol.index)
+    if wl['skip_absences'] and regular:
+        keep &= played
+    if wl['skip_short_games'] and played.sum() >= 2:
+        next_played = played.shift(-1, fill_value=True).astype(bool)
+        for gid in vol.index[played]:
+            others = total[played & (total.index != gid)]
+            if not next_played[gid] and total[gid] < .5*others.median():
+                keep[gid] = False
+    vol = vol.fillna(0.).astype(float)
+    ctx = wl['context']
+    if ctx:
+        for gid in vol.index:
+            margin, implied = ctx['lines'].get((gid, ctx['team']), (0., 22.))
+            for key in VOLUME:
+                bm, bi = ctx['coef'].get((position, key), (0., 0.))
+                vol.loc[gid, key] /= np.exp(bm*margin + bi*(implied-22.))
+    vol = vol[keep].tail(wl['window'])
+    if vol.empty:
+        return {k: 0. for k in VOLUME}, 0
+    w = wl['decay'] ** np.arange(len(vol)-1, -1, -1)
+    return dict(zip(VOLUME, (w @ vol.to_numpy()) / w.sum())), int(keep.sum())
+
+
+def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=None, roles=None):
+    wl = {**DEFAULT_WORKLOAD, **(workload or {})}
+    default_workload = workload is None
     history = stats[(stats.season.lt(season)) | (stats.season.eq(season)&stats.week.lt(cutoff_week))].copy()
     history = history[history.position.isin(POSITIONS)].sort_values(['season','week','player_id'])
     current = history[history.season.eq(season)]
@@ -131,9 +187,16 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True):
         if future.empty or team not in team_forecasts:
             continue
         hist = histories[identity.player_id]
-        recent_ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').tail(4).game_id.tolist()
+        team_ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').game_id.tolist()
+        recent_ids = team_ids[-4:]
         own = hist[hist.season.eq(season)&hist.team.eq(team)]
-        recent = weighted_window(own, recent_ids)
+        if default_workload:
+            recent = weighted_window(own, recent_ids)
+            evidence_games = len(team_ids)
+        else:
+            ctx = wl['context'] and {**wl['context'], 'team': team}
+            volume, evidence_games = player_window(own, team_ids, identity.position, {**wl, 'context': ctx})
+            recent = {**weighted_window(own, recent_ids), **volume}
         if sum(recent[k] for k in ('attempts','carries','targets')) <= 0:
             continue
         old = hist[hist.season.eq(season-1)]
@@ -142,16 +205,20 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True):
             # Player appearance mean avoids assuming a missing row was a healthy zero-workload game.
             prior = old.tail(8)[STATS].mean().to_dict()
             changed_team = old.iloc[-1].team != team
-            strength = CONFIG['changed_team_prior_games'] if changed_team else CONFIG['player_prior_games']
+            key = 'changed_team_prior_games' if changed_team else 'prior_games'
+            strength = wl[key] if wl[key] is not None else CONFIG['changed_team_prior_games' if changed_team else 'player_prior_games']
             strength *= min(1.,len(old)/8)
         else:
             prior, strength, changed_team = recent.copy(), 0., False
         # Count scheduled games of evidence (including no-usage observations), not a p-value.
-        n = len(prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)])
+        n = evidence_games
         weight = n/(n+strength)
         base = recent.copy()
         for key in ('attempts','carries','targets'):
             base[key] = weight*recent[key]+(1-weight)*prior[key]
+        # Optional externally estimated volume (e.g. role-share blend), per player id.
+        for key, value in ((wl['volume_override'] or {}).get(identity.player_id) or {}).items():
+            base[key] = value
         player_totals = hist.tail(8)[STATS].sum()
         positional = pos_totals.loc[identity.position]
         for _, (num, den, pseudo_n) in RATES.items():
@@ -165,23 +232,52 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True):
             base[key] = float((own_recent[key].sum()+20*pos_games[key].mean())/(len(own_recent)+20))
         players.append(dict(id=identity.player_id, name=identity.player_display_name,
             position=identity.position, team=team, lastObservedWeek=int(own.week.max()), base=base,
+            missedLastTeamGame=bool(team_ids) and int(own.week.max()) < int(prior_schedule[prior_schedule.game_id.eq(team_ids[-1])].week.iloc[0]),
             workloadEvidence=dict(recentGames=len(recent_ids), currentSeasonGames=n, recentWeight=weight, priorEquivalentGames=strength,
                 priorAvailable=bool(len(old)), changedTeam=bool(changed_team),
                 recentCarries=recent['carries'], priorCarries=prior['carries'],
                 recentTargets=recent['targets'], priorTargets=prior['targets']), future=future))
     # Reconcile candidate opportunity totals downward to independently estimated team totals.
     # Missing candidates do not cause artificial increases in covered players' workloads.
-    for team in team_forecasts:
-        members = [p for p in players if p['team']==team]
-        for key in ('attempts','carries','targets'):
-            total = sum(p['base'][key] for p in members)
-            cap = team_forecasts[team]['attempts' if key=='targets' else key]
-            factor = min(1.,cap/total) if total > 0 else 1.
-            related = [num for num,den,_ in RATES.values() if den==key]
-            for p in members:
-                p['base'][key] *= factor
-                for num in related:
-                    p['base'][num] *= factor
+    def reconcile():
+        for team in team_forecasts:
+            members = [p for p in players if p['team']==team]
+            for key in ('attempts','carries','targets'):
+                # Optionally, players who sat out the team's last game don't use up team volume.
+                active = [p for p in members if not (wl['reconcile_active_only'] and p['missedLastTeamGame'])]
+                total = sum(p['base'][key] for p in active)
+                cap = team_forecasts[team]['attempts' if key=='targets' else key]
+                factor = min(1.,cap/total) if total > 0 else 1.
+                related = [num for num,den,_ in RATES.values() if den==key]
+                for p in members:
+                    p['base'][key] *= factor
+                    for num in related:
+                        p['base'][num] *= factor
+    reconcile()
+    # Role blend (Phase B fix 2): after team reconciliation, blend each WR/TE/RB's targets and
+    # carries with his recent snap-share role; dependent yards, catches and TDs scale with them.
+    blend_cfg = wl['role_blend'] or CONFIG.get('role_blend')
+    if roles is not None and blend_cfg:
+        inputs = role_inputs(stats, roles, season, cutoff_week, blend_cfg['position_rates'], blend_cfg['pseudo_snaps'])
+        for p in players:
+            info = inputs.get(p['id'])
+            if not info or info['position'] != p['position'] or info['team'] != p['team']:
+                continue
+            evidence = {'snapShareLast2': round(info['snapShareLast2'], 4)}
+            for key in ('targets', 'carries'):
+                weights = blend_cfg['weights'].get(f"{p['position']} {key}")
+                if not weights or key not in info or p['base'][key] <= 0:
+                    continue
+                old = p['base'][key]
+                new = blend(old, info[key], weights)
+                p['base'][key] = new
+                for num in [num for num, den, _ in RATES.values() if den == key]:
+                    p['base'][num] *= new/old
+                evidence[key] = {'model': round(old, 3), 'last2': round(info[key]['last2'], 3),
+                                 'role': round(info[key]['role'], 3), 'blended': round(new, 3)}
+            p['workloadEvidence']['roleBlend'] = evidence
+        # Blended volumes still cannot exceed the team's projected totals.
+        reconcile()
     output = []
     for p in players:
         games = []

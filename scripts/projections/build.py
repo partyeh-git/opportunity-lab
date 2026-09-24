@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from model import CAMEL, CONFIG, STATS, forecast, read_inputs
+from roles import read_roles
 from availability import apply_availability, load_evidence
 
 
@@ -24,7 +25,8 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         raise ValueError('Previous week is incomplete')
     original = json.loads(Path(existing_path).read_text(encoding='utf-8'))
     identities = {p['id']:p for p in original['players']}
-    projections = forecast(stats,schedule,season,week)
+    roles = read_roles(data_dir,[season-1,season])
+    projections = forecast(stats,schedule,season,week,roles=roles)
     evidence, allocations = None, []
     if availability_path:
         evidence = load_evidence(availability_path,season,week,as_of)
@@ -51,16 +53,17 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         rows.append(row)
     rows.sort(key=lambda p:p['weekFull'],reverse=True)
     hashes = {f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in [
-        Path(data_dir)/f'stats_player_week_{season-1}.csv',Path(data_dir)/f'stats_player_week_{season}.csv',Path(data_dir)/'games.csv']}
+        Path(data_dir)/f'stats_player_week_{season-1}.csv',Path(data_dir)/f'stats_player_week_{season}.csv',Path(data_dir)/'games.csv',
+        Path(data_dir)/f'snap_counts_{season-1}.parquet',Path(data_dir)/f'snap_counts_{season}.parquet',Path(data_dir)/'players.csv']}
     payload = dict(season=season,week=week,dataThroughWeek=week-1,
         generatedAt=as_of,model=CONFIG['model'],
-        source='nflverse weekly player statistics and schedule; reviewed official availability and public status flags; no external rankings',
+        source='nflverse weekly player statistics, schedule and PFR snap counts; reviewed official availability and public status flags; no external rankings',
         candidateCount=len(rows),unmappedIdentityCount=sum(not p['sleeperId'] for p in rows),methodology=CONFIG,sourceHashes=hashes,
         modelHash=hashlib.sha256(Path(__file__).with_name('model.py').read_bytes()).hexdigest(),players=rows)
     if evidence:
         payload['methodology'] = {**CONFIG, 'limitations':[
-            'Verified absences are applied by a separate prospective overlay. Unresolved availability, return workload, snap/routes, red-zone locations, coaching, weather, and designed-run/scramble split are not quantified.'
-                if item.startswith('No verified current injury feed') else
+            'Verified absences are applied by a separate prospective overlay. Unresolved availability, return workload, routes run, red-zone locations, coaching, weather, and designed-run/scramble split are not quantified; snap share informs WR/TE/RB volume.'
+                if item.startswith('Snap share (PFR snap counts)') else
             'Future workload follows the sample-aware role estimate except for explicitly explained confirmed-absence adjustments; later return dates remain conditional.'
                 if item.startswith('Future workload is held') else item for item in CONFIG['limitations']]}
         payload['availabilitySummary'] = {**evidence['coverage'], 'reviewedAt':evidence['reviewedAt'],

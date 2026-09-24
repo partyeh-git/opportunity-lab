@@ -1,28 +1,95 @@
 {
-  "model": "sample_aware_matchup_v1",
-  "status": "experimental; fixed parameters before historical comparison",
+  "model": "sample_aware_matchup_role_v2",
+  "status": "role blend (Phase B fix 2) adopted 2026-09-24 after 2023 fit / 2024 check; earlier parameters unchanged",
   "created": "2026-09-22",
   "development": 2023,
   "validation": 2024,
-  "historical_evaluation_weeks": [2, 18],
+  "historical_evaluation_weeks": [
+    2,
+    18
+  ],
   "player_prior_games": 4,
   "changed_team_prior_games": 2,
   "team_prior_games": 4,
   "previous_season_defense_weight": 0.25,
   "future_defense_decay_per_week": 0.9,
-  "defense_factor_bounds": [0.8, 1.2],
+  "defense_factor_bounds": [
+    0.8,
+    1.2
+  ],
   "defense_pseudo_opportunities": {
-    "catch": 100, "receiving": 150, "rushing": 150,
-    "passing": 250, "receiving_td": 250, "rushing_td": 300,
-    "passing_td": 400, "interceptions": 400
+    "catch": 100,
+    "receiving": 150,
+    "rushing": 150,
+    "passing": 250,
+    "receiving_td": 250,
+    "rushing_td": 300,
+    "passing_td": 400,
+    "interceptions": 400
   },
   "evaluation_policy": "Compare fixed candidate and baseline on identical prior-selected players, retaining zero outcomes. Report early-season and full-window point MAE, workload error, and week-level differences. Do not tune on 2024 or 2025. Do not claim statistical significance or calibrated uncertainty from these fixed-weight experiments.",
   "limitations": [
     "Prior strengths are transparent heuristics, not fitted optimal weights.",
-    "No verified current injury feed, snap/routes, red-zone locations, coaching, weather, or designed-run/scramble split.",
+    "Snap share (PFR snap counts) informs WR/TE/RB targets and carries; routes run, red-zone locations, coaching, weather, and designed-run/scramble split are not modeled. No verified current injury feed in the core model.",
     "Future workload is held at the current sample-aware role estimate; only schedule and fading defensive effects vary by future week.",
     "Previous-season defensive information is discounted for continuity uncertainty; personnel continuity is not explicitly modeled.",
     "Players with no current-season usage are not covered; players without prior-season history lack a player-specific volume prior.",
     "Historical data may include subsequent stat corrections."
-  ]
+  ],
+  "role_blend": {
+    "version": "role_blend_v1",
+    "fit_season": 2023,
+    "pseudo_snaps": 100,
+    "position_rates": {
+      "RB targets": 0.08761,
+      "RB carries": 0.31989,
+      "TE targets": 0.09161,
+      "TE carries": 0.00284,
+      "WR targets": 0.11754,
+      "WR carries": 0.00536
+    },
+    "weights": {
+      "WR targets": [
+        0.402,
+        0.0,
+        0.5932
+      ],
+      "TE targets": [
+        0.4391,
+        0.0,
+        0.5903
+      ],
+      "RB targets": [
+        0.3315,
+        0.0,
+        0.6404
+      ],
+      "RB carries": [
+        0.3146,
+        0.058,
+        0.645
+      ]
+    },
+    "inputs": [
+      "model volume",
+      "last 2 games played",
+      "snap share x team volume x per-snap rate"
+    ],
+    "evaluation": {
+      "2024_pairs": [
+        0.6928,
+        0.7005
+      ],
+      "2024_pairs_p": 0.005,
+      "2024_mae": [
+        5.556,
+        5.509
+      ],
+      "2024_big_consensus_disagreements_won": [
+        0.4937,
+        0.534
+      ],
+      "note": "Weights fit on 2023 by non-negative least squares; 2024 not used in fitting. Same player cohort, zeros kept, chance-to-play applied. Consensus used only as a benchmark."
+    }
+  }
 }
