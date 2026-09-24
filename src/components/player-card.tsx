@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight, StickyNote } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Sheet,
@@ -15,6 +16,7 @@ type Projected = Projection["weeklyForecasts"][number]["projected"];
 type GameStats = Record<string, number>;
 type SleeperGame = {
   week: number;
+  date: string;
   opponent: string;
   is_away_team: boolean;
   stats: GameStats;
@@ -33,7 +35,40 @@ type SleeperPlayer = {
   practice_description?: string | null;
 };
 
+type SleeperNote = {
+  published: number;
+  source: string;
+  metadata: { title?: string; description?: string; analysis?: string; url?: string };
+};
+
 const s = (stats: GameStats, key: string) => stats[key] ?? 0;
+const DAY = 24 * 60 * 60 * 1000;
+const sourceName = (source: string) =>
+  source === "fantasy_pros" ? "FantasyPros" : source.replace(/_/g, " ");
+
+/** One news note: headline, what happened, and the writer's fantasy take, with its source. */
+function Note({ note }: { note: SleeperNote }) {
+  const { title, description, analysis, url } = note.metadata;
+  const label = `${sourceName(note.source)} via Sleeper`;
+  return (
+    <article className="space-y-1 text-xs leading-5">
+      <p className="font-semibold text-foreground">{title}</p>
+      {description && <p className="text-muted-foreground">{description}</p>}
+      {analysis && <p className="text-muted-foreground italic">{analysis}</p>}
+      <p className="text-[11px] text-muted-foreground">
+        {new Date(note.published).toLocaleDateString(undefined, { month: "short", day: "numeric" })}{" "}
+        ·{" "}
+        {url ? (
+          <a href={url} target="_blank" rel="noreferrer" className="underline hover:text-primary">
+            {label}
+          </a>
+        ) : (
+          label
+        )}
+      </p>
+    </article>
+  );
+}
 
 /** Stat columns per position: how to read a real game line and one of our projections. */
 const columns: Record<
@@ -121,11 +156,28 @@ export function PlayerCard({
     enabled: open && !!player.sleeperId,
     staleTime: 10 * 60 * 1000,
   });
+  const news = useQuery({
+    queryKey: ["sleeper-news", player.sleeperId],
+    queryFn: () =>
+      getJson<SleeperNote[]>(
+        `https://api.sleeper.com/players/nfl/${player.sleeperId}/news?limit=30`,
+      ),
+    enabled: open && !!player.sleeperId,
+    staleTime: 10 * 60 * 1000,
+  });
+  const [showAllNotes, setShowAllNotes] = useState(false);
+  const notes = [...(news.data ?? [])].sort((a, b) => b.published - a.published);
   const cols = columns[player.position] ?? columns["WR"]!;
   const games = Object.values(log.data ?? {})
     .filter((g): g is NonNullable<SleeperGame> => !!g && s(g.stats, "gp") > 0)
     .sort((a, b) => a.week - b.week);
   const playedPoints = games.map((g) => gamePoints(g.stats, settings, connected));
+  // A game's notes: anything published from game day through two days after (recaps and
+  // next-day injury updates). Sleeper keeps only recent notes, so older games have none.
+  const gameNotes = games.map((g) => {
+    const start = new Date(`${g.date}T00:00:00`).getTime();
+    return notes.filter((n) => n.published >= start && n.published < start + 3 * DAY);
+  });
   const average = playedPoints.length
     ? playedPoints.reduce((a, b) => a + b, 0) / playedPoints.length
     : null;
@@ -196,6 +248,26 @@ export function PlayerCard({
             ))}
           </section>
 
+          {notes.length > 0 && (
+            <section>
+              <h3 className="mb-2 font-display text-lg">Latest notes</h3>
+              <div className="space-y-3 rounded-md border p-3">
+                {(showAllNotes ? notes : notes.slice(0, 2)).map((note) => (
+                  <Note key={note.published} note={note} />
+                ))}
+                {notes.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllNotes(!showAllNotes)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {showAllNotes ? "Show fewer" : `Show all ${notes.length} notes`}
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+
           <section>
             <div className="mb-2 flex items-center justify-between">
               <h3 className="font-display text-lg">Game log</h3>
@@ -234,6 +306,15 @@ export function PlayerCard({
                       : fmt(c.actual(g.stats), c.label),
                   ),
                 ])}
+                details={gameNotes.map((list) =>
+                  list.length ? (
+                    <div className="space-y-3">
+                      {list.map((note) => (
+                        <Note key={note.published} note={note} />
+                      ))}
+                    </div>
+                  ) : null,
+                )}
               />
             )}
           </section>
@@ -272,7 +353,17 @@ export function PlayerCard({
   );
 }
 
-function StatTable({ headers, rows }: { headers: string[]; rows: (string | number)[][] }) {
+/** Stat table. Rows with details get a note icon and expand below when clicked. */
+function StatTable({
+  headers,
+  rows,
+  details,
+}: {
+  headers: string[];
+  rows: (string | number)[][];
+  details?: (ReactNode | null)[];
+}) {
+  const [openRow, setOpenRow] = useState<number | null>(null);
   return (
     <div className="overflow-x-auto rounded-md border">
       <table className="w-full text-xs tabular-nums">
@@ -289,18 +380,47 @@ function StatTable({ headers, rows }: { headers: string[]; rows: (string | numbe
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={String(row[0])} className="border-t">
-              {row.map((cell, i) => (
-                <td
-                  key={i}
-                  className={`px-2 py-1.5 ${i > 1 ? "text-right" : ""} ${i === 2 ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+          {rows.map((row, r) => {
+            const detail = details?.[r];
+            const expanded = openRow === r;
+            return (
+              <Fragment key={String(row[0])}>
+                <tr
+                  className={`border-t ${detail ? "cursor-pointer hover:bg-accent/50" : ""}`}
+                  onClick={detail ? () => setOpenRow(expanded ? null : r) : undefined}
+                  aria-expanded={detail ? expanded : undefined}
                 >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
+                  {row.map((cell, i) => (
+                    <td
+                      key={i}
+                      className={`px-2 py-1.5 ${i > 1 ? "text-right" : ""} ${i === 2 ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {i === 0 && detail ? (
+                        <span className="inline-flex items-center gap-1 text-primary">
+                          {expanded ? (
+                            <ChevronDown className="h-3 w-3" aria-hidden="true" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3" aria-hidden="true" />
+                          )}
+                          {cell}
+                          <StickyNote className="h-3 w-3" aria-label="Has notes" />
+                        </span>
+                      ) : (
+                        cell
+                      )}
+                    </td>
+                  ))}
+                </tr>
+                {detail && expanded && (
+                  <tr className="bg-muted/40">
+                    <td colSpan={row.length} className="px-3 py-3">
+                      {detail}
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>
