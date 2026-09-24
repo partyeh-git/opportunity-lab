@@ -11,6 +11,9 @@ bun run dev
 
 ## Implemented
 
+- Rankings open first, with the complete covered player list and a scrollable table with a fixed header
+- Personal ordering by dragging, keyboard arrows on the move handle, or direct overall-rank entry; Undo and reset to model order
+- Position/FLEX, NFL team, injury, roster-ownership, and name/team search filters; model points and personal lineup-impact sorting
 - Searchable Sleeper NFL player directory, position/team filters, and player detail dialogs
 - Source-reported roster and injury fields, with retrieval time and explicit availability limitations
 - Directory cached in the browser for up to 24 hours to avoid repeatedly fetching the large endpoint
@@ -32,6 +35,8 @@ For RB/WR/TE absences, carries and targets are adjusted separately. A recipient 
 The parameters remain experimental and are not statistical significance tests. Future role changes beyond these limited absence adjustments, routes/snaps, goal-line usage, coaching, weather, and designed runs versus scrambles are not yet modeled. Players need current-season usage; those without prior-season history lack a player-specific workload prior. QB and receiver outcomes are not jointly reconciled, including the effect of a replacement QB on receivers. DST is projected for the current week only. Trade comparisons omit keeper cost, required drops, and unresolved injury uncertainty. Calibrated outcome ranges, FAAB recommendations, and a sourced news feed are not implemented.
 
 Sleeper directory status is not confirmed game-day availability. NFL free agency does not indicate availability in a fantasy league. League username and selection are saved only in the browser; rosters are fetched read-only and kept in memory.
+
+Personal ranking order is saved only in this browser, separately by league, scoring settings, season, and weekly versus remaining-season view. Each weekly order is specific to that week. Remaining-season preferences survive weekly refreshes; newly covered players append in model order and departed IDs are removed. Filters preserve overall rank numbers and hidden players. Manual edits change presentation order, not projections, trade calculations, or the underlying model. Model order stays available for comparison. Clearing browser storage or using another site address/device does not carry these preferences across.
 
 ## Data refresh and historical check
 

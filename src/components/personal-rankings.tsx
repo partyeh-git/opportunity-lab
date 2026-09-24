@@ -1,14 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LeaguePicker, useLeague } from "@/components/league-context";
 import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
 import playersSnapshot from "@/data/rankings-current.json";
 import { ProjectionDetails } from "@/components/projection-details";
+import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 
 const projectionById = new Map(playersSnapshot.players.map((p) => [p.id, p]));
 
 const genericSettings = { rec: 1, pass_int: -2 };
+const teamLabel = (team: string) => (team === "LA" ? "LAR" : team);
 const labelFor = (position: string) =>
   ({
     WRRB_FLEX: "WR/RB FLEX",
@@ -19,7 +22,7 @@ const labelFor = (position: string) =>
 const positionOptions = (slots?: string[]) => [
   "All",
   ...new Set(
-    (slots ?? ["QB", "RB", "WR", "TE", "FLEX", "SUPER_FLEX", "DEF"]).filter(
+    ["QB", "RB", "WR", "TE", "FLEX", "SUPER_FLEX", "DEF", ...(slots ?? [])].filter(
       (slot) => !["BN", "IR", "TAXI", "RESERVE"].includes(slot),
     ),
   ),
@@ -40,8 +43,19 @@ export function PersonalRankings({
   const [position, setPosition] = useState("All");
   const [search, setSearch] = useState("");
   const [availability, setAvailability] = useState("All");
-  const [sortMode, setSortMode] = useState<"impact" | "points">(defensesOnly ? "points" : "impact");
-  const [limit, setLimit] = useState(50);
+  const [sortMode, setSortMode] = useState<"manual" | "impact" | "points">("manual");
+  const [team, setTeam] = useState("All");
+  const [injuryFilter, setInjuryFilter] = useState("All");
+  const [dragging, setDragging] = useState("");
+  const [dropTarget, setDropTarget] = useState("");
+  const gesture = useRef<{
+    id: string;
+    x: number;
+    y: number;
+    target: string;
+    moved: boolean;
+  } | null>(null);
+  const [saveMessage, setSaveMessage] = useState("");
   const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : horizon;
   const settings = useMemo(
     () =>
@@ -52,6 +66,30 @@ export function PersonalRankings({
     [league.selected, genericPpr],
   );
   const entries = useMemo(() => entriesFor(settings), [settings]);
+  const storageKey = rankingStorageKey(
+    playersSnapshot.season,
+    playersSnapshot.week,
+    effectiveHorizon,
+    league.selected?.league_id ?? "general",
+    settings,
+    defensesOnly,
+  );
+  const [savedOrder, setSavedOrder] = useState<{ key: string; ids: string[] }>({
+    key: "",
+    ids: [],
+  });
+  const [undo, setUndo] = useState<{ key: string; ids: string[] } | null>(null);
+  useEffect(() => {
+    try {
+      setSavedOrder({ key: storageKey, ids: parseOrder(localStorage.getItem(storageKey)) });
+      setSaveMessage("");
+    } catch {
+      setSavedOrder({ key: storageKey, ids: [] });
+      setSaveMessage("Browser storage is unavailable. Changes will last only for this visit.");
+    }
+  }, [storageKey]);
+  const ready = savedOrder.key === storageKey;
+  const customIds = ready ? savedOrder.ids : [];
   const rosters = league.rosters;
   const myRoster = rosters.find((r) => String(r.owner_id) === league.userId);
   const myIds = useMemo(() => new Set(myRoster?.players ?? []), [myRoster]);
@@ -101,29 +139,75 @@ export function PersonalRankings({
   );
   const options = positionOptions(league.selected?.roster_positions);
   const effectivePosition = options.includes(position) ? position : "All";
-  const ranked = entries
-    .filter((entry) => {
-      if (defensesOnly && entry.position !== "DEF") return false;
-      if (
-        !defensesOnly &&
-        effectivePosition !== "All" &&
-        !eligible(entry.position, effectivePosition)
-      )
-        return false;
-      if (effectiveHorizon === "ros" && entry.rosPoints === null) return false;
-      if (!entry.name.toLowerCase().includes(search.toLowerCase().trim())) return false;
-      if (rosterLoaded && availability !== "All" && statusOf(entry) !== availability) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      if (rosterLoaded && sortMode === "impact") {
-        const diff = (impacts.get(b.id) ?? 0) - (impacts.get(a.id) ?? 0);
-        if (Math.abs(diff) > 0.001) return diff;
-      }
-      return effectiveHorizon === "week"
-        ? b.weekPoints - a.weekPoints
-        : (b.rosPoints ?? 0) - (a.rosPoints ?? 0);
-    });
+  const modelOrder = entries
+    .filter(
+      (entry) =>
+        (!defensesOnly || entry.position === "DEF") &&
+        (effectiveHorizon !== "ros" || entry.rosPoints !== null),
+    )
+    .sort(
+      (a, b) =>
+        (effectiveHorizon === "week"
+          ? b.weekPoints - a.weekPoints
+          : (b.rosPoints ?? 0) - (a.rosPoints ?? 0)) || a.id.localeCompare(b.id),
+    );
+  const modelRanks = new Map(modelOrder.map((entry, index) => [entry.id, index + 1]));
+  const myOrder = reconcileOrder(
+    customIds,
+    modelOrder.map((entry) => entry.id),
+  );
+  const myRanks = new Map(myOrder.map((id, index) => [id, index + 1]));
+  const ordered = [...modelOrder].sort((a, b) => {
+    if (sortMode === "manual") return myRanks.get(a.id)! - myRanks.get(b.id)!;
+    if (rosterLoaded && sortMode === "impact") {
+      const diff = (impacts.get(b.id) ?? 0) - (impacts.get(a.id) ?? 0);
+      if (Math.abs(diff) > 0.001) return diff;
+    }
+    return modelRanks.get(a.id)! - modelRanks.get(b.id)!;
+  });
+  const overallRanks = new Map(ordered.map((entry, index) => [entry.id, index + 1]));
+  const ranked = ordered.filter((entry) => {
+    if (
+      !defensesOnly &&
+      effectivePosition !== "All" &&
+      !eligible(entry.position, effectivePosition)
+    )
+      return false;
+    if (
+      !`${entry.name} ${entry.team} ${teamLabel(entry.team)}`
+        .toLowerCase()
+        .includes(search.toLowerCase().trim())
+    )
+      return false;
+    if (team !== "All" && teamLabel(entry.team) !== team) return false;
+    const state = projectionById.get(entry.id)?.availability.state;
+    if (injuryFilter === "Hide confirmed out" && state === "confirmed_out") return false;
+    if (injuryFilter === "Uncertain availability" && state !== "uncertain") return false;
+    if (injuryFilter === "Confirmed out" && state !== "confirmed_out") return false;
+    if (rosterLoaded && availability !== "All" && statusOf(entry) !== availability) return false;
+    return true;
+  });
+  function save(ids: string[], remember = true) {
+    if (!ready) return;
+    if (remember) setUndo({ key: storageKey, ids: customIds });
+    setSavedOrder({ key: storageKey, ids });
+    setSortMode("manual");
+    try {
+      if (ids.length) localStorage.setItem(storageKey, JSON.stringify(ids));
+      else localStorage.removeItem(storageKey);
+      setSaveMessage(ids.length ? "Your order is saved in this browser." : "Model order restored.");
+    } catch {
+      setSaveMessage("Order changed for this visit; browser storage could not save it.");
+    }
+  }
+  function move(id: string, rank: number) {
+    const base = ordered.map((entry) => entry.id);
+    save(moveToRank(base, id, rank));
+  }
+  function moveBeside(id: string, target: string) {
+    const rank = overallRanks.get(target);
+    if (rank && id !== target) move(id, rank);
+  }
   const covered = entries.filter((e) => myIds.has(e.sleeperId)).length;
   const title = defensesOnly
     ? "DST streaming tiers"
@@ -131,50 +215,60 @@ export function PersonalRankings({
       ? "Weekly projections"
       : "Personalized rankings";
   return (
-    <div className="space-y-6">
-      <section className="border-b pb-6">
-        <p className="text-xs font-bold uppercase text-primary">
-          {playersSnapshot.season} · Week {playersSnapshot.week} research preview
-        </p>
-        <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{title}</h2>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          {defensesOnly
-            ? "Stream defenses by opponent-driven sacks, turnovers, points, and yards. Tiers follow your league's actual DST scoring."
-            : "Choose your Sleeper league to rank players by its scoring, lineup slots, and the change each player could make to your team."}
-        </p>
+    <div className="space-y-3">
+      <section className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase text-primary">
+            {playersSnapshot.season} · Week {playersSnapshot.week}
+          </p>
+          <h2 className="mt-1 font-display text-2xl font-semibold">{title}</h2>
+        </div>
+        <details className="min-w-64 text-sm">
+          <summary className="cursor-pointer text-primary">
+            {league.selected ? league.selected.name : "League & scoring settings"}
+          </summary>
+          <div className="mt-2">
+            <LeaguePicker />
+          </div>
+        </details>
       </section>
-      <LeaguePicker />
-      <div className="rounded-lg border border-warning/30 bg-warning-soft/50 p-4 text-sm leading-6">
-        {defensesOnly ? (
-          <>
-            <strong>DST preview:</strong> Opposing offense drives 65% of each matchup estimate;
-            defense history drives 35%. The 2025 historical check showed modest separation, so tiers
-            are broad. The formula does not yet use live injury or quarterback news.
-          </>
-        ) : (
-          <>
-            <strong>Early-season estimate:</strong> {playersSnapshot.candidateCount} modeled players
-            plus 32 DSTs, using NFL statistics through Week {playersSnapshot.dataThroughWeek}.
-            Recent usage is blended with prior-season history. Separate defensive adjustments apply
-            to rushing, receiving, and passing by position. Remaining points sum each future
-            matchup, excluding byes. Confirmed absences contribute zero; other estimates assume the
-            player plays. Uncertain injuries and returns are labeled below. Teammate workload
-            changes use observed roles where available. Unobserved players are omitted; outcome
-            ranges are not calibrated.
-          </>
+      <details className="rounded-md border border-warning/30 bg-warning-soft/50 px-3 py-2 text-xs leading-5">
+        <summary className="cursor-pointer">
+          Projection notes · stats through Week {playersSnapshot.dataThroughWeek} · confirmed
+          absences excluded; other points assume the player plays
+        </summary>
+        <div className="mt-2">
+          {defensesOnly ? (
+            <>
+              <strong>DST preview:</strong> Opposing offense drives 65% of each matchup estimate;
+              defense history drives 35%. The 2025 historical check showed modest separation, so
+              tiers are broad. The formula does not yet use live injury or quarterback news.
+            </>
+          ) : (
+            <>
+              <strong>Early-season estimate:</strong> {playersSnapshot.candidateCount} modeled
+              players plus 32 DSTs, using NFL statistics through Week{" "}
+              {playersSnapshot.dataThroughWeek}. Recent usage is blended with prior-season history.
+              Separate defensive adjustments apply to rushing, receiving, and passing by position.
+              Remaining points sum each future matchup, excluding byes. Confirmed absences
+              contribute zero; other estimates assume the player plays. Uncertain injuries and
+              returns are labeled below. Teammate workload changes use observed roles where
+              available. Unobserved players are omitted; outcome ranges are not calibrated.
+            </>
+          )}
+        </div>
+        {!defensesOnly && (
+          <p className="text-xs leading-5 text-muted-foreground">
+            Injury check:{" "}
+            {playersSnapshot.availabilitySummary.reviewedAt.slice(0, 16).replace("T", " ")} UTC.{" "}
+            {playersSnapshot.availabilitySummary.confirmedOutPlayers} confirmed absences in the
+            modeled player pool. The injury-report feed currently ends at Week{" "}
+            {playersSnapshot.availabilitySummary.latestInjuryReportWeek}; selected official team and
+            NFL updates supplement it. No flag means availability is unconfirmed, not that the
+            player has been cleared. Saved snapshot; refresh before lineup decisions.
+          </p>
         )}
-      </div>
-      {!defensesOnly && (
-        <p className="text-xs leading-5 text-muted-foreground">
-          Injury check:{" "}
-          {playersSnapshot.availabilitySummary.reviewedAt.slice(0, 16).replace("T", " ")} UTC.{" "}
-          {playersSnapshot.availabilitySummary.confirmedOutPlayers} confirmed absences in the
-          modeled player pool. The injury-report feed currently ends at Week{" "}
-          {playersSnapshot.availabilitySummary.latestInjuryReportWeek}; selected official team and
-          NFL updates supplement it. No flag means availability is unconfirmed, not that the player
-          has been cleared. Saved snapshot; refresh before lineup decisions.
-        </p>
-      )}
+      </details>
       <section className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4">
         {!league.selected && (
           <div className="inline-flex rounded-md border bg-background p-1">
@@ -209,7 +303,6 @@ export function PersonalRankings({
             value={effectivePosition}
             onChange={(e) => {
               setPosition(e.target.value);
-              setLimit(50);
             }}
             aria-label="Position or lineup slot"
             className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -233,17 +326,45 @@ export function PersonalRankings({
                 <option key={v}>{v}</option>
               ))}
             </select>
-            <select
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value as "impact" | "points")}
-              aria-label="Ranking method"
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              <option value="impact">My lineup impact</option>
-              <option value="points">Projected points</option>
-            </select>
           </>
         )}
+        <select
+          value={team}
+          onChange={(e) => setTeam(e.target.value)}
+          aria-label="NFL team filter"
+          className="h-9 rounded-md border bg-background px-3 text-sm"
+        >
+          <option value="All">All teams</option>
+          {[...new Set(entries.map((entry) => teamLabel(entry.team)))].sort().map((t) => (
+            <option key={t}>{t}</option>
+          ))}
+        </select>
+        {!defensesOnly && (
+          <select
+            value={injuryFilter}
+            onChange={(e) => setInjuryFilter(e.target.value)}
+            aria-label="Injury filter"
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+          >
+            {["All", "Hide confirmed out", "Uncertain availability", "Confirmed out"].map(
+              (value) => (
+                <option key={value} value={value}>
+                  {value === "All" ? "All injury statuses" : value}
+                </option>
+              ),
+            )}
+          </select>
+        )}
+        <select
+          value={sortMode}
+          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+          aria-label="Ranking method"
+          className="h-9 rounded-md border bg-background px-3 text-sm"
+        >
+          <option value="manual">My order</option>
+          <option value="points">Model order · points</option>
+          {rosterLoaded && <option value="impact">My lineup impact</option>}
+        </select>
         <Input
           className="max-w-52"
           placeholder={defensesOnly ? "Search teams" : "Search players or teams"}
@@ -251,22 +372,69 @@ export function PersonalRankings({
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Search rankings"
         />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setPosition("All");
+            setTeam("All");
+            setSearch("");
+            setAvailability("All");
+            setInjuryFilter("All");
+          }}
+        >
+          Clear filters
+        </Button>
       </section>
-      <p className="text-sm text-muted-foreground">
-        {ranked.length} results ·{" "}
-        {league.selected
-          ? `${league.selected.name} scoring and lineup`
-          : "General scoring until you connect a league"}
-        {rosterLoaded &&
-          ` · ${covered} of ${myRoster.players?.length ?? 0} roster entries have a current model estimate`}
-        {effectiveHorizon === "ros" &&
-          ` · DST excluded because only Week ${playersSnapshot.week} is modeled`}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <p>
+          {ranked.length} of {modelOrder.length} players ·{" "}
+          {league.selected ? `${league.selected.name} scoring and lineup` : "General scoring"}
+          {rosterLoaded &&
+            ` · ${covered} of ${myRoster.players?.length ?? 0} roster entries have a current model estimate`}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={!ready || undo?.key !== storageKey}
+            onClick={() => {
+              if (undo?.key === storageKey) {
+                save(undo.ids, false);
+                setUndo(null);
+              }
+            }}
+          >
+            Undo move
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={!ready || !customIds.length}
+            onClick={() => save([])}
+          >
+            Reset my order
+          </Button>
+        </div>
+      </div>
+      <details className="text-xs text-muted-foreground">
+        <summary className="cursor-pointer">How to reorder & save</summary>
+        <p className="mt-1">
+          Drag the handle, use its arrow keys, or enter an overall rank. Filters keep overall rank
+          numbers. Your order is saved separately in this browser for each league, scoring format,
+          and weekly/season view. Model projections stay unchanged. DST is available in the weekly
+          view only.
+        </p>
+      </details>
+      <p role="status" aria-live="polite" className="text-xs text-primary empty:hidden">
+        {saveMessage}
       </p>
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div data-rankings-scroll className="max-h-[70vh] overflow-auto rounded-lg border bg-card">
         <table className="w-full min-w-[780px] text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+          <thead className="sticky top-0 z-10 bg-muted text-left text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Rank</th>
+              <th className="px-3 py-2">{sortMode === "manual" ? "My rank" : "Rank"}</th>
+              <th className="px-3 py-2">Model</th>
               <th className="px-4 py-3">Player / team</th>
               <th className="px-4 py-3 text-right">
                 {effectiveHorizon === "week" ? `Week ${playersSnapshot.week} pts` : "Remaining pts"}
@@ -274,14 +442,116 @@ export function PersonalRankings({
               {rosterLoaded && <th className="px-4 py-3 text-right">Lineup impact</th>}
               {rosterLoaded && <th className="px-4 py-3">League status</th>}
               <th className="px-4 py-3">Matchup</th>
-              <th className="px-4 py-3">Projection basis</th>
+              <th className="px-4 py-3">Week {playersSnapshot.week} usage</th>
             </tr>
           </thead>
           <tbody>
-            {ranked.slice(0, limit).map((entry, index) => (
-              <tr key={entry.id} className="border-t">
-                <td className="px-4 py-3 tabular-nums text-muted-foreground">{index + 1}</td>
-                <td className="px-4 py-3 font-semibold">
+            {ranked.map((entry, index) => (
+              <tr
+                key={entry.id}
+                data-player-id={entry.id}
+                className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : "hover:bg-muted/30"}`}
+              >
+                <td className="px-2 py-2 tabular-nums text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={!ready}
+                      aria-pressed={dragging === entry.id}
+                      aria-label={`Move ${entry.name}`}
+                      title="Drag to reorder, or focus and use Up/Down arrows"
+                      className="touch-none select-none cursor-grab rounded p-1 focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
+                      onPointerDown={(event) => {
+                        if (event.button !== 0) return;
+                        event.preventDefault();
+                        event.currentTarget.focus();
+                        gesture.current = {
+                          id: entry.id,
+                          x: event.clientX,
+                          y: event.clientY,
+                          target: "",
+                          moved: false,
+                        };
+                        event.currentTarget.setPointerCapture(event.pointerId);
+                      }}
+                      onPointerMove={(event) => {
+                        const g = gesture.current;
+                        if (!g || g.id !== entry.id) return;
+                        if (!g.moved && Math.hypot(event.clientX - g.x, event.clientY - g.y) < 6)
+                          return;
+                        g.moved = true;
+                        setDragging(entry.id);
+                        const row = document
+                          .elementFromPoint(event.clientX, event.clientY)
+                          ?.closest<HTMLElement>("[data-player-id]");
+                        g.target = row?.dataset["playerId"] ?? "";
+                        setDropTarget(g.target);
+                        const scroller =
+                          event.currentTarget.closest<HTMLElement>("[data-rankings-scroll]");
+                        if (scroller) {
+                          const bounds = scroller.getBoundingClientRect();
+                          if (event.clientY < bounds.top + 50) scroller.scrollTop -= 20;
+                          if (event.clientY > bounds.bottom - 40) scroller.scrollTop += 20;
+                        }
+                      }}
+                      onPointerUp={(event) => {
+                        const g = gesture.current;
+                        gesture.current = null;
+                        event.currentTarget.releasePointerCapture(event.pointerId);
+                        if (g?.moved && g.target) moveBeside(g.id, g.target);
+                        setDragging("");
+                        setDropTarget("");
+                      }}
+                      onPointerCancel={() => {
+                        gesture.current = null;
+                        setDragging("");
+                        setDropTarget("");
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                          event.preventDefault();
+                          const target = ranked[index + (event.key === "ArrowUp" ? -1 : 1)];
+                          if (target) moveBeside(entry.id, target.id);
+                        }
+                      }}
+                    >
+                      <GripVertical className="h-4 w-4" />
+                    </button>
+                    <input
+                      key={`${storageKey}-${sortMode}-${overallRanks.get(entry.id)}`}
+                      type="number"
+                      min={1}
+                      max={modelOrder.length}
+                      disabled={!ready}
+                      defaultValue={overallRanks.get(entry.id)}
+                      aria-label={`Rank for ${entry.name}`}
+                      className="w-14 rounded border border-transparent bg-transparent px-1 py-1 text-center hover:border-input focus:border-primary"
+                      onBlur={(event) => {
+                        const rank = Number(event.target.value);
+                        if (
+                          event.target.value &&
+                          Number.isInteger(rank) &&
+                          rank >= 1 &&
+                          rank <= modelOrder.length &&
+                          rank !== overallRanks.get(entry.id)
+                        )
+                          move(entry.id, rank);
+                        else event.target.value = String(overallRanks.get(entry.id));
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.currentTarget.blur();
+                        if (event.key === "Escape") {
+                          event.currentTarget.value = String(overallRanks.get(entry.id));
+                          event.currentTarget.blur();
+                        }
+                      }}
+                    />
+                  </div>
+                </td>
+                <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                  {modelRanks.get(entry.id)}
+                </td>
+                <td className="px-4 py-2 font-semibold">
                   {entry.name}
                   {projectionById.get(entry.id)?.availability?.state !== "unverified" &&
                     projectionById.get(entry.id)?.availability && (
@@ -325,11 +595,6 @@ export function PersonalRankings({
           <p className="p-6 text-center text-muted-foreground">No results in this view.</p>
         )}
       </div>
-      {limit < ranked.length && (
-        <Button variant="outline" onClick={() => setLimit(limit + 50)}>
-          Show more
-        </Button>
-      )}
       {rosterLoaded && (
         <p className="text-xs leading-5 text-muted-foreground">
           Lineup impact estimates how much your best projected lineup changes if an outside player

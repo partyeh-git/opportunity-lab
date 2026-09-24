@@ -47,9 +47,9 @@ export const Route = createFileRoute("/")({
 });
 
 const navItems = [
+  ["Rankings", BarChart3],
   ["Players", Search],
   ["Start / Sit", ArrowRightLeft],
-  ["Rankings", BarChart3],
   ["Weekly Projections", BarChart3],
   ["DST Streamers", ShieldCheck],
   ["My Leagues", Trophy],
@@ -60,7 +60,7 @@ const navItems = [
 type Screen = (typeof navItems)[number][0];
 
 function Index() {
-  const [screen, setScreen] = useState<Screen>("Players");
+  const [screen, setScreen] = useState<Screen>("Rankings");
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground lg:flex">
@@ -99,10 +99,6 @@ function Index() {
           </div>
         </header>
         <div className="mx-auto max-w-[1480px] px-4 py-6 md:px-8 lg:px-10 lg:py-8">
-          <div className="mb-5 flex items-center gap-2 text-xs font-medium text-muted-foreground sm:hidden">
-            <span className="h-2 w-2 rounded-full bg-warning" />
-            Fantasy football research
-          </div>
           {screen === "Players" ? (
             <PlayerResearch />
           ) : screen === "Rankings" ? (
@@ -147,7 +143,7 @@ function Sidebar({
         <div className="flex h-20 items-center justify-between border-b border-sidebar-foreground/10 px-6">
           <Button
             variant="ghost"
-            onClick={() => onSelect("Players")}
+            onClick={() => onSelect("Rankings")}
             className="h-auto gap-3 p-0 text-left text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground"
           >
             <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
