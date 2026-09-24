@@ -853,7 +853,7 @@ export function PersonalRankings({
                         <span
                           title={detail}
                           aria-label={detail}
-                          className="ml-2 inline-block rounded bg-red-700 px-1.5 py-[3px] align-middle font-sans text-xs font-bold not-italic leading-none tracking-wider text-white ring-1 ring-red-400/60"
+                          className="ml-2 inline-block align-middle font-sans text-sm font-extrabold not-italic leading-none tracking-wide text-red-600 dark:text-red-400"
                         >
                           {letter}
                         </span>
