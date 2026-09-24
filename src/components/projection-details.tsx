@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type DetailPlayer = {
   position: string;
@@ -41,7 +42,6 @@ type DetailPlayer = {
 };
 
 export function ProjectionDetails({ player }: { player: DetailPlayer }) {
-  const [expanded, setExpanded] = useState(false);
   const labels: Record<string, string> = {
     catch: `${player.position} catch rate`,
     receiving: `Receiving yards vs ${player.position}`,
@@ -59,12 +59,19 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
         ? ["rushing", "rushing_td", "catch", "receiving", "receiving_td"]
         : ["catch", "receiving", "receiving_td"];
   return (
-    <details
-      className="mt-1 max-w-lg text-xs font-normal text-muted-foreground"
-      onToggle={(event) => setExpanded(event.currentTarget.open)}
-    >
-      <summary className="cursor-pointer text-primary">Why this projection?</summary>
-      {expanded && (
+    <Popover>
+      <PopoverTrigger
+        aria-label="Why this projection"
+        title="Why this projection"
+        className="inline-grid h-5 w-5 place-items-center rounded-full text-primary opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        <Info className="h-3.5 w-3.5" aria-hidden="true" />
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="max-h-[70vh] w-[26rem] max-w-[calc(100vw-2rem)] overflow-auto text-left font-sans text-xs font-normal text-muted-foreground"
+      >
+        <p className="font-semibold text-foreground">Why this projection</p>
         <>
           {player.availability && (
             <div className="my-3 space-y-2 rounded-md border p-3 leading-5">
@@ -179,7 +186,7 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
             availability forecasts.
           </p>
         </>
-      )}
-    </details>
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { GripVertical } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { ArrowDown, ArrowUp, GripVertical, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LeaguePicker, useLeague } from "@/components/league-context";
 import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
 import playersSnapshot from "@/data/rankings-current.json";
@@ -42,6 +43,66 @@ const lineupSlots = (slots?: string[]) => [
   ),
 ];
 
+type SortKey = "manual" | "model" | "value" | "points" | "ros" | "impact" | "name";
+type Sort = { key: SortKey; reversed: boolean };
+
+/** Small "i" bubble that explains a column or a number without taking table space. */
+function InfoBubble({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Popover>
+      <PopoverTrigger
+        aria-label={label}
+        className="inline-grid h-5 w-5 place-items-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        <Info className="h-3.5 w-3.5" aria-hidden="true" />
+      </PopoverTrigger>
+      <PopoverContent className="w-80 space-y-2 text-xs normal-case leading-5 tracking-normal">
+        {children}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/** Column header: click the label to sort (again to reverse), click the "i" for what it means. */
+function SortHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  align = "left",
+  children,
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: Sort;
+  onSort: (key: SortKey) => void;
+  align?: "left" | "right";
+  children: ReactNode;
+}) {
+  const active = sort.key === sortKey;
+  const Arrow = sort.reversed ? ArrowUp : ArrowDown;
+  return (
+    <th
+      className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}
+      aria-sort={active ? (sort.reversed ? "ascending" : "descending") : "none"}
+    >
+      <span
+        className={`inline-flex items-center gap-1 ${align === "right" ? "flex-row-reverse" : ""}`}
+      >
+        <button
+          type="button"
+          onClick={() => onSort(sortKey)}
+          className={`inline-flex items-center gap-1 whitespace-nowrap uppercase hover:text-volt ${active ? "text-volt" : ""}`}
+        >
+          {label}
+          {active && <Arrow className="h-3 w-3" aria-hidden="true" />}
+        </button>
+        <InfoBubble label={`What ${label} means`}>{children}</InfoBubble>
+      </span>
+    </th>
+  );
+}
+
 export function PersonalRankings({
   weeklyOnly = false,
   defensesOnly = false,
@@ -51,13 +112,14 @@ export function PersonalRankings({
 }) {
   const league = useLeague();
   const [genericPpr, setGenericPpr] = useState<"full" | "half">("full");
-  const [horizon, setHorizon] = useState<"week" | "ros">(
-    weeklyOnly || defensesOnly ? "week" : "ros",
-  );
   const [position, setPosition] = useState("All");
   const [search, setSearch] = useState("");
   const [availability, setAvailability] = useState("All");
-  const [sortMode, setSortMode] = useState<"manual" | "value" | "impact" | "points">("manual");
+  const [sort, setSort] = useState<Sort>({ key: "manual", reversed: false });
+  const sortBy = (key: SortKey) =>
+    setSort((current) =>
+      current.key === key ? { key, reversed: !current.reversed } : { key, reversed: false },
+    );
   const [team, setTeam] = useState("All");
   const [injuryFilter, setInjuryFilter] = useState("All");
   const [dragging, setDragging] = useState("");
@@ -70,7 +132,8 @@ export function PersonalRankings({
     moved: boolean;
   } | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
-  const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : horizon;
+  // The Weekly tab and the overall Rankings tab are separate boards; each has one horizon.
+  const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : "ros";
   const settings = useMemo(
     () =>
       league.selected?.scoring_settings ?? {
@@ -159,17 +222,35 @@ export function PersonalRankings({
       ),
     [entries],
   );
+  // League value is always rest-of-season: it drives the overall board and the weekly
+  // board's "ROS rank" column.
   const valueModel = useMemo(
     () =>
       leagueValues(
-        entries.flatMap((entry) => {
-          const points = effectiveHorizon === "week" ? entry.weekPoints : entry.rosPoints;
-          return points === null ? [] : [{ id: entry.id, position: entry.position, points }];
-        }),
+        entries.flatMap((entry) =>
+          entry.rosPoints === null
+            ? []
+            : [{ id: entry.id, position: entry.position, points: entry.rosPoints }],
+        ),
         league.selected?.total_rosters ?? 12,
         league.selected?.roster_positions ?? DEFAULT_LINEUP,
       ),
-    [entries, effectiveHorizon, league.selected],
+    [entries, league.selected],
+  );
+  const rosRanks = useMemo(
+    () =>
+      new Map(
+        entries
+          .filter((entry) => valueModel.values.get(entry.id) != null)
+          .sort(
+            (a, b) =>
+              valueModel.values.get(b.id)! - valueModel.values.get(a.id)! ||
+              (b.rosPoints ?? 0) - (a.rosPoints ?? 0) ||
+              a.id.localeCompare(b.id),
+          )
+          .map((entry, index) => [entry.id, index + 1]),
+      ),
+    [entries, valueModel],
   );
   const pointsFor = (entry: ResearchEntry) =>
     effectiveHorizon === "week" ? entry.weekPoints : (entry.rosPoints ?? 0);
@@ -195,13 +276,24 @@ export function PersonalRankings({
     modelOrder.map((entry) => entry.id),
   );
   const myRanks = new Map(myOrder.map((id, index) => [id, index + 1]));
+  // Higher score = listed first in a column's default direction. Missing values always sink.
+  const score = (entry: ResearchEntry): number => {
+    if (sort.key === "manual") return -myRanks.get(entry.id)!;
+    if (sort.key === "model") return -modelRanks.get(entry.id)!;
+    if (sort.key === "value") return valueModel.values.get(entry.id) ?? Number.NaN;
+    if (sort.key === "points") return pointsFor(entry);
+    if (sort.key === "ros") return -(rosRanks.get(entry.id) ?? Number.NaN);
+    if (sort.key === "impact") return impacts.get(entry.id) ?? Number.NaN;
+    return 0;
+  };
   const ordered = [...modelOrder].sort((a, b) => {
-    if (sortMode === "manual") return myRanks.get(a.id)! - myRanks.get(b.id)!;
-    if (sortMode === "points") return pointsFor(b) - pointsFor(a) || a.id.localeCompare(b.id);
-    if (rosterLoaded && sortMode === "impact") {
-      const diff = (impacts.get(b.id) ?? 0) - (impacts.get(a.id) ?? 0);
-      if (Math.abs(diff) > 0.001) return diff;
-    }
+    const direction = sort.reversed ? -1 : 1;
+    if (sort.key === "name") return direction * a.name.localeCompare(b.name);
+    const sa = score(a);
+    const sb = score(b);
+    if (Number.isNaN(sa) !== Number.isNaN(sb)) return Number.isNaN(sa) ? 1 : -1;
+    const diff = Number.isNaN(sa) ? 0 : sb - sa;
+    if (Math.abs(diff) > 0.001) return direction * diff;
     return modelRanks.get(a.id)! - modelRanks.get(b.id)!;
   });
   const overallRanks = new Map(ordered.map((entry, index) => [entry.id, index + 1]));
@@ -230,7 +322,7 @@ export function PersonalRankings({
     if (!ready) return;
     if (remember) setUndo({ key: storageKey, ids: customIds });
     setSavedOrder({ key: storageKey, ids });
-    setSortMode("manual");
+    setSort({ key: "manual", reversed: false });
     try {
       if (ids.length) localStorage.setItem(storageKey, JSON.stringify(ids));
       else localStorage.removeItem(storageKey);
@@ -251,8 +343,8 @@ export function PersonalRankings({
   const title = defensesOnly
     ? "DST streaming tiers"
     : weeklyOnly
-      ? "Weekly projections"
-      : "Personalized rankings";
+      ? "Weekly rankings"
+      : "Overall rankings";
   return (
     <div className="space-y-3">
       <section className="flex flex-wrap items-end justify-between gap-3">
@@ -323,20 +415,6 @@ export function PersonalRankings({
             ))}
           </div>
         )}
-        {!weeklyOnly && !defensesOnly && (
-          <div className="inline-flex rounded-md border bg-background p-1">
-            {(["week", "ros"] as const).map((v) => (
-              <Button
-                key={v}
-                size="sm"
-                variant={horizon === v ? "secondary" : "ghost"}
-                onClick={() => setHorizon(v)}
-              >
-                {v === "week" ? `Week ${playersSnapshot.week}` : "Rest of season"}
-              </Button>
-            ))}
-          </div>
-        )}
         {!defensesOnly && (
           <select
             value={effectivePosition}
@@ -394,19 +472,6 @@ export function PersonalRankings({
             )}
           </select>
         )}
-        <select
-          value={sortMode}
-          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
-          aria-label="Ranking method"
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="manual">My order</option>
-          <option value="value">
-            Model order · {showValue ? "league value" : "projected points"}
-          </option>
-          {showValue && <option value="points">Projected points only</option>}
-          {rosterLoaded && <option value="impact">My lineup impact</option>}
-        </select>
         <Input
           className="max-w-52"
           placeholder={defensesOnly ? "Search teams" : "Search players or teams"}
@@ -459,57 +524,6 @@ export function PersonalRankings({
           </Button>
         </div>
       </div>
-      {showValue && (
-        <details className="rounded-md border px-3 py-2 text-xs leading-5">
-          <summary className="cursor-pointer">
-            Model order: points above the positional starter baseline ·{" "}
-            {league.selected?.total_rosters ?? 12} teams
-            {effectiveHorizon === "ros"
-              ? ` · Weeks ${playersSnapshot.week}–18 · this season only`
-              : ` · Week ${playersSnapshot.week}`}
-          </summary>
-          <p className="mt-2">
-            {league.selected
-              ? "Uses your league’s scoring and starting slots."
-              : "Assumes 12 teams, 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX and DST; connect your league for its actual lineup."}{" "}
-            We fill the league’s starting spots, including flex and superflex, with the highest
-            projected scorers. Each player’s value is their points minus the last starter at their
-            position. A negative value means below that starter baseline, not worthless. This is not
-            a waiver, trade-price or keeper valuation; keeper costs and future seasons are not
-            included.
-          </p>
-          <p className="mt-1">
-            Baselines:{" "}
-            {[...valueModel.baselines]
-              .map(
-                ([pos, baseline]) =>
-                  `${labelFor(pos)}${baseline.rank}: ${baseline.points.toFixed(1)} pts`,
-              )
-              .join(" · ")}
-          </p>
-          {valueModel.filledSlots < valueModel.totalSlots && (
-            <p className="text-warning">
-              The modeled player pool cannot fill every supported starting slot; these baselines are
-              incomplete.
-            </p>
-          )}
-          {!!customIds.length && (
-            <p className="mt-1">
-              Your saved order is preserved. Choose “Model order · league value” to see the updated
-              baseline ranking.
-            </p>
-          )}
-        </details>
-      )}
-      <details className="text-xs text-muted-foreground">
-        <summary className="cursor-pointer">How to reorder & save</summary>
-        <p className="mt-1">
-          Drag the handle, use its arrow keys, or enter an overall rank. Filters keep overall rank
-          numbers. Your order is saved separately in this browser for each league, scoring format,
-          and weekly/season view. Weekly boards show one lineup slot at a time, each with its own
-          saved order. Model projections stay unchanged. DST is available in the weekly view only.
-        </p>
-      </details>
       <p role="status" aria-live="polite" className="text-xs text-primary empty:hidden">
         {saveMessage}
       </p>
@@ -517,17 +531,117 @@ export function PersonalRankings({
         <table className="w-full min-w-[780px] text-sm">
           <thead className="sticky top-0 z-10 bg-broadcast text-left text-xs font-semibold uppercase tracking-wide text-broadcast-foreground">
             <tr>
-              <th className="px-3 py-2">{sortMode === "manual" ? "My rank" : "Rank"}</th>
-              <th className="px-3 py-2">Model</th>
-              <th className="px-4 py-3">Player / team</th>
-              {showValue && <th className="px-4 py-3 text-right">Above starter</th>}
-              <th className="px-4 py-3 text-right">
-                {effectiveHorizon === "week" ? `Week ${playersSnapshot.week} pts` : "Remaining pts"}
-              </th>
-              {rosterLoaded && <th className="px-4 py-3 text-right">Lineup impact</th>}
-              {rosterLoaded && <th className="px-4 py-3">League status</th>}
-              <th className="px-4 py-3">Matchup</th>
-              <th className="px-4 py-3">Week {playersSnapshot.week} usage</th>
+              <SortHeader label="My rank" sortKey="manual" sort={sort} onSort={sortBy}>
+                <p>
+                  Your personal order. Drag the handle, use its arrow keys, or type a rank to move a
+                  player. It is saved in this browser, separately for each league, scoring format
+                  and board{weeklyBoard ? ", and each lineup slot" : ""}. Model projections stay
+                  unchanged.
+                </p>
+                <p>Sorting by another column and then moving a player saves that order as yours.</p>
+              </SortHeader>
+              <SortHeader label="Model" sortKey="model" sort={sort} onSort={sortBy}>
+                <p>
+                  {showValue
+                    ? "Where our model ranks the player on this board: by value above the worst league-wide starter (the Above starter column)."
+                    : "Where our model ranks the player on this board: by projected points this week."}
+                </p>
+              </SortHeader>
+              <SortHeader label="Player / team" sortKey="name" sort={sort} onSort={sortBy}>
+                <p>
+                  Sorts alphabetically. Colored tags show position
+                  {defensesOnly ? " and streaming tier" : ""}.
+                </p>
+              </SortHeader>
+              {weeklyBoard && (
+                <SortHeader
+                  label="ROS rank"
+                  sortKey="ros"
+                  sort={sort}
+                  onSort={sortBy}
+                  align="right"
+                >
+                  <p>
+                    The player's overall rank for the rest of the season across all positions, as on
+                    the Overall rankings tab: value above the worst league-wide starter in this
+                    league. Useful for spotting a low weekly projection on a player who still
+                    matters.
+                  </p>
+                </SortHeader>
+              )}
+              {showValue && (
+                <SortHeader
+                  label="Above starter"
+                  sortKey="value"
+                  sort={sort}
+                  onSort={sortBy}
+                  align="right"
+                >
+                  <p>
+                    Rest-of-season points above the worst starter at the player's position in this
+                    league. We fill every team's starting lineup, including flex and superflex, with
+                    the highest projected scorers; the last one picked at each position is the
+                    baseline.
+                  </p>
+                  <p>
+                    {league.selected
+                      ? `Uses ${league.selected.name}'s scoring and ${league.selected.total_rosters} teams.`
+                      : "Assumes 12 teams, 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX and DST; connect your league for its actual lineup."}{" "}
+                    Negative means below the starter baseline, not worthless. No keeper or trade
+                    value yet.
+                  </p>
+                  <p>
+                    Baselines:{" "}
+                    {[...valueModel.baselines]
+                      .map(
+                        ([pos, baseline]) =>
+                          `${labelFor(pos)}${baseline.rank} ${baseline.points.toFixed(1)}`,
+                      )
+                      .join(" · ")}
+                  </p>
+                  {valueModel.filledSlots < valueModel.totalSlots && (
+                    <p className="text-warning">
+                      The modeled player pool cannot fill every starting slot; these baselines are
+                      incomplete.
+                    </p>
+                  )}
+                </SortHeader>
+              )}
+              <SortHeader
+                label={
+                  effectiveHorizon === "week" ? `Week ${playersSnapshot.week} pts` : "Remaining pts"
+                }
+                sortKey="points"
+                sort={sort}
+                onSort={sortBy}
+                align="right"
+              >
+                <p>
+                  {effectiveHorizon === "week"
+                    ? `Projected fantasy points in Week ${playersSnapshot.week}, in this league's scoring.`
+                    : `Projected fantasy points for Weeks ${playersSnapshot.week} to 18 in this league's scoring, added up game by game against each opponent. Byes excluded.`}{" "}
+                  Confirmed absences count as zero; otherwise we assume the player plays. Click the
+                  "i" next to a player's number for how it was built.
+                </p>
+              </SortHeader>
+              {rosterLoaded && (
+                <SortHeader
+                  label="Lineup impact"
+                  sortKey="impact"
+                  sort={sort}
+                  onSort={sortBy}
+                  align="right"
+                >
+                  <p>
+                    How much your best projected lineup changes if an outside player joins your
+                    team, or if one of your players is removed. It does not deduct a trade return,
+                    required drop or keeper cost. Zero means no projected lineup change.
+                  </p>
+                </SortHeader>
+              )}
+              {rosterLoaded && <th className="px-3 py-2">League status</th>}
+              <th className="px-3 py-2">Matchup</th>
+              <th className="px-3 py-2">Week {playersSnapshot.week} usage</th>
             </tr>
           </thead>
           <tbody>
@@ -603,7 +717,7 @@ export function PersonalRankings({
                       <GripVertical className="h-4 w-4" />
                     </button>
                     <input
-                      key={`${storageKey}-${sortMode}-${overallRanks.get(entry.id)}`}
+                      key={`${storageKey}-${sort.key}-${sort.reversed}-${overallRanks.get(entry.id)}`}
                       type="number"
                       min={1}
                       max={modelOrder.length}
@@ -652,10 +766,12 @@ export function PersonalRankings({
                   {entry.position !== "DEF" && entry.lastObservedWeek < 2 && (
                     <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
                   )}
-                  {projectionById.has(entry.id) && (
-                    <ProjectionDetails player={projectionById.get(entry.id)!} />
-                  )}
                 </td>
+                {weeklyBoard && (
+                  <td className="px-4 py-3 text-right font-display text-lg tabular-nums text-muted-foreground">
+                    {rosRanks.get(entry.id) ?? "—"}
+                  </td>
+                )}
                 {showValue && (
                   <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
                     {valueModel.values.get(entry.id) == null
@@ -664,10 +780,12 @@ export function PersonalRankings({
                   </td>
                 )}
                 <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
-                  {(effectiveHorizon === "week"
-                    ? entry.weekPoints
-                    : (entry.rosPoints ?? 0)
-                  ).toFixed(1)}
+                  <span className="inline-flex items-center gap-1">
+                    {projectionById.has(entry.id) && (
+                      <ProjectionDetails player={projectionById.get(entry.id)!} />
+                    )}
+                    {pointsFor(entry).toFixed(1)}
+                  </span>
                 </td>
                 {rosterLoaded && (
                   <td className="px-4 py-3 text-right tabular-nums">
@@ -689,14 +807,6 @@ export function PersonalRankings({
           <p className="p-6 text-center text-muted-foreground">No results in this view.</p>
         )}
       </div>
-      {rosterLoaded && (
-        <p className="text-xs leading-5 text-muted-foreground">
-          Lineup impact estimates how much your best projected lineup changes if an outside player
-          joins your team, or if one of your players is removed. It does not deduct a trade return,
-          required drop, or keeper cost. A zero means no projected lineup change with the current
-          modeled roster.
-        </p>
-      )}
       {defensesOnly && (
         <p className="text-xs leading-5 text-muted-foreground">
           Tier 1 is the top five defenses by projected Week {playersSnapshot.week} points in this

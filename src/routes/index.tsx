@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlayerResearch } from "@/components/player-research";
 import { Trades } from "@/components/rankings-trades";
 import { PersonalRankings } from "@/components/personal-rankings";
 import { LeagueProvider } from "@/components/league-context";
@@ -47,10 +46,9 @@ export const Route = createFileRoute("/")({
 });
 
 const navItems = [
-  ["Rankings", BarChart3],
-  ["Players", Search],
+  ["Overall Rankings", BarChart3],
   ["Start / Sit", ArrowRightLeft],
-  ["Weekly Projections", BarChart3],
+  ["Weekly Rankings", BarChart3],
   ["DST Streamers", ShieldCheck],
   ["My Leagues", Trophy],
   ["Trades", ArrowRightLeft],
@@ -60,7 +58,7 @@ const navItems = [
 type Screen = (typeof navItems)[number][0];
 
 function Index() {
-  const [screen, setScreen] = useState<Screen>("Rankings");
+  const [screen, setScreen] = useState<Screen>("Overall Rankings");
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground lg:flex">
@@ -100,11 +98,9 @@ function Index() {
           key={screen}
           className="mx-auto max-w-[1480px] px-4 py-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 md:px-8 lg:px-10 lg:py-8"
         >
-          {screen === "Players" ? (
-            <PlayerResearch />
-          ) : screen === "Rankings" ? (
+          {screen === "Overall Rankings" ? (
             <PersonalRankings key="rankings" />
-          ) : screen === "Weekly Projections" ? (
+          ) : screen === "Weekly Rankings" ? (
             <PersonalRankings key="weekly" weeklyOnly />
           ) : screen === "DST Streamers" ? (
             <PersonalRankings key="dst" defensesOnly />
@@ -144,7 +140,7 @@ function Sidebar({
         <div className="flex h-20 items-center justify-between border-b border-sidebar-foreground/10 px-6">
           <Button
             variant="ghost"
-            onClick={() => onSelect("Rankings")}
+            onClick={() => onSelect("Overall Rankings")}
             className="h-auto gap-3 p-0 text-left text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground"
           >
             <span className="grid h-9 w-9 -skew-x-6 place-items-center rounded-md bg-volt text-volt-foreground">
