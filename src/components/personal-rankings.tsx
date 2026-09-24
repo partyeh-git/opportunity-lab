@@ -448,7 +448,10 @@ export function PersonalRankings({
       <section className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="broadcast-tag text-xs uppercase">
-            {playersSnapshot.season} · Week {playersSnapshot.week}
+            {playersSnapshot.season} ·{" "}
+            {effectiveHorizon === "ros"
+              ? `Rest of season · Weeks ${playersSnapshot.week}–18`
+              : `Week ${playersSnapshot.week}`}
           </p>
           <h2 className="mt-1 font-display text-2xl font-semibold">{title}</h2>
         </div>
@@ -738,8 +741,10 @@ export function PersonalRankings({
                 </SortHeader>
               )}
               {rosterLoaded && <th className="px-3 py-2">League status</th>}
-              <th className="px-3 py-2">Matchup</th>
-              <th className="px-3 py-2">Week {playersSnapshot.week} usage</th>
+              <th className="px-3 py-2">
+                {effectiveHorizon === "ros" ? `Week ${playersSnapshot.week} game` : "Matchup"}
+              </th>
+              <th className="px-3 py-2">Week {playersSnapshot.week} projected usage</th>
             </tr>
           </thead>
           <tbody>
