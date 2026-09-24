@@ -50,7 +50,7 @@ const lineupSlots = (slots?: string[]) => [
 const INJURY_LETTER: Record<string, string> = {
   Questionable: "Q",
   Doubtful: "D",
-  Out: "O",
+  Out: "OUT",
   IR: "IR",
   PUP: "PUP",
   Sus: "SUS",
@@ -853,7 +853,7 @@ export function PersonalRankings({
                         <span
                           title={detail}
                           aria-label={detail}
-                          className="ml-1.5 inline-block rounded-sm bg-red-600 px-1.5 py-0.5 align-middle text-[11px] font-bold leading-none text-white"
+                          className="ml-2 inline-block rounded bg-red-700 px-1.5 py-[3px] align-middle font-sans text-xs font-bold not-italic leading-none tracking-wider text-white ring-1 ring-red-400/60"
                         >
                           {letter}
                         </span>
