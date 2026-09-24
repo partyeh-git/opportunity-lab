@@ -38,6 +38,7 @@ type SleeperPlayer = {
 type SleeperNote = {
   published: number;
   source: string;
+  source_key?: string;
   metadata: { title?: string; description?: string; analysis?: string; url?: string };
 };
 
@@ -165,15 +166,30 @@ export function PlayerCard({
     enabled: open && !!player.sleeperId,
     staleTime: 10 * 60 * 1000,
   });
-  const [showAllNotes, setShowAllNotes] = useState(false);
-  const notes = [...(news.data ?? [])].sort((a, b) => b.published - a.published);
+  // Sleeper's feed only has the 10 newest notes; a daily job saves older ones in the app
+  // (scripts/archive-notes.mjs). Merge both so the card shows the whole season.
+  const archive = useQuery({
+    queryKey: ["notes-archive", player.sleeperId],
+    queryFn: async () => {
+      const response = await fetch(`/notes/${player.sleeperId}.json`);
+      return response.ok ? ((await response.json()) as SleeperNote[]) : [];
+    },
+    enabled: open && !!player.sleeperId,
+    staleTime: 10 * 60 * 1000,
+  });
+  const noteKey = (n: SleeperNote) => `${n.source}:${n.source_key ?? n.published}`;
+  const notes = [
+    ...new Map(
+      [...(archive.data ?? []), ...(news.data ?? [])].map((n) => [noteKey(n), n]),
+    ).values(),
+  ].sort((a, b) => b.published - a.published);
   const cols = columns[player.position] ?? columns["WR"]!;
   const games = Object.values(log.data ?? {})
     .filter((g): g is NonNullable<SleeperGame> => !!g && s(g.stats, "gp") > 0)
     .sort((a, b) => a.week - b.week);
   const playedPoints = games.map((g) => gamePoints(g.stats, settings, connected));
   // A game's notes: anything published from game day through two days after (recaps and
-  // next-day injury updates). Sleeper keeps only recent notes, so older games have none.
+  // next-day injury updates). Saved notes start in September 2026, so older games have none.
   const gameNotes = games.map((g) => {
     const start = new Date(`${g.date}T00:00:00`).getTime();
     return notes.filter((n) => n.published >= start && n.published < start + 3 * DAY);
@@ -250,20 +266,13 @@ export function PlayerCard({
 
           {notes.length > 0 && (
             <section>
-              <h3 className="mb-2 font-display text-lg">Latest notes</h3>
-              <div className="space-y-3 rounded-md border p-3">
-                {(showAllNotes ? notes : notes.slice(0, 2)).map((note) => (
-                  <Note key={note.published} note={note} />
+              <h3 className="mb-2 font-display text-lg">
+                Notes <span className="text-sm text-muted-foreground">· {notes.length}</span>
+              </h3>
+              <div className="max-h-80 space-y-3 overflow-y-auto rounded-md border p-3">
+                {notes.map((note) => (
+                  <Note key={noteKey(note)} note={note} />
                 ))}
-                {notes.length > 2 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllNotes(!showAllNotes)}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    {showAllNotes ? "Show fewer" : `Show all ${notes.length} notes`}
-                  </button>
-                )}
               </div>
             </section>
           )}
@@ -310,7 +319,7 @@ export function PlayerCard({
                   list.length ? (
                     <div className="space-y-3">
                       {list.map((note) => (
-                        <Note key={note.published} note={note} />
+                        <Note key={noteKey(note)} note={note} />
                       ))}
                     </div>
                   ) : null,

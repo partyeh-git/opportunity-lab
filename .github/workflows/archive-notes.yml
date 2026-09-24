@@ -1,0 +1,38 @@
+name: Archive player notes
+
+# Sleeper's public feed only keeps each player's 10 newest notes, so save new ones daily
+# to build a full-season history for the player card. Display only; never a model input.
+on:
+  schedule:
+    - cron: "0 11 * * *" # daily, 7am Eastern
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archive-notes
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/archive-notes.mjs
+      - name: Commit new notes
+        run: |
+          git add public/notes
+          if git diff --cached --quiet; then
+            echo "No new notes."
+            exit 0
+          fi
+          git config user.name "notes-archiver"
+          git config user.email "notes-archiver@users.noreply.github.com"
+          git commit -m "Archive new player notes"
+          git pull --rebase origin main
+          git push origin HEAD:main
