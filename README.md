@@ -40,6 +40,8 @@ Personal ranking order is saved only in this browser, separately by league, scor
 
 ## Data refresh and historical check
 
+**Weekly (automatic):** `.github/workflows/weekly-projections.yml` runs Tuesday, Wednesday and Thursday mornings and calls `python scripts/weekly_refresh.py`. Once every game of the week is final (and that week's snap counts are published, or on the Thursday retry regardless), it downloads nflverse box scores, schedule, PFR snap counts, player ids and injury reports plus Sleeper's player directory, rolls `scripts/projections/injury-review.json` forward (reviewed IR placements carry inside their minimum stay; players currently on IR/PUP/suspended are out that week; one-week Outs never carry), rebuilds the projections and DST, runs the model tests, and commits. It does nothing if the site already shows the upcoming week. Run it by hand with `--week N` to rebuild a specific week, or from the Actions tab ("Run workflow").
+
 `src/data/rankings-current.json` is produced by the versioned `scripts/projections` model; `src/data/dst-current.json` is produced by `scripts/build_dst_snapshot.py`. Both consume nflverse player-week statistics and games, and reject incomplete preceding weeks. Keep a prior snapshot for stable Sleeper identity mappings. The projection script does not download data, evaluate 2025 outcomes, or use outside rankings. For the current snapshot:
 
 ```sh

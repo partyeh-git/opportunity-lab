@@ -61,7 +61,7 @@ def prepare(snapshot_path, sleeper_path, injuries_path, games_path, review_path,
         previous_sources = rows.get(r['id'], {}).get('sources', [])
         rows[r['id']] = dict(id=r['id'], team=r['team'], reportedStatus=r['reportedStatus'],
             injury=r['injury'], outWeeks=out, note=r['note'],
-            sources=[dict(kind='official', title=r['sourceTitle'], url=r['sourceUrl'],
+            sources=[dict(kind=r.get('sourceKind', 'official'), title=r['sourceTitle'], url=r['sourceUrl'],
                 publishedDate=r['publishedDate'], retrievedAt=review['reviewedAt']), *previous_sources])
         for key in ('replacementId', 'replacementWeeks'):
             if key in r:

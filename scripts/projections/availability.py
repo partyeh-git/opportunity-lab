@@ -38,8 +38,9 @@ def load_evidence(path, season, week, as_of):
         weeks = record.get('outWeeks', [])
         if any(type(w) is not int or not 1 <= w <= 18 for w in weeks):
             raise ValueError('Invalid absence week')
-        if weeks and not any(s['kind'] == 'official' for s in record['sources']):
-            raise ValueError('Confirmed absence requires reviewed official evidence')
+        # IR/PUP/suspension roster status (NFL transactions, via Sleeper) establishes the current week only.
+        if weeks and not any(s['kind'] in ('official', 'roster_status') for s in record['sources']):
+            raise ValueError('Confirmed absence requires reviewed official evidence or an IR/PUP/suspension roster status')
         if not set(record.get('replacementWeeks', [])).issubset(weeks):
             raise ValueError('Replacement start must fall within confirmed absence weeks')
     return evidence

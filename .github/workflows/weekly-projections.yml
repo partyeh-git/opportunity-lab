@@ -1,0 +1,53 @@
+name: Weekly projections
+
+# After each NFL week's games are final, download public nflverse/Sleeper data, roll the
+# injury ledger forward, rebuild player projections and DST, run the model tests, and commit.
+# Idempotent: if the site already shows the upcoming week, it does nothing. It waits for the
+# week's snap counts on Tuesday/Wednesday and builds regardless on the Thursday retry.
+on:
+  schedule:
+    - cron: "0 14 * * 2" # Tuesday 10am Eastern, after Monday night
+    - cron: "0 14 * * 3" # Wednesday retry (late stats or snap counts)
+    - cron: "0 14 * * 4" # Thursday retry, before Thursday night; builds even with stale snaps
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Rebuild this week now (optional; blank = next week once games are final)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-projections
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy pandas pyarrow
+      - name: Rebuild projections
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.week }}" ]; then ARGS="--week ${{ github.event.inputs.week }}"; fi
+          if [ "${{ github.event.schedule }}" = "0 14 * * 4" ] || [ -n "${{ github.event.inputs.week }}" ]; then ARGS="$ARGS --allow-stale-snaps"; fi
+          python scripts/weekly_refresh.py $ARGS
+      - name: Commit changes
+        run: |
+          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json
+          if git diff --cached --quiet; then
+            echo "No projection changes."
+            exit 0
+          fi
+          WEEK=$(python -c "import json;print(json.load(open('src/data/rankings-current.json'))['week'])")
+          git config user.name "projections-bot"
+          git config user.email "projections-bot@users.noreply.github.com"
+          git commit -m "Weekly projections refresh for Week $WEEK"
+          git pull --rebase origin main
+          git push origin HEAD:main
