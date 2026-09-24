@@ -27,7 +27,7 @@ const labelFor = (position: string) =>
     DEF: "DST",
   })[position] ?? position;
 const positionChip: Record<string, string> = {
-  QB: "bg-violet-100 text-violet-800 dark:bg-violet-400/20 dark:text-violet-200",
+  QB: "bg-rose-100 text-rose-800 dark:bg-rose-400/20 dark:text-rose-200",
   RB: "bg-lime-100 text-lime-800 dark:bg-lime-400/20 dark:text-lime-200",
   WR: "bg-sky-100 text-sky-800 dark:bg-sky-400/20 dark:text-sky-200",
   TE: "bg-amber-100 text-amber-800 dark:bg-amber-400/20 dark:text-amber-200",
