@@ -48,9 +48,12 @@ type DetailPlayer = {
  */
 export function ProjectionDetails({
   player,
+  chance,
   children,
 }: {
   player: DetailPlayer;
+  /** Weekly boards: chance the player plays and why. */
+  chance?: { value: number; reason: string } | undefined;
   children: ReactNode;
 }) {
   const labels: Record<string, string> = {
@@ -94,6 +97,12 @@ export function ProjectionDetails({
         className="w-72 space-y-1.5 text-left font-sans text-xs font-normal not-italic normal-case leading-5 text-muted-foreground"
       >
         <p className="font-semibold text-foreground">How we got this number</p>
+        {chance && (
+          <p>
+            <span className="text-foreground">Chance to play:</span>{" "}
+            {Math.round(chance.value * 100)}% ({chance.reason}). The number shown is if he plays.
+          </p>
+        )}
         <p>
           <span className="text-foreground">Workload:</span>{" "}
           {usage.priorAvailable

@@ -12,6 +12,8 @@ import { PlayerCard } from "@/components/player-card";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { boardTiers } from "@/lib/tiers";
+import { chanceReason, chanceToPlay, gameStatus, gamesJustMissed } from "@/lib/availability";
+import { scoreProjectedStats } from "@/lib/projection-scoring";
 
 const projectionById = new Map(playersSnapshot.players.map((p) => [p.id, p]));
 
@@ -285,8 +287,38 @@ export function PersonalRankings({
       ),
     [entries, valueModel],
   );
+  // Weekly boards show points IF the player plays, plus the chance he plays; the model order
+  // ranks on chance x points (Phase B fix 1: 63.8% to 69.3% start/sit pairs right on 2024).
+  // Ruled-out players have a zeroed projection, so use their matchup-neutral line instead.
+  const ifPlays = (entry: ResearchEntry) => {
+    const p = projectionById.get(entry.id);
+    return entry.weekPoints > 0 || !p
+      ? entry.weekPoints
+      : scoreProjectedStats(p.neutralProjected, settings);
+  };
+  const chances = useMemo(
+    () =>
+      new Map(
+        entries.map((entry) => {
+          const p = projectionById.get(entry.id);
+          if (!p) return [entry.id, { value: 1, reason: "" }];
+          const info = injuries.data
+            ? injuries.data.players[entry.sleeperId]?.status
+            : p.availability?.reportedStatus;
+          const status = gameStatus(info);
+          const missed = gamesJustMissed(p.team, p.lastObservedWeek, playersSnapshot.week);
+          return [
+            entry.id,
+            { value: chanceToPlay(status, missed), reason: chanceReason(status, missed) },
+          ];
+        }),
+      ),
+    [entries, injuries.data],
+  );
+  const chanceOf = (entry: ResearchEntry) => chances.get(entry.id)?.value ?? 1;
+  const expectedFor = (entry: ResearchEntry) => chanceOf(entry) * ifPlays(entry);
   const pointsFor = (entry: ResearchEntry) =>
-    effectiveHorizon === "week" ? entry.weekPoints : (entry.rosPoints ?? 0);
+    effectiveHorizon === "week" ? ifPlays(entry) : (entry.rosPoints ?? 0);
   const modelOrder = entries
     .filter(
       (entry) =>
@@ -296,10 +328,11 @@ export function PersonalRankings({
     )
     .sort(
       (a, b) =>
-        (!showValue
-          ? 0
-          : (valueModel.values.get(b.id) ?? -Infinity) -
-            (valueModel.values.get(a.id) ?? -Infinity)) ||
+        (showValue
+          ? (valueModel.values.get(b.id) ?? -Infinity) - (valueModel.values.get(a.id) ?? -Infinity)
+          : weeklyBoard
+            ? expectedFor(b) - expectedFor(a)
+            : 0) ||
         pointsFor(b) - pointsFor(a) ||
         a.id.localeCompare(b.id),
     );
@@ -343,7 +376,7 @@ export function PersonalRankings({
         }),
       );
     const values = modelOrder.map((e) =>
-      showValue ? (valueModel.values.get(e.id) ?? -Infinity) : e.weekPoints,
+      showValue ? (valueModel.values.get(e.id) ?? -Infinity) : expectedFor(e),
     );
     const tierNumbers = showValue ? boardTiers(values, 150, 10) : boardTiers(values, 60, 6);
     return new Map(modelOrder.map((e, i) => [e.id, tierNumbers[i]!]));
@@ -609,7 +642,7 @@ export function PersonalRankings({
                 <p>
                   {showValue
                     ? "Where our model ranks the player on this board: by value above the worst league-wide starter (the Above starter column)."
-                    : "Where our model ranks the player on this board: by projected points this week."}
+                    : "Where our model ranks the player on this board: points if he plays times his chance to play. A healthy player keeps nearly all his points; a Questionable one is discounted."}
                 </p>
               </SortHeader>
               <SortHeader label="Player / team" sortKey="name" sort={sort} onSort={sortBy}>
@@ -683,7 +716,7 @@ export function PersonalRankings({
               >
                 <p>
                   {effectiveHorizon === "week"
-                    ? `Projected fantasy points in Week ${playersSnapshot.week}, in this league's scoring.`
+                    ? `Projected fantasy points in Week ${playersSnapshot.week} if the player plays, in this league's scoring. When there is real doubt, the % beside it is his chance to play, from the injury designation and games just missed (learned from past injury reports).`
                     : `Projected fantasy points for Weeks ${playersSnapshot.week} to 18 in this league's scoring, added up game by game against each opponent. Byes excluded.`}{" "}
                   Confirmed absences count as zero; otherwise we assume the player plays. Click the
                   "i" next to a player's number for how it was built.
@@ -882,11 +915,22 @@ export function PersonalRankings({
                   )}
                   <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
                     {projectionById.has(entry.id) ? (
-                      <ProjectionDetails player={projectionById.get(entry.id)!}>
+                      <ProjectionDetails
+                        player={projectionById.get(entry.id)!}
+                        chance={weeklyBoard ? chances.get(entry.id) : undefined}
+                      >
                         {pointsFor(entry).toFixed(1)}
                       </ProjectionDetails>
                     ) : (
                       pointsFor(entry).toFixed(1)
+                    )}
+                    {weeklyBoard && chanceOf(entry) < 0.9 && (
+                      <span
+                        title={`Chance to play · ${chances.get(entry.id)?.reason}`}
+                        className={`ml-1.5 font-sans text-xs font-bold not-italic ${chanceOf(entry) < 0.5 ? "text-red-600 dark:text-red-400" : "text-warning"}`}
+                      >
+                        {Math.round(chanceOf(entry) * 100)}%
+                      </span>
                     )}
                   </td>
                   {rosterLoaded && (
@@ -924,7 +968,9 @@ export function PersonalRankings({
               summary={[
                 {
                   label: `Week ${playersSnapshot.week} vs ${card.opponent}`,
-                  value: `${card.weekPoints.toFixed(1)} pts`,
+                  value:
+                    `${ifPlays(card).toFixed(1)} pts` +
+                    (chanceOf(card) < 0.9 ? ` · ${Math.round(chanceOf(card) * 100)}% to play` : ""),
                 },
                 {
                   label: "Rest of season",
