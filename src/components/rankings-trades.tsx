@@ -182,14 +182,15 @@ export function Rankings({ weeklyOnly = false }: { weeklyOnly?: boolean }) {
                   {p.lastObservedWeek < 2 && (
                     <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
                   )}
-                  <ProjectionDetails player={p} />
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {p.team} vs {p.opponent}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{statLine(p)}</td>
                 <td className="px-4 py-3 text-right font-semibold tabular-nums">
-                  {fmt(points(p, scoring, effectiveHorizon))}
+                  <ProjectionDetails player={p}>
+                    {fmt(points(p, scoring, effectiveHorizon))}
+                  </ProjectionDetails>
                 </td>
               </tr>
             ))}

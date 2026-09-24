@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, GripVertical, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import playersSnapshot from "@/data/rankings-current.json";
 import { ProjectionDetails } from "@/components/projection-details";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
+import { boardTiers } from "@/lib/tiers";
 
 const projectionById = new Map(playersSnapshot.players.map((p) => [p.id, p]));
 
@@ -297,6 +298,38 @@ export function PersonalRankings({
     return modelRanks.get(a.id)! - modelRanks.get(b.id)!;
   });
   const overallRanks = new Map(ordered.map((entry, index) => [entry.id, index + 1]));
+  // Tiers split the board at its natural gaps: weekly points on weekly boards, value above
+  // starter on the overall board. DST keeps its streaming tiers. Only the top of the board is
+  // split; everyone below is one "Deep" tier.
+  const defenseBoard = defensesOnly || (weeklyBoard && effectivePosition === "DEF");
+  const tiers = useMemo(() => {
+    if (defenseBoard)
+      return new Map(
+        modelOrder.map((e) => {
+          const label = defenseTiers.get(e.id) ?? "";
+          return [e.id, label.startsWith("Tier ") ? Number(label.slice(5)) : 4];
+        }),
+      );
+    const values = modelOrder.map((e) =>
+      showValue ? (valueModel.values.get(e.id) ?? -Infinity) : e.weekPoints,
+    );
+    const tierNumbers = showValue ? boardTiers(values, 150, 10) : boardTiers(values, 60, 6);
+    return new Map(modelOrder.map((e, i) => [e.id, tierNumbers[i]!]));
+    // modelOrder is rebuilt each render; its identity follows these inputs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries, effectivePosition, weeklyBoard, defenseBoard, showValue, valueModel, defenseTiers]);
+  const lastTier = Math.max(0, ...tiers.values());
+  const tierLabel = (tier?: number) =>
+    defenseBoard
+      ? tier === 4
+        ? "Deep stream"
+        : `Tier ${tier}`
+      : tier === lastTier && tiers.size > (showValue ? 150 : 60)
+        ? "Deep"
+        : `Tier ${tier}`;
+  // Tier lines only make sense when the list runs best to worst.
+  const showTiers = ["manual", "model", "value", "points"].includes(sort.key) && !sort.reversed;
+  const columnCount = 6 + (weeklyBoard ? 1 : 0) + (showValue ? 1 : 0) + (rosterLoaded ? 2 : 0);
   const ranked = ordered.filter((entry) => {
     if (
       !defensesOnly &&
@@ -646,160 +679,173 @@ export function PersonalRankings({
           </thead>
           <tbody>
             {ranked.map((entry, index) => (
-              <tr
-                key={entry.id}
-                data-player-id={entry.id}
-                className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : "transition-colors hover:bg-accent/50"}`}
-              >
-                <td className="px-2 py-2 tabular-nums text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      disabled={!ready}
-                      aria-pressed={dragging === entry.id}
-                      aria-label={`Move ${entry.name}`}
-                      title="Drag to reorder, or focus and use Up/Down arrows"
-                      className="touch-none select-none cursor-grab rounded p-1 focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
-                      onPointerDown={(event) => {
-                        if (event.button !== 0) return;
-                        event.preventDefault();
-                        event.currentTarget.focus();
-                        gesture.current = {
-                          id: entry.id,
-                          x: event.clientX,
-                          y: event.clientY,
-                          target: "",
-                          moved: false,
-                        };
-                        event.currentTarget.setPointerCapture(event.pointerId);
-                      }}
-                      onPointerMove={(event) => {
-                        const g = gesture.current;
-                        if (!g || g.id !== entry.id) return;
-                        if (!g.moved && Math.hypot(event.clientX - g.x, event.clientY - g.y) < 6)
-                          return;
-                        g.moved = true;
-                        setDragging(entry.id);
-                        const row = document
-                          .elementFromPoint(event.clientX, event.clientY)
-                          ?.closest<HTMLElement>("[data-player-id]");
-                        g.target = row?.dataset["playerId"] ?? "";
-                        setDropTarget(g.target);
-                        const scroller =
-                          event.currentTarget.closest<HTMLElement>("[data-rankings-scroll]");
-                        if (scroller) {
-                          const bounds = scroller.getBoundingClientRect();
-                          if (event.clientY < bounds.top + 50) scroller.scrollTop -= 20;
-                          if (event.clientY > bounds.bottom - 40) scroller.scrollTop += 20;
-                        }
-                      }}
-                      onPointerUp={(event) => {
-                        const g = gesture.current;
-                        gesture.current = null;
-                        event.currentTarget.releasePointerCapture(event.pointerId);
-                        if (g?.moved && g.target) moveBeside(g.id, g.target);
-                        setDragging("");
-                        setDropTarget("");
-                      }}
-                      onPointerCancel={() => {
-                        gesture.current = null;
-                        setDragging("");
-                        setDropTarget("");
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-                          event.preventDefault();
-                          const target = ranked[index + (event.key === "ArrowUp" ? -1 : 1)];
-                          if (target) moveBeside(entry.id, target.id);
-                        }
-                      }}
-                    >
-                      <GripVertical className="h-4 w-4" />
-                    </button>
-                    <input
-                      key={`${storageKey}-${sort.key}-${sort.reversed}-${overallRanks.get(entry.id)}`}
-                      type="number"
-                      min={1}
-                      max={modelOrder.length}
-                      disabled={!ready}
-                      defaultValue={overallRanks.get(entry.id)}
-                      aria-label={`Rank for ${entry.name}`}
-                      className="w-14 rounded border border-transparent bg-transparent px-1 py-1 text-center font-display text-lg hover:border-input focus:border-primary"
-                      onBlur={(event) => {
-                        const rank = Number(event.target.value);
-                        if (
-                          event.target.value &&
-                          Number.isInteger(rank) &&
-                          rank >= 1 &&
-                          rank <= modelOrder.length &&
-                          rank !== overallRanks.get(entry.id)
-                        )
-                          move(entry.id, rank);
-                        else event.target.value = String(overallRanks.get(entry.id));
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") event.currentTarget.blur();
-                        if (event.key === "Escape") {
-                          event.currentTarget.value = String(overallRanks.get(entry.id));
-                          event.currentTarget.blur();
-                        }
-                      }}
-                    />
-                  </div>
-                </td>
-                <td className="px-3 py-2 tabular-nums text-muted-foreground">
-                  {modelRanks.get(entry.id)}
-                </td>
-                <td className="px-4 py-2 font-semibold">
-                  {entry.name}
-                  {projectionById.get(entry.id)?.availability?.state !== "unverified" &&
-                    projectionById.get(entry.id)?.availability && (
-                      <span className="ml-2 inline-block rounded border border-warning/40 px-2 py-0.5 text-xs font-medium text-warning">
-                        {projectionById.get(entry.id)!.availability.label}
-                      </span>
-                    )}
-                  <span
-                    className={`ml-2 inline-block -skew-x-6 rounded-sm px-1.5 py-0.5 text-[11px] font-bold ${positionChip[entry.position] ?? "bg-muted text-muted-foreground"}`}
-                  >
-                    {entry.position === "DEF" ? defenseTiers.get(entry.id) : entry.position}
-                  </span>
-                  {entry.position !== "DEF" && entry.lastObservedWeek < 2 && (
-                    <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
+              <Fragment key={entry.id}>
+                {showTiers &&
+                  (index === 0 || tiers.get(ranked[index - 1]!.id) !== tiers.get(entry.id)) && (
+                    <tr aria-hidden="true">
+                      <td
+                        colSpan={columnCount}
+                        className="border-t-2 border-t-volt bg-muted/60 px-3 py-1 font-display text-sm text-foreground"
+                      >
+                        {tierLabel(tiers.get(entry.id))}
+                      </td>
+                    </tr>
                   )}
-                </td>
-                {weeklyBoard && (
-                  <td className="px-4 py-3 text-right font-display text-lg tabular-nums text-muted-foreground">
-                    {rosRanks.get(entry.id) ?? "—"}
+                <tr
+                  data-player-id={entry.id}
+                  className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : "transition-colors hover:bg-accent/50"}`}
+                >
+                  <td className="px-2 py-2 tabular-nums text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={!ready}
+                        aria-pressed={dragging === entry.id}
+                        aria-label={`Move ${entry.name}`}
+                        title="Drag to reorder, or focus and use Up/Down arrows"
+                        className="touch-none select-none cursor-grab rounded p-1 focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
+                        onPointerDown={(event) => {
+                          if (event.button !== 0) return;
+                          event.preventDefault();
+                          event.currentTarget.focus();
+                          gesture.current = {
+                            id: entry.id,
+                            x: event.clientX,
+                            y: event.clientY,
+                            target: "",
+                            moved: false,
+                          };
+                          event.currentTarget.setPointerCapture(event.pointerId);
+                        }}
+                        onPointerMove={(event) => {
+                          const g = gesture.current;
+                          if (!g || g.id !== entry.id) return;
+                          if (!g.moved && Math.hypot(event.clientX - g.x, event.clientY - g.y) < 6)
+                            return;
+                          g.moved = true;
+                          setDragging(entry.id);
+                          const row = document
+                            .elementFromPoint(event.clientX, event.clientY)
+                            ?.closest<HTMLElement>("[data-player-id]");
+                          g.target = row?.dataset["playerId"] ?? "";
+                          setDropTarget(g.target);
+                          const scroller =
+                            event.currentTarget.closest<HTMLElement>("[data-rankings-scroll]");
+                          if (scroller) {
+                            const bounds = scroller.getBoundingClientRect();
+                            if (event.clientY < bounds.top + 50) scroller.scrollTop -= 20;
+                            if (event.clientY > bounds.bottom - 40) scroller.scrollTop += 20;
+                          }
+                        }}
+                        onPointerUp={(event) => {
+                          const g = gesture.current;
+                          gesture.current = null;
+                          event.currentTarget.releasePointerCapture(event.pointerId);
+                          if (g?.moved && g.target) moveBeside(g.id, g.target);
+                          setDragging("");
+                          setDropTarget("");
+                        }}
+                        onPointerCancel={() => {
+                          gesture.current = null;
+                          setDragging("");
+                          setDropTarget("");
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                            event.preventDefault();
+                            const target = ranked[index + (event.key === "ArrowUp" ? -1 : 1)];
+                            if (target) moveBeside(entry.id, target.id);
+                          }
+                        }}
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </button>
+                      <input
+                        key={`${storageKey}-${sort.key}-${sort.reversed}-${overallRanks.get(entry.id)}`}
+                        type="number"
+                        min={1}
+                        max={modelOrder.length}
+                        disabled={!ready}
+                        defaultValue={overallRanks.get(entry.id)}
+                        aria-label={`Rank for ${entry.name}`}
+                        className="w-14 rounded border border-transparent bg-transparent px-1 py-1 text-center font-display text-lg hover:border-input focus:border-primary"
+                        onBlur={(event) => {
+                          const rank = Number(event.target.value);
+                          if (
+                            event.target.value &&
+                            Number.isInteger(rank) &&
+                            rank >= 1 &&
+                            rank <= modelOrder.length &&
+                            rank !== overallRanks.get(entry.id)
+                          )
+                            move(entry.id, rank);
+                          else event.target.value = String(overallRanks.get(entry.id));
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") event.currentTarget.blur();
+                          if (event.key === "Escape") {
+                            event.currentTarget.value = String(overallRanks.get(entry.id));
+                            event.currentTarget.blur();
+                          }
+                        }}
+                      />
+                    </div>
                   </td>
-                )}
-                {showValue && (
-                  <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
-                    {valueModel.values.get(entry.id) == null
-                      ? "—"
-                      : `${valueModel.values.get(entry.id)! >= 0 ? "+" : ""}${valueModel.values.get(entry.id)!.toFixed(1)}`}
+                  <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                    {modelRanks.get(entry.id)}
                   </td>
-                )}
-                <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
-                  <span className="inline-flex items-center gap-1">
-                    {projectionById.has(entry.id) && (
-                      <ProjectionDetails player={projectionById.get(entry.id)!} />
+                  <td className="px-4 py-2 font-semibold">
+                    {entry.name}
+                    {projectionById.get(entry.id)?.availability?.state !== "unverified" &&
+                      projectionById.get(entry.id)?.availability && (
+                        <span className="ml-2 inline-block rounded border border-warning/40 px-2 py-0.5 text-xs font-medium text-warning">
+                          {projectionById.get(entry.id)!.availability.label}
+                        </span>
+                      )}
+                    <span
+                      className={`ml-2 inline-block -skew-x-6 rounded-sm px-1.5 py-0.5 text-[11px] font-bold ${positionChip[entry.position] ?? "bg-muted text-muted-foreground"}`}
+                    >
+                      {entry.position === "DEF" ? defenseTiers.get(entry.id) : entry.position}
+                    </span>
+                    {entry.position !== "DEF" && entry.lastObservedWeek < 2 && (
+                      <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
                     )}
-                    {pointsFor(entry).toFixed(1)}
-                  </span>
-                </td>
-                {rosterLoaded && (
-                  <td className="px-4 py-3 text-right tabular-nums">
-                    +{Math.max(0, impacts.get(entry.id) ?? 0).toFixed(1)}
                   </td>
-                )}
-                {rosterLoaded && (
-                  <td className="px-4 py-3 text-muted-foreground">{statusOf(entry)}</td>
-                )}
-                <td className="px-4 py-3 text-muted-foreground">
-                  {entry.team} vs {entry.opponent}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{entry.detail}</td>
-              </tr>
+                  {weeklyBoard && (
+                    <td className="px-4 py-3 text-right font-display text-lg tabular-nums text-muted-foreground">
+                      {rosRanks.get(entry.id) ?? "—"}
+                    </td>
+                  )}
+                  {showValue && (
+                    <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
+                      {valueModel.values.get(entry.id) == null
+                        ? "—"
+                        : `${valueModel.values.get(entry.id)! >= 0 ? "+" : ""}${valueModel.values.get(entry.id)!.toFixed(1)}`}
+                    </td>
+                  )}
+                  <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
+                    {projectionById.has(entry.id) ? (
+                      <ProjectionDetails player={projectionById.get(entry.id)!}>
+                        {pointsFor(entry).toFixed(1)}
+                      </ProjectionDetails>
+                    ) : (
+                      pointsFor(entry).toFixed(1)
+                    )}
+                  </td>
+                  {rosterLoaded && (
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      +{Math.max(0, impacts.get(entry.id) ?? 0).toFixed(1)}
+                    </td>
+                  )}
+                  {rosterLoaded && (
+                    <td className="px-4 py-3 text-muted-foreground">{statusOf(entry)}</td>
+                  )}
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {entry.team} vs {entry.opponent}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{entry.detail}</td>
+                </tr>
+              </Fragment>
             ))}
           </tbody>
         </table>

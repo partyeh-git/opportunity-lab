@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import type { ReactNode } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type DetailPlayer = {
@@ -41,14 +41,25 @@ type DetailPlayer = {
   }[];
 };
 
-export function ProjectionDetails({ player }: { player: DetailPlayer }) {
+/**
+ * Click the projected number to see, in a few lines, what drove it: how much the workload
+ * leans on this season, the matchup effects that moved it most, teammate-absence boosts,
+ * and any injury flag. The full game log and schedule belong in the player card.
+ */
+export function ProjectionDetails({
+  player,
+  children,
+}: {
+  player: DetailPlayer;
+  children: ReactNode;
+}) {
   const labels: Record<string, string> = {
-    catch: `${player.position} catch rate`,
-    receiving: `Receiving yards vs ${player.position}`,
-    rushing: `Rushing yards vs ${player.position}`,
-    passing: "QB passing yards",
-    receiving_td: `Receiving TDs vs ${player.position}`,
-    rushing_td: `Rushing TDs vs ${player.position}`,
+    catch: "Catch rate",
+    receiving: "Receiving yards",
+    rushing: "Rushing yards",
+    passing: "Passing yards",
+    receiving_td: "Receiving TDs",
+    rushing_td: "Rushing TDs",
     passing_td: "Passing TDs",
     interceptions: "Interceptions",
   };
@@ -58,134 +69,62 @@ export function ProjectionDetails({ player }: { player: DetailPlayer }) {
       : player.position === "RB"
         ? ["rushing", "rushing_td", "catch", "receiving", "receiving_td"]
         : ["catch", "receiving", "receiving_td"];
+  // The two matchup effects that moved this projection most.
+  const matchup = relevant
+    .flatMap((key) => {
+      const f = player.matchupFactors[key];
+      return f ? [{ key, change: (f.factor - 1) * 100 }] : [];
+    })
+    .filter((m) => Math.abs(m.change) >= 1)
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+    .slice(0, 2);
+  const usage = player.workloadEvidence;
+  const flagged = player.availability && player.availability.state !== "unverified";
+  const boost = player.roleAdjustments?.[0];
   return (
     <Popover>
       <PopoverTrigger
-        aria-label="Why this projection"
-        title="Why this projection"
-        className="inline-grid h-5 w-5 place-items-center rounded-full text-primary opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
+        title="How we got this number"
+        className="cursor-pointer underline decoration-dotted decoration-1 underline-offset-4 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
       >
-        <Info className="h-3.5 w-3.5" aria-hidden="true" />
+        {children}
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="max-h-[70vh] w-[26rem] max-w-[calc(100vw-2rem)] overflow-auto text-left font-sans text-xs font-normal text-muted-foreground"
+        className="w-72 space-y-1.5 text-left font-sans text-xs font-normal not-italic normal-case leading-5 text-muted-foreground"
       >
-        <p className="font-semibold text-foreground">Why this projection</p>
-        <>
-          {player.availability && (
-            <div className="my-3 space-y-2 rounded-md border p-3 leading-5">
-              <p className="font-semibold text-foreground">
-                {player.availability.label}
-                {player.availability.injury && ` · ${player.availability.injury}`}
-              </p>
-              <p>{player.availability.note}</p>
-              {player.availability.outWeeks.length > 0 && (
-                <p>
-                  Confirmed missed weeks: {player.availability.outWeeks.join(", ")}. These games
-                  contribute zero points. Later points assume a return and are not a confirmed
-                  recovery forecast.
-                </p>
-              )}
-              {player.availability.sources.map((s) => (
-                <p key={s.url}>
-                  <a
-                    href={s.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-primary underline"
-                  >
-                    {s.title}
-                  </a>
-                  {s.publishedDate && ` · published ${s.publishedDate}`}
-                </p>
-              ))}
-              <p>
-                Checked {player.availability.reviewedAt.slice(0, 16).replace("T", " ")} UTC. This is
-                a saved snapshot, not a live injury feed.
-              </p>
-            </div>
-          )}
-          {!!player.roleAdjustments?.length && (
-            <div className="my-3 space-y-2 rounded-md border p-3 leading-5">
-              <p className="font-semibold text-foreground">
-                Workload changes from teammate absences
-              </p>
-              {player.roleAdjustments.map((a) => (
-                <p key={`${a.week}-${a.opportunity}`}>
-                  Week {a.week}: +{a.added.toFixed(1)}{" "}
-                  {a.opportunity === "attempts" ? "pass attempts" : a.opportunity} with{" "}
-                  {a.absentPlayers.join(", ")} out.
-                  {a.evidenceGames > 0
-                    ? ` Based on ${a.evidenceGames} observed game${a.evidenceGames === 1 ? "" : "s"} during the absence, moderated for the small sample. Only the increase beyond the existing estimate is added.`
-                    : ` ${a.note}`}
-                </p>
-              ))}
-              <p>
-                These role adjustments are provisional. Unassigned workload is not automatically
-                awarded to other players.
-              </p>
-            </div>
-          )}
-          <p className="my-2 leading-5">
-            {player.workloadEvidence.priorAvailable
-              ? `Recent usage has ${(player.workloadEvidence.recentWeight * 100).toFixed(0)}% weight; the rest comes from prior-season usage${player.workloadEvidence.changedTeam ? ", discounted because the player changed teams" : ""}.`
-              : "No prior-season player workload is available; this role estimate is especially uncertain."}{" "}
-            These weights reflect limited evidence, not a statistical significance test.
+        <p className="font-semibold text-foreground">How we got this number</p>
+        <p>
+          <span className="text-foreground">Workload:</span>{" "}
+          {usage.priorAvailable
+            ? `${(usage.recentWeight * 100).toFixed(0)}% this season, the rest last season${usage.changedTeam ? " (new team, discounted)" : ""}.`
+            : "no prior-season data, so extra uncertain."}
+        </p>
+        <p>
+          <span className="text-foreground">Matchup:</span>{" "}
+          {matchup.length
+            ? matchup
+                .map((m) => `${labels[m.key]} ${m.change >= 0 ? "+" : ""}${m.change.toFixed(0)}%`)
+                .join(" · ")
+            : "about average."}
+        </p>
+        {boost && (
+          <p>
+            <span className="text-foreground">Role:</span> +{boost.added.toFixed(1)}{" "}
+            {boost.opportunity === "attempts" ? "pass attempts" : boost.opportunity} with{" "}
+            {boost.absentPlayers.join(", ")} out (Week {boost.week}).
           </p>
-          <ul className="space-y-1">
-            {relevant.map((key) => {
-              const f = player.matchupFactors[key];
-              if (!f) return null;
-              const change = (f.factor - 1) * 100;
-              return (
-                <li key={key}>
-                  {labels[key]}: {change >= 0 ? "+" : ""}
-                  {change.toFixed(1)}% ({(f.reliability * 100).toFixed(0)}% evidence weight)
-                </li>
-              );
-            })}
-          </ul>
-          <p className="my-2 leading-5">
-            Each defensive category is estimated separately and moderated for sample size. Positive
-            yardage and TD adjustments favor the player; a positive interception adjustment
-            increases turnover risk.
+        )}
+        {flagged && (
+          <p className="text-warning">
+            {player.availability!.label}
+            {player.availability!.injury && ` · ${player.availability!.injury}`}
+            {player.availability!.outWeeks.length > 0 &&
+              `. Counts zero in Week${player.availability!.outWeeks.length > 1 ? "s" : ""} ${player.availability!.outWeeks.join(", ")}`}
+            .
           </p>
-          <table className="my-2 w-full text-left">
-            <caption className="mb-1 text-left">
-              Remaining schedule · full / half PPR · conditional on playing except confirmed
-              absences
-            </caption>
-            <thead>
-              <tr>
-                <th>Week</th>
-                <th>Opponent</th>
-                <th>Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              {player.weeklyForecasts.map((g) => (
-                <tr key={g.week}>
-                  <td>
-                    {g.week}
-                    {g.availability === "out" ? " · Out" : ""}
-                  </td>
-                  <td>{g.opponent}</td>
-                  <td>
-                    {g.full.toFixed(1)} / {g.half.toFixed(1)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="leading-5">
-            Byes are excluded. Future defensive effects fade toward average; workload stays at the
-            current role estimate except for the explained absence adjustments. Unresolved injuries,
-            workload limits on return, and the effect of a quarterback change on receivers are not
-            quantified. These totals are conditional scenarios, not probability-weighted
-            availability forecasts.
-          </p>
-        </>
+        )}
+        <p>Assumes the player plays unless ruled out. Byes count zero.</p>
       </PopoverContent>
     </Popover>
   );
