@@ -20,6 +20,13 @@ const labelFor = (position: string) =>
     FLEX: "FLEX",
     DEF: "DST",
   })[position] ?? position;
+const positionChip: Record<string, string> = {
+  QB: "bg-pink-500 text-white",
+  RB: "bg-volt text-volt-foreground",
+  WR: "bg-sky-400 text-sky-950",
+  TE: "bg-orange-400 text-orange-950",
+  DEF: "bg-violet-500 text-white",
+};
 const positionOptions = (slots?: string[]) => [
   "All",
   ...new Set(
@@ -250,7 +257,7 @@ export function PersonalRankings({
     <div className="space-y-3">
       <section className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase text-primary">
+          <p className="broadcast-tag text-xs uppercase">
             {playersSnapshot.season} · Week {playersSnapshot.week}
           </p>
           <h2 className="mt-1 font-display text-2xl font-semibold">{title}</h2>
@@ -508,7 +515,7 @@ export function PersonalRankings({
       </p>
       <div data-rankings-scroll className="max-h-[70vh] overflow-auto rounded-lg border bg-card">
         <table className="w-full min-w-[780px] text-sm">
-          <thead className="sticky top-0 z-10 bg-muted text-left text-xs uppercase text-muted-foreground">
+          <thead className="sticky top-0 z-10 bg-broadcast text-left text-xs font-semibold uppercase tracking-wide text-broadcast-foreground">
             <tr>
               <th className="px-3 py-2">{sortMode === "manual" ? "My rank" : "Rank"}</th>
               <th className="px-3 py-2">Model</th>
@@ -528,7 +535,7 @@ export function PersonalRankings({
               <tr
                 key={entry.id}
                 data-player-id={entry.id}
-                className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : "hover:bg-muted/30"}`}
+                className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : "transition-colors hover:bg-accent/50"}`}
               >
                 <td className="px-2 py-2 tabular-nums text-muted-foreground">
                   <div className="flex items-center gap-1">
@@ -603,7 +610,7 @@ export function PersonalRankings({
                       disabled={!ready}
                       defaultValue={overallRanks.get(entry.id)}
                       aria-label={`Rank for ${entry.name}`}
-                      className="w-14 rounded border border-transparent bg-transparent px-1 py-1 text-center hover:border-input focus:border-primary"
+                      className="w-14 rounded border border-transparent bg-transparent px-1 py-1 text-center font-display text-lg hover:border-input focus:border-primary"
                       onBlur={(event) => {
                         const rank = Number(event.target.value);
                         if (
@@ -637,7 +644,9 @@ export function PersonalRankings({
                         {projectionById.get(entry.id)!.availability.label}
                       </span>
                     )}
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  <span
+                    className={`ml-2 inline-block -skew-x-6 rounded-sm px-1.5 py-0.5 text-[11px] font-bold ${positionChip[entry.position] ?? "bg-muted text-muted-foreground"}`}
+                  >
                     {entry.position === "DEF" ? defenseTiers.get(entry.id) : entry.position}
                   </span>
                   {entry.position !== "DEF" && entry.lastObservedWeek < 2 && (
@@ -648,13 +657,13 @@ export function PersonalRankings({
                   )}
                 </td>
                 {showValue && (
-                  <td className="px-4 py-3 text-right font-semibold tabular-nums">
+                  <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
                     {valueModel.values.get(entry.id) == null
                       ? "—"
                       : `${valueModel.values.get(entry.id)! >= 0 ? "+" : ""}${valueModel.values.get(entry.id)!.toFixed(1)}`}
                   </td>
                 )}
-                <td className="px-4 py-3 text-right font-semibold tabular-nums">
+                <td className="px-4 py-3 text-right font-display text-lg tabular-nums">
                   {(effectiveHorizon === "week"
                     ? entry.weekPoints
                     : (entry.rosPoints ?? 0)

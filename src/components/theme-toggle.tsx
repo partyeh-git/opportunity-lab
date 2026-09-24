@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 const STORAGE_KEY = "opportunity-lab-theme";
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
     const onStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return;
-      const nextDark = event.newValue !== "light";
+      const nextDark = event.newValue === "dark";
       document.documentElement.classList.toggle("dark", nextDark);
       setDark(nextDark);
     };

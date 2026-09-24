@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "DM Sans", ui-sans-serif, sans-serif;
-  --font-display: "Newsreader", ui-serif, serif;
+  --font-sans: "Barlow", ui-sans-serif, sans-serif;
+  --font-display: "Barlow Condensed", ui-sans-serif, sans-serif;
   --radius-sm: calc(var(--radius) - 3px);
   --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
@@ -38,71 +38,87 @@
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-ink-soft: var(--ink-soft);
+  --color-volt: var(--volt);
+  --color-volt-foreground: var(--volt-foreground);
+  --color-hot: var(--hot);
+  --color-broadcast: var(--broadcast);
+  --color-broadcast-foreground: var(--broadcast-foreground);
 }
 
+/* Prime-time broadcast theme: navy "score bug" chrome, volt-lime and hot-pink accents. */
 :root {
   color-scheme: light;
-  --radius: 0.5rem;
-  --background: oklch(0.975 0.009 83);
-  --foreground: oklch(0.23 0.025 225);
-  --card: oklch(0.995 0.004 83);
-  --card-foreground: oklch(0.23 0.025 225);
-  --popover: oklch(0.995 0.004 83);
-  --popover-foreground: oklch(0.23 0.025 225);
-  --primary: oklch(0.39 0.088 154);
-  --primary-foreground: oklch(0.985 0.005 85);
-  --secondary: oklch(0.925 0.018 83);
-  --secondary-foreground: oklch(0.3 0.025 220);
-  --muted: oklch(0.945 0.009 83);
-  --muted-foreground: oklch(0.51 0.025 225);
-  --accent: oklch(0.91 0.035 151);
-  --accent-foreground: oklch(0.29 0.07 153);
-  --destructive: oklch(0.55 0.19 27);
-  --destructive-foreground: oklch(0.985 0.005 85);
-  --border: oklch(0.875 0.018 80);
-  --input: oklch(0.84 0.02 80);
-  --ring: oklch(0.48 0.09 154);
-  --sidebar: oklch(0.205 0.035 232);
-  --sidebar-foreground: oklch(0.94 0.012 85);
-  --sidebar-muted: oklch(0.69 0.025 220);
-  --sidebar-accent: oklch(0.29 0.048 202);
-  --success: oklch(0.44 0.1 153);
-  --success-soft: oklch(0.92 0.04 151);
-  --warning: oklch(0.58 0.105 72);
-  --warning-soft: oklch(0.94 0.052 83);
-  --ink-soft: oklch(0.36 0.025 225);
+  --radius: 0.3rem;
+  --background: oklch(0.965 0.006 250);
+  --foreground: oklch(0.18 0.03 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.03 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.03 262);
+  --primary: oklch(0.56 0.24 5);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.925 0.012 255);
+  --secondary-foreground: oklch(0.22 0.03 262);
+  --muted: oklch(0.94 0.008 255);
+  --muted-foreground: oklch(0.46 0.03 262);
+  --accent: oklch(0.95 0.1 125);
+  --accent-foreground: oklch(0.2 0.03 262);
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.86 0.015 258);
+  --input: oklch(0.8 0.02 258);
+  --ring: oklch(0.56 0.24 5);
+  --sidebar: oklch(0.17 0.035 265);
+  --sidebar-foreground: oklch(0.97 0.005 250);
+  --sidebar-muted: oklch(0.72 0.03 258);
+  --sidebar-accent: oklch(0.25 0.045 265);
+  --success: oklch(0.5 0.14 150);
+  --success-soft: oklch(0.93 0.06 150);
+  --warning: oklch(0.58 0.14 60);
+  --warning-soft: oklch(0.95 0.06 85);
+  --ink-soft: oklch(0.36 0.03 262);
+  --volt: oklch(0.93 0.22 125);
+  --volt-foreground: oklch(0.17 0.035 265);
+  --hot: oklch(0.56 0.24 5);
+  --broadcast: oklch(0.17 0.035 265);
+  --broadcast-foreground: oklch(0.97 0.005 250);
 }
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.18 0.018 240);
-  --foreground: oklch(0.94 0.008 85);
-  --card: oklch(0.225 0.021 240);
+  --background: oklch(0.15 0.03 265);
+  --foreground: oklch(0.96 0.005 250);
+  --card: oklch(0.2 0.035 265);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.25 0.022 240);
+  --popover: oklch(0.22 0.035 265);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.77 0.12 157);
-  --primary-foreground: oklch(0.19 0.035 155);
-  --secondary: oklch(0.29 0.022 240);
+  --primary: oklch(0.93 0.22 125);
+  --primary-foreground: oklch(0.17 0.035 265);
+  --secondary: oklch(0.26 0.04 265);
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.27 0.021 240);
-  --muted-foreground: oklch(0.75 0.017 235);
-  --accent: oklch(0.32 0.045 157);
-  --accent-foreground: oklch(0.91 0.055 157);
-  --destructive: oklch(0.74 0.16 27);
-  --destructive-foreground: oklch(0.18 0.03 27);
-  --border: oklch(0.35 0.022 240);
-  --input: oklch(0.43 0.022 240);
+  --muted: oklch(0.24 0.035 265);
+  --muted-foreground: oklch(0.74 0.025 255);
+  --accent: oklch(0.3 0.06 265);
+  --accent-foreground: oklch(0.96 0.005 250);
+  --destructive: oklch(0.7 0.2 20);
+  --destructive-foreground: oklch(0.15 0.03 265);
+  --border: oklch(0.32 0.04 265);
+  --input: oklch(0.4 0.04 265);
   --ring: var(--primary);
-  --sidebar: oklch(0.15 0.025 240);
-  --sidebar-foreground: oklch(0.94 0.012 85);
-  --sidebar-muted: oklch(0.74 0.02 235);
-  --sidebar-accent: oklch(0.28 0.035 210);
-  --success: oklch(0.8 0.12 157);
-  --success-soft: oklch(0.3 0.045 157);
-  --warning: oklch(0.82 0.12 80);
-  --warning-soft: oklch(0.31 0.045 75);
-  --ink-soft: oklch(0.7 0.025 235);
+  --sidebar: oklch(0.12 0.03 265);
+  --sidebar-foreground: oklch(0.97 0.005 250);
+  --sidebar-muted: oklch(0.72 0.03 258);
+  --sidebar-accent: oklch(0.22 0.045 265);
+  --success: oklch(0.82 0.16 150);
+  --success-soft: oklch(0.3 0.06 150);
+  --warning: oklch(0.84 0.14 80);
+  --warning-soft: oklch(0.3 0.05 75);
+  --ink-soft: oklch(0.72 0.025 255);
+  --volt: oklch(0.93 0.22 125);
+  --volt-foreground: oklch(0.17 0.035 265);
+  --hot: oklch(0.7 0.22 5);
+  --broadcast: oklch(0.1 0.03 265);
+  --broadcast-foreground: oklch(0.97 0.005 250);
 }
 
 @layer base {
@@ -124,7 +140,36 @@
     letter-spacing: 0;
   }
   ::selection {
-    background: var(--success-soft);
-    color: var(--foreground);
+    background: var(--volt);
+    color: var(--volt-foreground);
+  }
+  /* Condensed italic caps for every display heading: the broadcast lower-third look. */
+  .font-display {
+    font-style: italic;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+}
+
+@layer components {
+  /* Slanted volt tag, for week and section labels. */
+  .broadcast-tag {
+    display: inline-block;
+    transform: skewX(-10deg);
+    background: var(--volt);
+    color: var(--volt-foreground);
+    padding: 0.1rem 0.6rem;
+    font-weight: 700;
+  }
+  .broadcast-tag > * {
+    display: inline-block;
+    transform: skewX(10deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):active {
+    transform: scale(0.97);
   }
 }

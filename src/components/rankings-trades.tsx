@@ -38,7 +38,7 @@ const replacements: Record<League, Record<string, number>> = {
 function Intro({ title, description }: { title: string; description: string }) {
   return (
     <section className="border-b pb-6">
-      <p className="text-xs font-bold uppercase text-primary">
+      <p className="broadcast-tag text-xs uppercase">
         {snapshot.season} · Week {snapshot.week} research preview
       </p>
       <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{title}</h2>
@@ -159,7 +159,7 @@ export function Rankings({ weeklyOnly = false }: { weeklyOnly?: boolean }) {
       </p>
       <div className="overflow-x-auto rounded-lg border bg-card">
         <table className="w-full min-w-[650px] text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-broadcast text-left text-xs font-semibold uppercase tracking-wide text-broadcast-foreground">
             <tr>
               <th className="px-4 py-3">Rank</th>
               <th className="px-4 py-3">Player</th>

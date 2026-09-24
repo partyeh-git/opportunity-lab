@@ -74,7 +74,7 @@ function Index() {
         onClose={() => setMobileOpen(false)}
       />
       <main className="min-w-0 flex-1 lg:ml-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur md:px-8 lg:px-10">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b-[3px] border-b-volt bg-background/95 px-4 backdrop-blur md:px-8 lg:px-10">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -86,19 +86,20 @@ function Index() {
               <Menu />
             </Button>
             <div>
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Workspace</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-hot">
+                Fantasy football
+              </p>
               <h1 className="font-display text-xl font-semibold md:text-2xl">{screen}</h1>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground md:flex">
-              <span className="h-2 w-2 rounded-full bg-warning" />
-              Fantasy football
-            </span>
             <ThemeToggle />
           </div>
         </header>
-        <div className="mx-auto max-w-[1480px] px-4 py-6 md:px-8 lg:px-10 lg:py-8">
+        <div
+          key={screen}
+          className="mx-auto max-w-[1480px] px-4 py-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 md:px-8 lg:px-10 lg:py-8"
+        >
           {screen === "Players" ? (
             <PlayerResearch />
           ) : screen === "Rankings" ? (
@@ -146,12 +147,14 @@ function Sidebar({
             onClick={() => onSelect("Rankings")}
             className="h-auto gap-3 p-0 text-left text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground"
           >
-            <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
+            <span className="grid h-9 w-9 -skew-x-6 place-items-center rounded-md bg-volt text-volt-foreground">
               <Gauge className="h-5 w-5" />
             </span>
             <span>
-              <strong className="block font-display text-lg">Opportunity Lab</strong>
-              <span className="text-[10px] uppercase text-sidebar-muted">Decision research</span>
+              <strong className="block font-display text-xl leading-none">Opportunity Lab</strong>
+              <span className="text-[10px] uppercase tracking-widest text-sidebar-muted">
+                Your leagues, your board
+              </span>
             </span>
           </Button>
           <Button
@@ -170,7 +173,7 @@ function Sidebar({
               key={label}
               variant="ghost"
               onClick={() => onSelect(label)}
-              className={`h-auto w-full justify-start px-3 py-2.5 text-left font-normal ${screen === label ? "bg-sidebar-accent text-sidebar-foreground" : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"}`}
+              className={`h-auto w-full justify-start px-3 py-2.5 text-left font-medium transition-colors ${screen === label ? "bg-volt text-volt-foreground hover:bg-volt hover:text-volt-foreground" : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"}`}
             >
               <Icon className="h-4 w-4" />
               {label}
@@ -242,7 +245,7 @@ function MyLeagues() {
   return (
     <div className="mx-auto max-w-5xl space-y-7">
       <section className="border-b pb-7">
-        <p className="text-xs font-bold uppercase text-primary">Optional connection</p>
+        <p className="broadcast-tag text-xs uppercase">Optional connection</p>
         <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">
           Bring your league context into view.
         </h2>
