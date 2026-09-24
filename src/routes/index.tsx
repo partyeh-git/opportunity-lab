@@ -25,12 +25,12 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Opportunity Lab — Fantasy Football Research" },
+      { title: "Fantasy HQ" },
       {
         name: "description",
         content: "An honest, explainable fantasy-football analytics research workspace.",
       },
-      { property: "og:title", content: "Opportunity Lab — Fantasy Football Research" },
+      { property: "og:title", content: "Fantasy HQ" },
       {
         property: "og:description",
         content: "An honest, explainable fantasy-football analytics research workspace.",
@@ -151,7 +151,7 @@ function Sidebar({
               <Gauge className="h-5 w-5" />
             </span>
             <span>
-              <strong className="block font-display text-xl leading-none">Opportunity Lab</strong>
+              <strong className="block font-display text-xl leading-none">Fantasy HQ</strong>
               <span className="text-[10px] uppercase tracking-widest text-sidebar-muted">
                 Your leagues, your board
               </span>

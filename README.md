@@ -1,4 +1,4 @@
-# Opportunity Lab
+# Fantasy HQ
 
 A fantasy-football player research hub. Development progress and model evaluation summaries belong in chat, not on the app landing page.
 
