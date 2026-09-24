@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trades } from "@/components/rankings-trades";
 import { PersonalRankings } from "@/components/personal-rankings";
+import { WaiversFaab } from "@/components/waivers-faab";
 import { LeagueProvider } from "@/components/league-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -106,6 +107,8 @@ function Index() {
             <PersonalRankings key="dst" defensesOnly />
           ) : screen === "Trades" ? (
             <Trades />
+          ) : screen === "Waivers & FAAB" ? (
+            <WaiversFaab />
           ) : screen === "My Leagues" ? (
             <MyLeagues />
           ) : (
@@ -349,10 +352,6 @@ function FutureScreen({ screen }: { screen: Screen }) {
     "Start / Sit": [
       "Compare your options",
       "Start/sit recommendations are not available yet. Browse Players to check player details and Sleeper status.",
-    ],
-    "Waivers & FAAB": [
-      "Find your next pickup",
-      "League availability and personalized bid recommendations are not available yet.",
     ],
     "News & Roles": [
       "Follow player availability",

@@ -15,12 +15,14 @@ export type SleeperLeague = {
   total_rosters: number;
   scoring_settings: Record<string, number>;
   roster_positions: string[];
+  settings?: { waiver_budget?: number };
 };
 export type SleeperRoster = {
   owner_id: string;
   players: string[] | null;
   starters: string[] | null;
   roster_id: number;
+  settings?: { waiver_budget_used?: number };
 };
 type LeagueState = {
   username: string;
