@@ -139,6 +139,25 @@
   select {
     letter-spacing: 0;
   }
+  /* Hand cursor on everything clickable (Tailwind v4 no longer sets it on buttons). */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="checkbox"],
+  [role="switch"],
+  a[href],
+  summary,
+  select,
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
   ::selection {
     background: var(--volt);
     color: var(--volt-foreground);
