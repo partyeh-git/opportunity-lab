@@ -31,7 +31,9 @@ export function rankingStorageKey(
   leagueId: string,
   settings: Record<string, number>,
   defensesOnly: boolean,
+  slot = "",
 ) {
   const scoring = JSON.stringify(Object.entries(settings).sort(([a], [b]) => a.localeCompare(b)));
-  return `opportunity-ranking-v1:${season}:${horizon === "week" ? week : "ros"}:${leagueId}:${defensesOnly ? "dst" : "players"}:${scoring}`;
+  const board = defensesOnly ? "dst" : slot ? `players-${slot}` : "players";
+  return `opportunity-ranking-v1:${season}:${horizon === "week" ? week : "ros"}:${leagueId}:${board}:${scoring}`;
 }

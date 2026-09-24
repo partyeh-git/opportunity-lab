@@ -1,6 +1,8 @@
 import playersSnapshot from "@/data/rankings-current.json";
 import defensesSnapshot from "@/data/dst-current.json";
 import { scoreProjectedStats, scoreRemainingGames } from "./projection-scoring";
+import { eligible } from "./league-value";
+export { eligible } from "./league-value";
 
 export type PlayerProjection = (typeof playersSnapshot.players)[number];
 export type DefenseProjection = (typeof defensesSnapshot.defenses)[number];
@@ -81,15 +83,6 @@ export function entriesFor(settings: Record<string, number>): ResearchEntry[] {
       detail: `${d.sacks.toFixed(1)} sacks · ${(d.interceptions + d.fumbleRecoveries).toFixed(1)} takeaways · ${d.expectedPointsAllowed.toFixed(0)} pts allowed`,
     })),
   ];
-}
-
-export function eligible(position: string, slot: string) {
-  if (slot === position) return true;
-  if (slot === "FLEX") return ["RB", "WR", "TE"].includes(position);
-  if (slot === "WRRB_FLEX") return ["WR", "RB"].includes(position);
-  if (slot === "SUPER_FLEX") return ["QB", "RB", "WR", "TE"].includes(position);
-  if (slot === "REC_FLEX") return ["WR", "TE"].includes(position);
-  return false;
 }
 
 export function optimizeLineup(entries: ResearchEntry[], slots: string[], horizon: "week" | "ros") {

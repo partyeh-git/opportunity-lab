@@ -42,4 +42,14 @@ assert.equal(
   key(3, "ros", "one", { pass_td: 4, rec: 1 }),
   "Key order must not reset preferences",
 );
+assert.notEqual(
+  rankingStorageKey(2026, 3, "week", "one", { rec: 1 }, false, "QB"),
+  rankingStorageKey(2026, 3, "week", "one", { rec: 1 }, false, "RB"),
+  "Weekly position boards keep separate orders",
+);
+assert.equal(
+  rankingStorageKey(2026, 3, "ros", "one", { rec: 1 }, false),
+  'opportunity-ranking-v1:2026:ros:one:players:[["rec",1]]',
+  "ROS keys stay unchanged so saved season orders survive",
+);
 console.log("Saved ranking order checks passed.");
