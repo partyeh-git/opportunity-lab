@@ -7,6 +7,7 @@ import { LeaguePicker, useLeague } from "@/components/league-context";
 import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
 import playersSnapshot from "@/data/rankings-current.json";
 import { ProjectionDetails } from "@/components/projection-details";
+import { PlayerCard } from "@/components/player-card";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { boardTiers } from "@/lib/tiers";
@@ -133,6 +134,7 @@ export function PersonalRankings({
     moved: boolean;
   } | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
+  const [cardId, setCardId] = useState("");
   // The Weekly tab and the overall Rankings tab are separate boards; each has one horizon.
   const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : "ros";
   const settings = useMemo(
@@ -795,7 +797,17 @@ export function PersonalRankings({
                     {modelRanks.get(entry.id)}
                   </td>
                   <td className="px-4 py-2 font-semibold">
-                    {entry.name}
+                    {projectionById.has(entry.id) ? (
+                      <button
+                        type="button"
+                        onClick={() => setCardId(entry.id)}
+                        className="text-left hover:text-primary hover:underline"
+                      >
+                        {entry.name}
+                      </button>
+                    ) : (
+                      entry.name
+                    )}
                     {projectionById.get(entry.id)?.availability?.state !== "unverified" &&
                       projectionById.get(entry.id)?.availability && (
                         <span className="ml-2 inline-block rounded border border-warning/40 px-2 py-0.5 text-xs font-medium text-warning">
@@ -853,6 +865,34 @@ export function PersonalRankings({
           <p className="p-6 text-center text-muted-foreground">No results in this view.</p>
         )}
       </div>
+      {projectionById.has(cardId) &&
+        (() => {
+          const card = entries.find((e) => e.id === cardId)!;
+          return (
+            <PlayerCard
+              key={cardId}
+              player={projectionById.get(cardId)!}
+              settings={settings}
+              connected={!!league.selected}
+              open
+              onOpenChange={(open) => !open && setCardId("")}
+              summary={[
+                {
+                  label: `Week ${playersSnapshot.week} vs ${card.opponent}`,
+                  value: `${card.weekPoints.toFixed(1)} pts`,
+                },
+                {
+                  label: "Rest of season",
+                  value: card.rosPoints == null ? "—" : `${card.rosPoints.toFixed(0)} pts`,
+                },
+                {
+                  label: "Overall rank",
+                  value: rosRanks.has(cardId) ? `#${rosRanks.get(cardId)}` : "—",
+                },
+              ]}
+            />
+          );
+        })()}
       {defensesOnly && (
         <p className="text-xs leading-5 text-muted-foreground">
           Tier 1 is the top five defenses by projected Week {playersSnapshot.week} points in this
