@@ -52,11 +52,13 @@ function Note({ note }: { note: SleeperNote }) {
   const { title, description, analysis, url } = note.metadata;
   const label = `${sourceName(note.source)} via Sleeper`;
   return (
-    <article className="space-y-1 text-xs leading-5">
-      <p className="font-semibold text-foreground">{title}</p>
-      {description && <p className="text-muted-foreground">{description}</p>}
-      {analysis && <p className="text-muted-foreground italic">{analysis}</p>}
-      <p className="text-[11px] text-muted-foreground">
+    <article className="space-y-1.5 py-4 text-sm leading-6">
+      <p className="text-base font-semibold text-foreground">{title}</p>
+      {description && <p className="text-foreground/85">{description}</p>}
+      {analysis && (
+        <p className="border-l-2 border-border pl-3 text-foreground/75">{analysis}</p>
+      )}
+      <p className="text-xs text-muted-foreground">
         {new Date(note.published).toLocaleDateString(undefined, { month: "short", day: "numeric" })}{" "}
         ·{" "}
         {url ? (
@@ -229,7 +231,7 @@ export function PlayerCard({
 
         <div className="mt-4 space-y-5 text-sm">
           {(injury || flagged || practice || sleeper?.injury_notes) && (
-            <section className="space-y-1 rounded-md border border-warning/40 bg-warning-soft/60 p-3 text-xs leading-5">
+            <section className="space-y-1 rounded-md border border-warning/40 bg-warning-soft/60 p-3 text-sm leading-6">
               {injury && (
                 <p>
                   <span className="font-semibold text-foreground">Sleeper status:</span> {injury}
@@ -269,7 +271,7 @@ export function PlayerCard({
               <h3 className="mb-2 font-display text-lg">
                 Notes <span className="text-sm text-muted-foreground">· {notes.length}</span>
               </h3>
-              <div className="max-h-80 space-y-3 overflow-y-auto rounded-md border p-3">
+              <div className="max-h-[28rem] divide-y overflow-y-auto rounded-md border px-4">
                 {notes.map((note) => (
                   <Note key={noteKey(note)} note={note} />
                 ))}
@@ -350,7 +352,7 @@ export function PlayerCard({
                 ];
               })}
             />
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
               Projected in {connected ? "your league's" : "the selected"} scoring. Assumes the
               player plays unless ruled out; later-season matchup effects fade toward average. Past
               game stats come from Sleeper.
@@ -375,13 +377,13 @@ function StatTable({
   const [openRow, setOpenRow] = useState<number | null>(null);
   return (
     <div className="overflow-x-auto rounded-md border">
-      <table className="w-full text-xs tabular-nums">
+      <table className="w-full text-sm tabular-nums">
         <thead className="bg-broadcast text-broadcast-foreground">
           <tr>
             {headers.map((h, i) => (
               <th
                 key={h}
-                className={`px-2 py-1.5 font-semibold ${i > 1 ? "text-right" : "text-left"}`}
+                className={`px-2.5 py-2 font-semibold ${i > 1 ? "text-right" : "text-left"}`}
               >
                 {h}
               </th>
@@ -402,17 +404,17 @@ function StatTable({
                   {row.map((cell, i) => (
                     <td
                       key={i}
-                      className={`px-2 py-1.5 ${i > 1 ? "text-right" : ""} ${i === 2 ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+                      className={`px-2.5 py-2 ${i > 1 ? "text-right" : ""} ${i === 2 ? "font-semibold text-foreground" : "text-foreground/80"}`}
                     >
                       {i === 0 && detail ? (
                         <span className="inline-flex items-center gap-1 text-primary">
                           {expanded ? (
-                            <ChevronDown className="h-3 w-3" aria-hidden="true" />
+                            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
                           ) : (
-                            <ChevronRight className="h-3 w-3" aria-hidden="true" />
+                            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
                           )}
                           {cell}
-                          <StickyNote className="h-3 w-3" aria-label="Has notes" />
+                          <StickyNote className="h-3.5 w-3.5" aria-label="Has notes" />
                         </span>
                       ) : (
                         cell
