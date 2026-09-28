@@ -1,11 +1,15 @@
-import playersSnapshot from "@/data/rankings-current.json";
-import defensesSnapshot from "@/data/dst-current.json";
+import {
+  defensesSnapshot,
+  playersSnapshot,
+  type DefensesSnapshot,
+  type PlayersSnapshot,
+} from "@/lib/snapshots";
 import { scoreProjectedStats, scoreRemainingGames } from "./projection-scoring";
 import { eligible } from "./league-value";
 export { eligible } from "./league-value";
 
-export type PlayerProjection = (typeof playersSnapshot.players)[number];
-export type DefenseProjection = (typeof defensesSnapshot.defenses)[number];
+export type PlayerProjection = PlayersSnapshot["players"][number];
+export type DefenseProjection = DefensesSnapshot["defenses"][number];
 export type ResearchEntry = {
   id: string;
   sleeperId: string;

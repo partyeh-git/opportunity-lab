@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { loadSnapshots } from "@/lib/snapshots";
 import {
   ArrowRightLeft,
   BarChart3,
@@ -41,7 +43,9 @@ export const Route = createFileRoute("/")({
   }),
   component: () => (
     <LeagueProvider>
-      <Index />
+      <SnapshotGate>
+        <Index />
+      </SnapshotGate>
     </LeagueProvider>
   ),
 });
@@ -57,6 +61,24 @@ const navItems = [
   ["News & Roles", Newspaper],
 ] as const;
 type Screen = (typeof navItems)[number][0];
+
+// The weekly projections load from GitHub at startup (lib/snapshots); screens read them after.
+function SnapshotGate({ children }: { children: ReactNode }) {
+  const snapshots = useQuery({
+    queryKey: ["snapshots"],
+    queryFn: loadSnapshots,
+    staleTime: Infinity,
+    retry: 2,
+  });
+  if (snapshots.isSuccess) return <>{children}</>;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 text-sm text-muted-foreground">
+      {snapshots.isError
+        ? "Projections didn't load. Refresh to try again."
+        : "Loading projections…"}
+    </div>
+  );
+}
 
 function Index() {
   const [screen, setScreen] = useState<Screen>("Overall Rankings");

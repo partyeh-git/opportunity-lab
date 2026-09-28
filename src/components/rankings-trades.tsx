@@ -6,12 +6,13 @@ import { ProjectionDetails } from "@/components/projection-details";
 import { LeaguePicker, useLeague } from "@/components/league-context";
 import { entriesFor, optimizeLineup, scorePlayer } from "@/lib/research-scoring";
 import { scoreRemainingGames } from "@/lib/projection-scoring";
-import snapshot from "@/data/rankings-current.json";
+import { playersSnapshot as snapshot, type PlayersSnapshot } from "@/lib/snapshots";
 
-type Player = (typeof snapshot.players)[number];
+type Player = PlayersSnapshot["players"][number];
+// Read at use time: the projections are loaded at startup, after this module is imported.
+const allPlayers = () => snapshot.players as Player[];
 type Scoring = "full" | "half";
 type League = "ballerz" | "plumbuses";
-const allPlayers = snapshot.players as Player[];
 const fmt = (value: number) => value.toFixed(1);
 const points = (
   player: Player,
@@ -98,7 +99,7 @@ export function Rankings({ weeklyOnly = false }: { weeklyOnly?: boolean }) {
   const effectiveHorizon = weeklyOnly ? "week" : horizon;
   const ranked = useMemo(
     () =>
-      allPlayers
+      allPlayers()
         .filter(
           (p) =>
             (position === "All" || p.position === position) &&
@@ -218,7 +219,7 @@ function replacementPoints(
   settings?: Record<string, number>,
 ) {
   const n = replacements[league][position] ?? 1;
-  const sorted = allPlayers
+  const sorted = allPlayers()
     .filter((p) => p.position === position)
     .sort((a, b) => points(b, scoring, "ros", settings) - points(a, scoring, "ros", settings));
   const replacement = sorted[Math.min(n, sorted.length) - 1];
@@ -355,18 +356,18 @@ export function Trades() {
   const myIds = new Set(myRoster?.players ?? []);
   const owned =
     settings && myRoster ? entriesFor(settings).filter((entry) => myIds.has(entry.sleeperId)) : [];
-  const giveChoices = myRoster ? allPlayers.filter((p) => myIds.has(p.sleeperId)) : allPlayers;
+  const giveChoices = myRoster ? allPlayers().filter((p) => myIds.has(p.sleeperId)) : allPlayers();
   const rostered = new Set(connected.rosters.flatMap((r) => r.players ?? []));
   const getChoices = myRoster
-    ? allPlayers.filter((p) => !myIds.has(p.sleeperId) && rostered.has(p.sleeperId))
-    : allPlayers;
+    ? allPlayers().filter((p) => !myIds.has(p.sleeperId) && rostered.has(p.sleeperId))
+    : allPlayers();
   const lineupBefore =
     connected.selected && myRoster
       ? optimizeLineup(owned, connected.selected.roster_positions, "ros")
       : null;
   const afterRoster = owned.filter(
     (entry) =>
-      !give.some((id) => allPlayers.find((p) => p.id === id)?.sleeperId === entry.sleeperId),
+      !give.some((id) => allPlayers().find((p) => p.id === id)?.sleeperId === entry.sleeperId),
   );
   if (settings) {
     for (const id of get) {
@@ -382,7 +383,7 @@ export function Trades() {
     (sum, id) =>
       sum +
       surplus(
-        allPlayers.find((p) => p.id === id)!,
+        allPlayers().find((p) => p.id === id)!,
         league,
         scoring,
         settings,
@@ -393,7 +394,7 @@ export function Trades() {
     (sum, id) =>
       sum +
       surplus(
-        allPlayers.find((p) => p.id === id)!,
+        allPlayers().find((p) => p.id === id)!,
         league,
         scoring,
         settings,

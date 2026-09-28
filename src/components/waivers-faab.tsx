@@ -16,7 +16,8 @@ import {
   worthDollars,
   type Claim,
 } from "@/lib/faab";
-import snapshot from "@/data/rankings-current.json";
+import { playersSnapshot as snapshot } from "@/lib/snapshots";
+import { fetchPublicJson } from "@/lib/live-data";
 
 const HURT = new Set(["Out", "IR", "Doubtful", "PUP", "Sus"]);
 const SKILL = ["QB", "RB", "WR", "TE"];
@@ -56,6 +57,12 @@ function useJson<T>(key: string, url: string, enabled = true) {
     enabled,
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
+      // Files the GitHub jobs refresh (e.g. /injuries.json): read the newest copy.
+      if (url.startsWith("/")) {
+        const file = await fetchPublicJson<T>(url.slice(1));
+        if (file === null) throw new Error(`${url} unavailable`);
+        return file;
+      }
       const response = await fetch(url);
       if (!response.ok) throw new Error(`${url} unavailable`);
       return (await response.json()) as T;

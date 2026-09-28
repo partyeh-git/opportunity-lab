@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LeaguePicker, useLeague } from "@/components/league-context";
 import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
-import playersSnapshot from "@/data/rankings-current.json";
+import { playersSnapshot } from "@/lib/snapshots";
+import { fetchPublicJson } from "@/lib/live-data";
 import { ProjectionDetails } from "@/components/projection-details";
 import { PlayerCard } from "@/components/player-card";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
@@ -15,7 +16,14 @@ import { boardTiers } from "@/lib/tiers";
 import { chanceReason, chanceToPlay, gameStatus, gamesJustMissed } from "@/lib/availability";
 import { scoreProjectedStats } from "@/lib/projection-scoring";
 
-const projectionById = new Map(playersSnapshot.players.map((p) => [p.id, p]));
+// Built on first use: the projections are loaded at startup, after this module is imported.
+let projectionMap: Map<string, (typeof playersSnapshot.players)[number]> | undefined;
+const projections = () =>
+  (projectionMap ??= new Map(playersSnapshot.players.map((p) => [p.id, p])));
+const projectionById = {
+  get: (id: string) => projections().get(id),
+  has: (id: string) => projections().has(id),
+};
 
 const genericSettings = { rec: 1, pass_int: -2 };
 const teamLabel = (team: string) => (team === "LA" ? "LAR" : team);
@@ -154,9 +162,9 @@ export function PersonalRankings({
   const injuries = useQuery({
     queryKey: ["injuries"],
     queryFn: async () => {
-      const response = await fetch("/injuries.json");
-      if (!response.ok) throw new Error("No injury file");
-      return (await response.json()) as { players: Record<string, InjuryInfo> };
+      const file = await fetchPublicJson<{ players: Record<string, InjuryInfo> }>("injuries.json");
+      if (!file) throw new Error("No injury file");
+      return file;
     },
     staleTime: 10 * 60 * 1000,
   });

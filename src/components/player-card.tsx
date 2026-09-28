@@ -8,10 +8,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import playersSnapshot from "@/data/rankings-current.json";
+import { playersSnapshot, type PlayersSnapshot } from "@/lib/snapshots";
+import { fetchPublicJson } from "@/lib/live-data";
 import { scoreProjectedStats } from "@/lib/projection-scoring";
 
-type Projection = (typeof playersSnapshot.players)[number];
+type Projection = PlayersSnapshot["players"][number];
 type Projected = Projection["weeklyForecasts"][number]["projected"];
 type GameStats = Record<string, number>;
 type SleeperGame = {
@@ -55,9 +56,7 @@ function Note({ note }: { note: SleeperNote }) {
     <article className="space-y-1.5 py-4 text-sm leading-6">
       <p className="text-base font-semibold text-foreground">{title}</p>
       {description && <p className="text-foreground/85">{description}</p>}
-      {analysis && (
-        <p className="border-l-2 border-border pl-3 text-foreground/75">{analysis}</p>
-      )}
+      {analysis && <p className="border-l-2 border-border pl-3 text-foreground/75">{analysis}</p>}
       <p className="text-xs text-muted-foreground">
         {new Date(note.published).toLocaleDateString(undefined, { month: "short", day: "numeric" })}{" "}
         ·{" "}
@@ -173,8 +172,7 @@ export function PlayerCard({
   const archive = useQuery({
     queryKey: ["notes-archive", player.sleeperId],
     queryFn: async () => {
-      const response = await fetch(`/notes/${player.sleeperId}.json`);
-      return response.ok ? ((await response.json()) as SleeperNote[]) : [];
+      return (await fetchPublicJson<SleeperNote[]>(`notes/${player.sleeperId}.json`)) ?? [];
     },
     enabled: open && !!player.sleeperId,
     staleTime: 10 * 60 * 1000,
