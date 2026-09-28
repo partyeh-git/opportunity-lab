@@ -1,511 +1,472 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeftRight, Plus, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ProjectionDetails } from "@/components/projection-details";
 import { useLeague } from "@/components/league-context";
-import { entriesFor, optimizeLineup, scorePlayer } from "@/lib/research-scoring";
-import { scoreRemainingGames } from "@/lib/projection-scoring";
-import { playersSnapshot as snapshot, type PlayersSnapshot } from "@/lib/snapshots";
+import { useWeekStatus, WeekOverStrip } from "@/components/weather-icons";
+import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
+import { scoreProjectedStats } from "@/lib/projection-scoring";
+import { playersSnapshot as snapshot } from "@/lib/snapshots";
+import { REAL_CHANGE, simulateSeason, tradeVerdict, type SimPlayer } from "@/lib/trade-sim";
 
-type Player = PlayersSnapshot["players"][number];
-// Read at use time: the projections are loaded at startup, after this module is imported.
-const allPlayers = () => snapshot.players as Player[];
-type Scoring = "full" | "half";
-type League = "ballerz" | "plumbuses";
-const fmt = (value: number) => value.toFixed(1);
-const points = (
-  player: Player,
-  scoring: Scoring,
-  horizon: "week" | "ros",
-  settings?: Record<string, number>,
-) =>
-  settings
-    ? horizon === "week"
-      ? scorePlayer(player, settings)
-      : scoreRemainingGames(player, settings)
-    : horizon === "week"
-      ? scoring === "full"
-        ? player.weekFull
-        : player.weekHalf
-      : scoring === "full"
-        ? player.rosFull
-        : player.rosHalf;
-const replacements: Record<League, Record<string, number>> = {
-  ballerz: { QB: 20, RB: 20, WR: 30, TE: 10 },
-  plumbuses: { QB: 12, RB: 24, WR: 36, TE: 12 },
+const LAST_WEEK = 18;
+const MAX_PER_SIDE = 4;
+const genericSettings = { rec: 1, pass_int: -2 };
+const signed = (value: number, digits = 1) => `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
+const teamLabel = (team: string) => (team === "LA" ? "LAR" : team);
+
+type TradePlayer = SimPlayer & {
+  sleeperId: string;
+  team: string;
+  /** Projected points from the first unplayed week on. */
+  points: number;
+  /** Points above the worst league-wide starter, as on the Overall board. */
+  value: number;
+};
+type SleeperUser = {
+  user_id: string;
+  display_name: string;
+  metadata?: { team_name?: string } | null;
 };
 
-function Intro({ title, description }: { title: string; description: string }) {
+/** One side of the trade: tap a player to add or remove him. */
+function Side({
+  title,
+  choices,
+  roster,
+  selected,
+  onToggle,
+}: {
+  title: string;
+  /** Everyone who can be picked for this side. */
+  choices: TradePlayer[];
+  /** Show the choices as tappable names (a known roster) instead of a search box. */
+  roster: boolean;
+  selected: TradePlayer[];
+  onToggle: (id: string) => void;
+}) {
+  const [text, setText] = useState("");
+  const query = text.toLowerCase().trim();
+  const picked = new Set(selected.map((p) => p.id));
+  const full = selected.length >= MAX_PER_SIDE;
+  const matches =
+    !roster && query
+      ? choices
+          .filter(
+            (p) =>
+              !picked.has(p.id) && `${p.name} ${teamLabel(p.team)}`.toLowerCase().includes(query),
+          )
+          .slice(0, 8)
+      : [];
   return (
-    <section className="border-b pb-6">
-      <p className="broadcast-tag text-xs uppercase">
-        {snapshot.season} · Week {snapshot.week} research preview
-      </p>
-      <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{title}</h2>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
+    <section className="space-y-3 rounded-lg border bg-card p-4">
+      <h3 className="font-display text-xl font-semibold">{title}</h3>
+      {selected.length > 0 && (
+        <ul className="space-y-1.5">
+          {selected.map((p) => (
+            <li
+              key={p.id}
+              className="flex items-center justify-between gap-2 rounded-md border border-volt bg-background px-3 py-2 text-sm"
+            >
+              <span>
+                <strong>{p.name}</strong>{" "}
+                <span className="text-xs text-muted-foreground">
+                  {p.position} · {teamLabel(p.team)}
+                </span>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  Value {signed(p.value)}
+                </span>
+                <Button size="sm" variant="ghost" onClick={() => onToggle(p.id)}>
+                  Remove
+                </Button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {full ? (
+        <p className="text-xs text-muted-foreground">Up to {MAX_PER_SIDE} players a side.</p>
+      ) : roster ? (
+        <div className="flex flex-wrap gap-1.5">
+          {choices
+            .filter((p) => !picked.has(p.id))
+            .map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onToggle(p.id)}
+                className="rounded-full border px-2.5 py-1 text-xs transition-colors hover:border-primary hover:bg-accent"
+              >
+                {p.name} <span className="text-muted-foreground">{p.position}</span>
+              </button>
+            ))}
+        </div>
+      ) : (
+        <div className="relative">
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && matches[0]) {
+                onToggle(matches[0].id);
+                setText("");
+              }
+            }}
+            placeholder="Type a player's name"
+            aria-label={`${title}: add a player`}
+          />
+          {matches.length > 0 && (
+            <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-popover text-sm shadow-lg">
+              {matches.map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-accent"
+                    onClick={() => {
+                      onToggle(p.id);
+                      setText("");
+                    }}
+                  >
+                    <span className="font-semibold">{p.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {p.position} · {teamLabel(p.team)}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </section>
   );
 }
 
-function Caveat({ trades = false }: { trades?: boolean }) {
-  return (
-    <div className="rounded-lg border border-warning/30 bg-warning-soft/50 p-4 text-sm leading-6">
-      <strong>Early-season estimate.</strong> Based on NFL player stats through Week 2;{" "}
-      {snapshot.candidateCount} players with observed {snapshot.season} opportunities. This version
-      blends recent usage with prior-season workloads and applies separate defensive adjustments by
-      position and play type. Confirmed missed games contribute zero; unresolved injuries and return
-      dates remain conditional on playing. Selected teammate role changes are included. Players
-      without current-season opportunities are omitted. Rest-of-season totals sum the remaining
-      matchups, excluding byes; future roles and availability remain uncertain.
-      {trades && " Trade comparisons also depend on who would fill each vacated roster spot."}
-    </div>
-  );
-}
-
-function ScoringButtons({ value, onChange }: { value: Scoring; onChange: (v: Scoring) => void }) {
-  return (
-    <div className="inline-flex rounded-md border bg-card p-1" aria-label="Reception scoring">
-      {(["full", "half"] as const).map((option) => (
-        <Button
-          key={option}
-          type="button"
-          size="sm"
-          variant={value === option ? "default" : "ghost"}
-          onClick={() => onChange(option)}
-        >
-          {option === "full" ? "Full PPR" : "Half PPR"}
-        </Button>
-      ))}
-    </div>
-  );
-}
-
-function statLine(player: Player) {
-  const s = player.projected;
-  if (player.position === "QB")
-    return `${fmt(s.passingYards)} pass yd · ${s.passingTds.toFixed(2)} pass TD · ${fmt(s.carries)} rush att`;
-  if (player.position === "RB")
-    return `${fmt(s.carries)} carries · ${fmt(s.rushingYards)} rush yd · ${fmt(s.targets)} targets`;
-  return `${fmt(s.targets)} targets · ${fmt(s.receptions)} catches · ${fmt(s.receivingYards)} rec yd`;
-}
-
-export function Rankings({ weeklyOnly = false }: { weeklyOnly?: boolean }) {
-  const [scoring, setScoring] = useState<Scoring>("full");
-  const [horizon, setHorizon] = useState<"week" | "ros">(weeklyOnly ? "week" : "ros");
-  const [position, setPosition] = useState("All");
-  const [search, setSearch] = useState("");
-  const [limit, setLimit] = useState(50);
-  const effectiveHorizon = weeklyOnly ? "week" : horizon;
-  const ranked = useMemo(
-    () =>
-      allPlayers()
-        .filter(
-          (p) =>
-            (position === "All" || p.position === position) &&
-            p.name.toLowerCase().includes(search.toLowerCase().trim()),
-        )
-        .sort(
-          (a, b) => points(b, scoring, effectiveHorizon) - points(a, scoring, effectiveHorizon),
-        ),
-    [position, search, scoring, effectiveHorizon],
-  );
-  return (
-    <div className="space-y-6">
-      <Intro
-        title={weeklyOnly ? "Weekly projections" : "Player rankings"}
-        description="Original point estimates from observed player opportunity and stabilized efficiency. Change the scoring math without reranking by hand."
-      />
-      <Caveat />
-      <section className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
-        <ScoringButtons value={scoring} onChange={setScoring} />
-        {!weeklyOnly && (
-          <div className="inline-flex rounded-md border bg-background p-1">
-            {(["week", "ros"] as const).map((option) => (
-              <Button
-                key={option}
-                size="sm"
-                variant={horizon === option ? "secondary" : "ghost"}
-                onClick={() => setHorizon(option)}
-              >
-                {option === "week" ? `Week ${snapshot.week}` : "Rest of season"}
-              </Button>
-            ))}
-          </div>
-        )}
-        <select
-          value={position}
-          onChange={(e) => {
-            setPosition(e.target.value);
-            setLimit(50);
-          }}
-          aria-label="Position"
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-        >
-          {["All", "QB", "RB", "WR", "TE"].map((p) => (
-            <option key={p}>{p}</option>
-          ))}
-        </select>
-        <Input
-          className="max-w-56"
-          placeholder="Search players"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search players"
-        />
-      </section>
-      <p className="text-sm text-muted-foreground">
-        {ranked.length} players · Week {snapshot.week} opponent shown for context · Data through
-        Week {snapshot.dataThroughWeek}
-      </p>
-      <div className="overflow-x-auto rounded-lg border bg-card">
-        <table className="w-full min-w-[650px] text-sm">
-          <thead className="bg-broadcast text-left text-xs font-semibold uppercase tracking-wide text-broadcast-foreground">
-            <tr>
-              <th className="px-4 py-3">Rank</th>
-              <th className="px-4 py-3">Player</th>
-              <th className="px-4 py-3">Matchup</th>
-              <th className="px-4 py-3">Projected opportunity</th>
-              <th className="px-4 py-3 text-right">
-                {effectiveHorizon === "week" ? `Week ${snapshot.week} pts` : "Remaining pts"}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {ranked.slice(0, limit).map((p, i) => (
-              <tr key={p.id} className="border-t">
-                <td className="px-4 py-3 tabular-nums text-muted-foreground">{i + 1}</td>
-                <td className="px-4 py-3 font-semibold">
-                  {p.name}
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    {p.position}
-                  </span>
-                  {p.lastObservedWeek < 2 && (
-                    <span className="ml-2 text-xs text-warning">No Week 2 usage</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {p.team} vs {p.opponent}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{statLine(p)}</td>
-                <td className="px-4 py-3 text-right font-semibold tabular-nums">
-                  <ProjectionDetails player={p}>
-                    {fmt(points(p, scoring, effectiveHorizon))}
-                  </ProjectionDetails>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {ranked.length === 0 && (
-          <p className="p-6 text-center text-muted-foreground">
-            No matching players in this snapshot.
-          </p>
-        )}
-      </div>
-      {limit < ranked.length && (
-        <Button variant="outline" onClick={() => setLimit(limit + 50)}>
-          Show more
-        </Button>
-      )}
-    </div>
-  );
-}
-
-function replacementPoints(
-  position: string,
-  league: League,
-  scoring: Scoring,
-  settings?: Record<string, number>,
-) {
-  const n = replacements[league][position] ?? 1;
-  const sorted = allPlayers()
-    .filter((p) => p.position === position)
-    .sort((a, b) => points(b, scoring, "ros", settings) - points(a, scoring, "ros", settings));
-  const replacement = sorted[Math.min(n, sorted.length) - 1];
-  return replacement ? points(replacement, scoring, "ros", settings) : 0;
-}
-
-function surplus(
-  player: Player,
-  league: League,
-  scoring: Scoring,
-  settings?: Record<string, number>,
-) {
-  return Math.max(
-    0,
-    points(player, scoring, "ros", settings) -
-      replacementPoints(player.position, league, scoring, settings),
-  );
-}
-
-function PlayerPicker({
-  players,
-  selected,
-  otherSelected,
-  onAdd,
-  onRemove,
-  league,
-  scoring,
-  settings,
-}: {
-  players: Player[];
-  selected: string[];
-  otherSelected: string[];
-  onAdd: (id: string) => void;
-  onRemove: (id: string) => void;
-  league: League;
-  scoring: Scoring;
-  settings: Record<string, number> | undefined;
-}) {
-  const [query, setQuery] = useState("");
-  const matches =
-    query.trim().length >= 2
-      ? players
-          .filter(
-            (p) =>
-              p.name.toLowerCase().includes(query.toLowerCase().trim()) &&
-              !selected.includes(p.id) &&
-              !otherSelected.includes(p.id),
-          )
-          .slice(0, 6)
-      : [];
-  return (
-    <div className="space-y-3">
-      <Input
-        placeholder="Search for a player"
-        aria-label="Search trade players"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      {matches.length > 0 && (
-        <div className="rounded-md border bg-background p-1">
-          {matches.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => {
-                onAdd(p.id);
-                setQuery("");
-              }}
-              className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-muted"
-            >
-              <span>
-                {p.name}{" "}
-                <span className="text-muted-foreground">
-                  {p.position} · {p.team}
-                </span>
-              </span>
-              <Plus className="h-4 w-4" />
-            </button>
-          ))}
-        </div>
-      )}
-      {selected.length === 0 && (
-        <p className="rounded-md border border-dashed p-5 text-sm text-muted-foreground">
-          Add up to four players.
-        </p>
-      )}
-      {selected.map((id) => {
-        const p = players.find((item) => item.id === id);
-        if (!p) return null;
-        return (
-          <div
-            key={id}
-            className="flex items-center justify-between gap-2 rounded-md border bg-background p-3 text-sm"
-          >
-            <div>
-              <strong>{p.name}</strong>
-              <span className="ml-2 text-muted-foreground">
-                {p.position} · {p.team}
-              </span>
-              <p className="text-xs text-muted-foreground">
-                {fmt(surplus(p, league, scoring, settings))} estimated surplus points
-              </p>
-            </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              aria-label={`Remove ${p.name}`}
-              onClick={() => onRemove(id)}
-            >
-              <X />
-            </Button>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function Trades() {
-  const connected = useLeague();
-  const [league, setLeague] = useState<League>("ballerz");
-  const [scoring, setScoring] = useState<Scoring>("full");
+  const league = useLeague();
+  const weekStatus = useWeekStatus(snapshot.week);
+  const settings = useMemo(
+    () => league.selected?.scoring_settings ?? genericSettings,
+    [league.selected],
+  );
+  const lineup = league.selected?.roster_positions ?? DEFAULT_LINEUP;
+  const teams = league.selected?.total_rosters ?? 12;
+  // Games already played do not count toward a trade.
+  const firstWeek = weekStatus.decisionWeek;
+  const weeks = useMemo(
+    () => Array.from({ length: LAST_WEEK - firstWeek + 1 }, (_, i) => firstWeek + i),
+    [firstWeek],
+  );
+  // Defenses have no rest-of-season projection, so the lineup is played without that spot.
+  const slots = useMemo(
+    () => lineup.filter((slot) => !["BN", "IR", "TAXI", "RESERVE", "DEF"].includes(slot)),
+    [lineup],
+  );
+  const players = useMemo(() => {
+    const scored = snapshot.players.map((p) => {
+      const weekly = new Map(
+        p.weeklyForecasts
+          .filter((g) => g.week >= firstWeek && g.week <= LAST_WEEK)
+          .map((g) => [g.week, scoreProjectedStats(g.projected, settings)]),
+      );
+      return {
+        id: p.id,
+        sleeperId: p.sleeperId,
+        name: p.name,
+        position: p.position,
+        team: p.team,
+        weekly,
+        points: [...weekly.values()].reduce((sum, v) => sum + v, 0),
+      };
+    });
+    const values = leagueValues(scored, teams, lineup).values;
+    return scored
+      .map((p): TradePlayer => ({ ...p, value: values.get(p.id) ?? 0 }))
+      .sort((a, b) => b.value - a.value);
+  }, [settings, lineup, teams, firstWeek]);
+  const byId = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
+
+  const users = useQuery({
+    queryKey: ["sleeper-users", league.selected?.league_id],
+    queryFn: async () => {
+      const response = await fetch(
+        `https://api.sleeper.app/v1/league/${league.selected!.league_id}/users`,
+      );
+      if (!response.ok) throw new Error("Sleeper team names are unavailable.");
+      return (await response.json()) as SleeperUser[];
+    },
+    enabled: !!league.selected,
+    staleTime: 60 * 60 * 1000,
+  });
+  const teamName = (ownerId: string, rosterId: number) => {
+    const user = users.data?.find((u) => u.user_id === ownerId);
+    return (user?.metadata?.team_name || user?.display_name || `Team ${rosterId}`).trim();
+  };
+
+  const myRoster = league.rosters.find((r) => String(r.owner_id) === league.userId);
+  const others = league.rosters.filter((r) => r !== myRoster);
+  const connected = !!league.selected && !!myRoster;
+  const [partnerId, setPartnerId] = useState(0);
   const [give, setGive] = useState<string[]>([]);
   const [get, setGet] = useState<string[]>([]);
-  const settings = connected.selected?.scoring_settings;
   useEffect(() => {
-    if (!connected.selected) return;
-    setLeague(connected.selected.roster_positions.includes("SUPER_FLEX") ? "ballerz" : "plumbuses");
-    setScoring(connected.selected.scoring_settings["rec"] === 0.5 ? "half" : "full");
+    setPartnerId(0);
     setGive([]);
     setGet([]);
-  }, [connected.selected]);
-  const myRoster = connected.rosters.find((r) => String(r.owner_id) === connected.userId);
-  const myIds = new Set(myRoster?.players ?? []);
-  const owned =
-    settings && myRoster ? entriesFor(settings).filter((entry) => myIds.has(entry.sleeperId)) : [];
-  const giveChoices = myRoster ? allPlayers().filter((p) => myIds.has(p.sleeperId)) : allPlayers();
-  const rostered = new Set(connected.rosters.flatMap((r) => r.players ?? []));
-  const getChoices = myRoster
-    ? allPlayers().filter((p) => !myIds.has(p.sleeperId) && rostered.has(p.sleeperId))
-    : allPlayers();
-  const lineupBefore =
-    connected.selected && myRoster
-      ? optimizeLineup(owned, connected.selected.roster_positions, "ros")
-      : null;
-  const afterRoster = owned.filter(
-    (entry) =>
-      !give.some((id) => allPlayers().find((p) => p.id === id)?.sleeperId === entry.sleeperId),
-  );
-  if (settings) {
-    for (const id of get) {
-      const incoming = entriesFor(settings).find((entry) => entry.id === id);
-      if (incoming) afterRoster.push(incoming);
+  }, [league.selected?.league_id]);
+  const partner = others.find((r) => r.roster_id === partnerId);
+  const rosterOf = (ids: string[] | null | undefined) => {
+    const owned = new Set(ids ?? []);
+    return players.filter((p) => owned.has(p.sleeperId));
+  };
+  const mine = useMemo(() => rosterOf(myRoster?.players), [players, myRoster]); // eslint-disable-line react-hooks/exhaustive-deps
+  const theirs = useMemo(() => rosterOf(partner?.players), [players, partner]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const giving = give.flatMap((id) => byId.get(id) ?? []);
+  const getting = get.flatMap((id) => byId.get(id) ?? []);
+  const toggle = (list: string[], set: (ids: string[]) => void) => (id: string) =>
+    set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+  const ready = giving.length > 0 && getting.length > 0;
+
+  const result = useMemo(() => {
+    if (!ready) return null;
+    const swap = (roster: TradePlayer[], out: TradePlayer[], incoming: TradePlayer[]) => [
+      ...roster.filter((p) => !out.includes(p)),
+      ...incoming,
+    ];
+    const side = (roster: TradePlayer[], out: TradePlayer[], incoming: TradePlayer[]) => {
+      const before = simulateSeason(roster, slots, weeks);
+      const after = simulateSeason(swap(roster, out, incoming), slots, weeks);
+      return { before, after, perWeek: (after.total - before.total) / weeks.length };
+    };
+    return {
+      me: connected ? side(mine, giving, getting) : null,
+      them: connected && partner ? side(theirs, getting, giving) : null,
+    };
+    // giving/getting are rebuilt each render; their identity follows give/get.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, give, get, mine, theirs, slots, weeks, connected, partner]);
+
+  const valueOut = giving.reduce((sum, p) => sum + p.value, 0);
+  const valueIn = getting.reduce((sum, p) => sum + p.value, 0);
+  const verdict = result?.me ? tradeVerdict(result.me.perWeek, result.them?.perWeek ?? null) : null;
+  const partnerName = partner ? teamName(partner.owner_id, partner.roster_id) : "They";
+  // Bench spots: a lopsided player count means someone has to be dropped.
+  const spots = lineup.length;
+  const rosterCount = (myRoster?.players?.length ?? 0) - (myRoster?.reserve?.length ?? 0);
+  const mustDrop = connected ? rosterCount - giving.length + getting.length - spots : 0;
+
+  const reasons = (() => {
+    if (!result?.me) return [];
+    const { before, after } = result.me;
+    const games = (s: typeof before, id: string) => s.starts.get(id) ?? { weeks: 0, points: 0 };
+    const lines: string[] = [];
+    for (const p of getting) {
+      const g = games(after, p.id);
+      lines.push(
+        g.weeks
+          ? `${p.name} starts for you in ${g.weeks} of ${weeks.length} weeks, about ${(g.points / g.weeks).toFixed(1)} points a start.`
+          : `${p.name} would not crack your lineup; he is bench depth.`,
+      );
     }
-  }
-  const lineupAfter =
-    connected.selected && myRoster
-      ? optimizeLineup(afterRoster, connected.selected.roster_positions, "ros")
-      : null;
-  const giveValue = give.reduce(
-    (sum, id) =>
-      sum +
-      surplus(
-        allPlayers().find((p) => p.id === id)!,
-        league,
-        scoring,
-        settings,
-      ),
-    0,
-  );
-  const getValue = get.reduce(
-    (sum, id) =>
-      sum +
-      surplus(
-        allPlayers().find((p) => p.id === id)!,
-        league,
-        scoring,
-        settings,
-      ),
-    0,
-  );
+    for (const p of giving) {
+      const g = games(before, p.id);
+      lines.push(
+        g.weeks
+          ? `You lose ${p.name}, who starts for you in ${g.weeks} of ${weeks.length} weeks at about ${(g.points / g.weeks).toFixed(1)} points.`
+          : `${p.name} is not starting for you now, so losing him costs your lineup nothing.`,
+      );
+    }
+    const movers = mine
+      .filter((p) => !giving.includes(p))
+      .map((p) => ({ p, change: games(after, p.id).weeks - games(before, p.id).weeks }))
+      .filter((m) => Math.abs(m.change) >= 2)
+      .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+      .slice(0, 3);
+    for (const { p, change } of movers)
+      lines.push(
+        change > 0
+          ? `${p.name} moves into your lineup for ${change} more weeks.`
+          : `${p.name} goes to your bench for ${-change} weeks.`,
+      );
+    return lines;
+  })();
+
   return (
-    <div className="space-y-6">
-      <Intro
-        title="Trade value research"
-        description="Compare players using projected rest-of-season points above a position replacement level. This is a starting point for a trade discussion, not a personalized verdict."
-      />
-      <Caveat trades />
-      <section className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4">
-        {connected.selected ? (
-          <p className="text-sm text-muted-foreground">
-            Trade estimates use {connected.selected.name}'s scoring and lineup slots.
-          </p>
-        ) : (
-          <>
-            <label className="text-sm font-semibold">
-              League format
-              <select
-                className="ml-3 h-9 rounded-md border border-input bg-background px-3 text-sm font-normal"
-                value={league}
-                onChange={(e) => {
-                  const next = e.target.value as League;
-                  setLeague(next);
-                  setScoring(next === "ballerz" ? "full" : "half");
-                }}
-              >
-                <option value="ballerz">10-team superflex</option>
-                <option value="plumbuses">12-team 1-QB keeper</option>
-              </select>
-            </label>
-            <ScoringButtons value={scoring} onChange={setScoring} />
-          </>
-        )}
+    <div className="space-y-4">
+      {weekStatus.weekOver && <WeekOverStrip week={snapshot.week} />}
+      <section className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="broadcast-tag text-xs uppercase">
+          {snapshot.season} · Trades · Weeks {firstWeek}–{LAST_WEEK}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {league.selected
+            ? `${league.selected.name} scoring and lineup`
+            : "Full PPR, 12 teams. Connect your league to see what a trade does to your lineup."}
+        </p>
       </section>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-lg border bg-card p-5">
-          <h3 className="mb-4 font-display text-xl font-semibold">You give</h3>
-          <PlayerPicker
-            players={giveChoices}
-            selected={give}
-            otherSelected={get}
-            onAdd={(id) => setGive((v) => (v.length < 4 ? [...v, id] : v))}
-            onRemove={(id) => setGive((v) => v.filter((x) => x !== id))}
-            league={league}
-            scoring={scoring}
-            settings={settings}
-          />
-        </section>
-        <section className="rounded-lg border bg-card p-5">
-          <h3 className="mb-4 font-display text-xl font-semibold">You get</h3>
-          <PlayerPicker
-            players={getChoices}
-            selected={get}
-            otherSelected={give}
-            onAdd={(id) => setGet((v) => (v.length < 4 ? [...v, id] : v))}
-            onRemove={(id) => setGet((v) => v.filter((x) => x !== id))}
-            league={league}
-            scoring={scoring}
-            settings={settings}
-          />
-        </section>
-      </div>
-      {give.length > 0 && get.length > 0 && (
-        <section className="rounded-lg border bg-card p-5">
-          <div className="mb-3 flex items-center gap-2 font-display text-xl font-semibold">
-            <ArrowLeftRight className="h-5 w-5" /> Comparison
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <span className="text-xs uppercase text-muted-foreground">Give</span>
-              <p className="text-2xl font-semibold tabular-nums">{fmt(giveValue)}</p>
-            </div>
-            <div>
-              <span className="text-xs uppercase text-muted-foreground">Get</span>
-              <p className="text-2xl font-semibold tabular-nums">{fmt(getValue)}</p>
-            </div>
-            <div>
-              <span className="text-xs uppercase text-muted-foreground">Estimated difference</span>
-              <p className="text-2xl font-semibold tabular-nums">
-                {getValue - giveValue >= 0 ? "+" : ""}
-                {fmt(getValue - giveValue)}
-              </p>
-            </div>
-          </div>
-          {lineupBefore !== null && lineupAfter !== null && (
-            <p className="mt-4 text-sm font-semibold">
-              Your modeled lineup after this trade: {lineupAfter - lineupBefore >= 0 ? "+" : ""}
-              {fmt(lineupAfter - lineupBefore)} remaining-season points versus your current roster.
-            </p>
+
+      {connected && (
+        <section className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4">
+          <label className="text-sm font-semibold" htmlFor="trade-partner">
+            Trade with
+          </label>
+          <select
+            id="trade-partner"
+            value={partnerId}
+            onChange={(e) => {
+              setPartnerId(Number(e.target.value));
+              setGet([]);
+            }}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value={0}>Pick a team</option>
+            {others.map((r) => (
+              <option key={r.roster_id} value={r.roster_id}>
+                {teamName(r.owner_id, r.roster_id)}
+              </option>
+            ))}
+          </select>
+          {(give.length > 0 || get.length > 0) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setGive([]);
+                setGet([]);
+              }}
+            >
+              Clear trade
+            </Button>
           )}
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">
-            These are estimated surplus fantasy points, not auction dollars. The comparison omits
-            unresolved injury risk, bye-week lineup needs, keeper costs, and draft picks. A
-            multi-player side also needs open roster spots.
-          </p>
         </section>
       )}
-      <p className="text-xs leading-5 text-muted-foreground">
-        Replacement level uses the{" "}
-        {league === "ballerz"
-          ? "20th QB, 20th RB, 30th WR, and 10th TE"
-          : "12th QB, 24th RB, 36th WR, and 12th TE"}{" "}
-        in this covered player pool, ordered by remaining-season points. Values use the sum of
-        future matchups and are clamped at zero. Only public NFL statistics are used; no league
-        roster or trade input is saved.
-      </p>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Side
+          title="You give"
+          choices={connected ? mine : players}
+          roster={connected}
+          selected={giving}
+          onToggle={toggle(give, setGive)}
+        />
+        {connected && !partner ? (
+          <section className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+            <h3 className="font-display text-xl font-semibold text-foreground">You get</h3>
+            <p className="mt-3">Pick the team you are trading with to see its players.</p>
+          </section>
+        ) : (
+          <Side
+            title="You get"
+            choices={(connected ? theirs : players).filter((p) => !give.includes(p.id))}
+            roster={connected}
+            selected={getting}
+            onToggle={toggle(get, setGet)}
+          />
+        )}
+      </div>
+
+      {!ready ? (
+        <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+          Add at least one player to each side to see who wins the trade.
+        </p>
+      ) : (
+        <section
+          className="space-y-4 rounded-lg border-2 border-volt bg-card p-4"
+          aria-live="polite"
+        >
+          {verdict && result?.me ? (
+            <>
+              <div>
+                {verdict.fairness && (
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {verdict.fairness}
+                  </p>
+                )}
+                <p className="mt-1 font-display text-2xl md:text-3xl">{verdict.headline}</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { label: "Your lineup", side: result.me },
+                  ...(result.them ? [{ label: `${partnerName}'s lineup`, side: result.them }] : []),
+                ].map(({ label, side }) => (
+                  <div key={label} className="rounded-md bg-muted p-3">
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p
+                      className={`mt-1 font-display text-3xl tabular-nums ${side.perWeek <= -REAL_CHANGE ? "text-red-600 dark:text-red-400" : side.perWeek >= REAL_CHANGE ? "text-volt" : ""}`}
+                    >
+                      {signed(side.perWeek)}
+                      <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">
+                        points a week
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {signed(side.after.total - side.before.total, 0)} over the rest of the season
+                      ({side.before.total.toFixed(0)} to {side.after.total.toFixed(0)})
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Why
+                </p>
+                <ul className="mt-1 list-disc space-y-1 pl-5 text-sm leading-6">
+                  {reasons.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+              {mustDrop > 0 && (
+                <p className="text-sm text-warning">
+                  You would have to drop {mustDrop} player{mustDrop > 1 ? "s" : ""} to make room.
+                  That cost is not counted here.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="font-display text-2xl">
+              {Math.abs(valueIn - valueOut) < 10
+                ? "Close to even on value"
+                : valueIn > valueOut
+                  ? "You get more value"
+                  : "You give more value"}
+            </p>
+          )}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Value swapped (same Value as the Overall board)
+            </p>
+            <p className="mt-1 text-sm">
+              You give <strong className="tabular-nums">{signed(valueOut)}</strong>, you get{" "}
+              <strong className="tabular-nums">{signed(valueIn)}</strong>:{" "}
+              <strong className="tabular-nums">{Math.abs(valueIn - valueOut).toFixed(1)}</strong>{" "}
+              {valueIn >= valueOut ? "in your favor" : "in their favor"}.
+            </p>
+          </div>
+        </section>
+      )}
+
+      <details className="text-xs leading-5 text-muted-foreground">
+        <summary className="cursor-pointer text-primary">How the verdict is made</summary>
+        <ul className="mt-2 list-disc space-y-1 rounded-md border bg-card p-3 pl-7">
+          <li>
+            We play out the rest of the season week by week, before and after the trade, fielding
+            each team's best lineup every week. Byes, ruled-out weeks and bench depth all count.
+          </li>
+          <li>
+            A change under {REAL_CHANGE} points a week is treated as no real change. Fair, tilted
+            and lopsided compare what each team's lineup gains.
+          </li>
+          <li>
+            Value is points above the worst starter at the position in this league. It can disagree
+            with the lineup number: a great player helps less if you are already strong there.
+          </li>
+          <li>Not counted: keeper value, draft picks, defenses, and who you would drop.</li>
+        </ul>
+      </details>
     </div>
   );
 }

@@ -21,6 +21,8 @@ export type SleeperRoster = {
   owner_id: string;
   players: string[] | null;
   starters: string[] | null;
+  /** Players parked on injured reserve; they do not take a roster spot. */
+  reserve?: string[] | null;
   roster_id: number;
   settings?: { waiver_budget_used?: number };
 };
