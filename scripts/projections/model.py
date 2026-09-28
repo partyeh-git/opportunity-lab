@@ -202,6 +202,13 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
     fixtures = schedule[schedule.season.eq(season)&schedule.week.ge(cutoff_week)]
     prior_schedule = schedule[(schedule.season.eq(season)&schedule.week.lt(cutoff_week)) | schedule.season.eq(season-1)]
     histories = dict(tuple(history.groupby('player_id')))
+    # Per-week lookups shared by every player (computed once, not per player).
+    this_season = prior_schedule[prior_schedule.season.eq(season)]
+    team_game_ids = {team: g.sort_values('week').game_id.tolist() for team, g in this_season.groupby('team')}
+    game_week = dict(zip(prior_schedule.game_id[::-1], prior_schedule.week[::-1]))
+    fixtures_by_team = {team: g.sort_values('week') for team, g in fixtures.groupby('team')}
+    recent_history = history[history.season.ge(season-1)]
+    rare_means = {}
     team_totals = history.groupby(['season','team','game_id'],as_index=False)[STATS].sum()
     team_forecasts = {}
     # Phase B fix 3 (optional): whole season, newest games weighted most. Weight of a game =
@@ -236,11 +243,11 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
     players = []
     for identity in current.groupby('player_id',sort=False).tail(1).itertuples():
         team = identity.team
-        future = fixtures[fixtures.team.eq(team)].sort_values('week')
-        if future.empty or team not in team_forecasts:
+        future = fixtures_by_team.get(team)
+        if future is None or future.empty or team not in team_forecasts:
             continue
         hist = histories[identity.player_id]
-        team_ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').game_id.tolist()
+        team_ids = team_game_ids.get(team, [])
         recent_ids = team_ids[-4:]
         own = hist[hist.season.eq(season)&hist.team.eq(team)]
         clean = hist[~hist.partial]
@@ -313,8 +320,10 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         for key in ('fumbles_lost_total','passing_2pt_conversions','rushing_2pt_conversions',
                     'receiving_2pt_conversions','special_teams_tds','fumble_recovery_tds'):
             own_recent = eff.tail(8)
-            pos_games = history[history.season.ge(season-1)&history.position.eq(identity.position)]
-            base[key] = float((own_recent[key].sum()+20*pos_games[key].mean())/(len(own_recent)+20))
+            if (identity.position, key) not in rare_means:
+                pos_games = recent_history[recent_history.position.eq(identity.position)]
+                rare_means[(identity.position, key)] = pos_games[key].mean()
+            base[key] = float((own_recent[key].sum()+20*rare_means[(identity.position, key)])/(len(own_recent)+20))
         season_ppg = None
         if sw and sw.get('ros_ppg_k'):
             played_now = hist[hist.season.eq(season) & ~hist.partial]
@@ -323,7 +332,7 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
                 season_ppg = dict(points=float(np.mean(pts)), games=len(pts))
         players.append(dict(id=identity.player_id, name=identity.player_display_name, seasonPpg=season_ppg,
             position=identity.position, team=team, lastObservedWeek=int(own.week.max()), base=base,
-            missedLastTeamGame=bool(team_ids) and int(own.week.max()) < int(prior_schedule[prior_schedule.game_id.eq(team_ids[-1])].week.iloc[0]),
+            missedLastTeamGame=bool(team_ids) and int(own.week.max()) < int(game_week[team_ids[-1]]),
             workloadEvidence=dict(recentGames=len(recent_ids), currentSeasonGames=n, recentWeight=weight, priorEquivalentGames=strength,
                 priorAvailable=bool(len(old)), changedTeam=bool(changed_team),
                 recentCarries=recent['carries'], priorCarries=prior['carries'],
@@ -332,11 +341,13 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         # Starter of each team's most recent game (most pass attempts). Depth charts can lag, so a QB
         # keeps his volume if he started last week even when the chart lists someone else.
         last_starter, streak = {}, {}
+        qb_games = dict(tuple(history[history.position.eq('QB')].groupby(['game_id', 'team'])))
+        empty = history.iloc[:0]
         for team in team_forecasts:
-            ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').game_id.tolist()
+            ids = team_game_ids.get(team, [])
             starters = []
             for gid in ids:
-                g = history[history.game_id.eq(gid)&history.team.eq(team)&history.position.eq('QB')]
+                g = qb_games.get((gid, team), empty)
                 starters.append(g.loc[g.attempts.idxmax(), 'player_id'] if len(g) and g.attempts.max() > 0 else None)
             if starters and starters[-1]:
                 last_starter[team] = starters[-1]
