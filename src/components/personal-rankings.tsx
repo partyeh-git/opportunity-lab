@@ -389,6 +389,14 @@ export function PersonalRankings({
     return modelRanks.get(a.id)! - modelRanks.get(b.id)!;
   });
   const overallRanks = new Map(ordered.map((entry, index) => [entry.id, index + 1]));
+  // Overall board narrowed to one position: number the list 1, 2, 3 within that position and
+  // show the all-positions rank beside it.
+  const positionView = showValue && effectivePosition !== "All";
+  const rankedList = positionView
+    ? ordered.filter((entry) => eligible(entry.position, effectivePosition))
+    : ordered;
+  const listRanks = new Map(rankedList.map((entry, index) => [entry.id, index + 1]));
+  const tierTop = showValue && !positionView ? 150 : 60;
   // Tiers split the board at its natural gaps: weekly points on weekly boards, value above
   // starter on the overall board. DST keeps its streaming tiers. Only the top of the board is
   // split; everyone below is one "Deep" tier.
@@ -401,11 +409,14 @@ export function PersonalRankings({
           return [e.id, label.startsWith("Tier ") ? Number(label.slice(5)) : 4];
         }),
       );
-    const values = modelOrder.map((e) =>
+    const pool = positionView
+      ? modelOrder.filter((e) => eligible(e.position, effectivePosition))
+      : modelOrder;
+    const values = pool.map((e) =>
       showValue ? (valueModel.values.get(e.id) ?? -Infinity) : expectedFor(e),
     );
-    const tierNumbers = showValue ? boardTiers(values, 150, 10) : boardTiers(values, 60, 6);
-    return new Map(modelOrder.map((e, i) => [e.id, tierNumbers[i]!]));
+    const tierNumbers = boardTiers(values, tierTop, tierTop === 150 ? 10 : 6);
+    return new Map(pool.map((e, i) => [e.id, tierNumbers[i]!]));
     // modelOrder is rebuilt each render; its identity follows these inputs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries, effectivePosition, weeklyBoard, defenseBoard, showValue, valueModel, defenseTiers]);
@@ -415,7 +426,7 @@ export function PersonalRankings({
       ? tier === 4
         ? "Deep stream"
         : `Tier ${tier}`
-      : tier === lastTier && tiers.size > (showValue ? 150 : 60)
+      : tier === lastTier && tiers.size > tierTop
         ? "Deep"
         : `Tier ${tier}`;
   // Tier lines only make sense when the list runs best to worst.
@@ -663,11 +674,18 @@ export function PersonalRankings({
                 </p>
                 <p>Sorting by another column and then moving a player saves that order as yours.</p>
               </SortHeader>
-              <SortHeader label="Model" sortKey="model" sort={sort} onSort={sortBy}>
+              <SortHeader
+                label={positionView ? "Overall" : "Model"}
+                sortKey="model"
+                sort={sort}
+                onSort={sortBy}
+              >
                 <p>
-                  {showValue
-                    ? "Where our model ranks the player on this board: by value above the worst league-wide starter (the Value column)."
-                    : "Where our model ranks the player on this board: points if he plays times his chance to play. A healthy player keeps nearly all his points; a Questionable one is discounted."}
+                  {positionView
+                    ? "Where our model ranks the player across all positions, as on the full Overall board. My rank counts only the position you picked."
+                    : showValue
+                      ? "Where our model ranks the player on this board: by value above the worst league-wide starter (the Value column)."
+                      : "Where our model ranks the player on this board: points if he plays times his chance to play. A healthy player keeps nearly all his points; a Questionable one is discounted."}
                 </p>
               </SortHeader>
               <SortHeader label="Player / team" sortKey="name" sort={sort} onSort={sortBy}>
@@ -850,12 +868,12 @@ export function PersonalRankings({
                         <GripVertical className="h-4 w-4" />
                       </button>
                       <input
-                        key={`${storageKey}-${sort.key}-${sort.reversed}-${overallRanks.get(entry.id)}`}
+                        key={`${storageKey}-${sort.key}-${sort.reversed}-${listRanks.get(entry.id)}`}
                         type="number"
                         min={1}
-                        max={modelOrder.length}
+                        max={rankedList.length}
                         disabled={!ready}
-                        defaultValue={overallRanks.get(entry.id)}
+                        defaultValue={listRanks.get(entry.id)}
                         aria-label={`Rank for ${entry.name}`}
                         className="w-14 rounded border border-transparent bg-transparent px-1 py-1 text-center font-display text-lg hover:border-input focus:border-primary"
                         onBlur={(event) => {
@@ -864,16 +882,16 @@ export function PersonalRankings({
                             event.target.value &&
                             Number.isInteger(rank) &&
                             rank >= 1 &&
-                            rank <= modelOrder.length &&
-                            rank !== overallRanks.get(entry.id)
+                            rank <= rankedList.length &&
+                            rank !== listRanks.get(entry.id)
                           )
-                            move(entry.id, rank);
-                          else event.target.value = String(overallRanks.get(entry.id));
+                            moveBeside(entry.id, rankedList[rank - 1]!.id);
+                          else event.target.value = String(listRanks.get(entry.id));
                         }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") event.currentTarget.blur();
                           if (event.key === "Escape") {
-                            event.currentTarget.value = String(overallRanks.get(entry.id));
+                            event.currentTarget.value = String(listRanks.get(entry.id));
                             event.currentTarget.blur();
                           }
                         }}
