@@ -1,6 +1,6 @@
 {
-  "model": "sample_aware_matchup_role_v3",
-  "status": "v3 adopted 2026-09-27: minimal-playing-time rule, known-out players excluded from team volume, depth-chart QB1, betting-implied points (weekly). Fit 2023, checked 2024, tested once on held-out 2025.",
+  "model": "sample_aware_matchup_role_v4",
+  "status": "v4 adopted 2026-09-28 (Phase B fix 3): whole season with fading game weights (replaces last-4 window) and rest-of-season blend with actual season points per game. v3: minimal-playing-time rule, known-out players excluded from team volume, depth-chart QB1, betting-implied points (weekly). Fit 2019-2023, checked 2024, tested once on held-out 2025.",
   "created": "2026-09-22",
   "development": 2023,
   "validation": 2024,
@@ -100,6 +100,15 @@
       "RB": 0.0111,
       "TE": 0.0035,
       "WR": 0.0179
+    },
+    "season_weights": {
+      "decay": 0.95,
+      "last": 1.0,
+      "changed_last": 0.5,
+      "team_decay": 0.95,
+      "team_last": 1.0,
+      "eff_decay": 0.9,
+      "ros_ppg_k": 10
     }
   },
   "playing_time_fix": {
@@ -140,6 +149,33 @@
         -0.27
       ],
       "note": "Same players, players who played, v2 projection >= 5. Paired t-tests (player-weeks for error, weeks for pairs). Implied k fit on 2023 only. 2024 cases were inspected while shaping the QB depth rule, so 2025 (first use) is the clean test."
+    }
+  },
+  "whole_season_fix": {
+    "rule": "Every game this season counts, weight 0.95^(games ago); last season continues the same fade (half weight after a team change); team totals the same; efficiency fades 0.9 per game over this season and last. Rest of season (weeks after the current one): points x (1-a) + actual season points per game x a, a = games/(games+10), injury-shortened games excluded; not for QBs who lost the starting job.",
+    "evaluation": {
+      "ros_pairs_build_2019_2023": [
+        65.88,
+        66.81
+      ],
+      "ros_pairs_build_p": 0.0019,
+      "ros_pairs_2024": [
+        66.73,
+        67.52
+      ],
+      "ros_pairs_2025": [
+        65.77,
+        66.71
+      ],
+      "weekly_mae_2024": [
+        5.688,
+        5.693
+      ],
+      "weekly_mae_2025": [
+        5.603,
+        5.583
+      ],
+      "note": "ROS pair accuracy, top 30 QB/60 RB/72 WR/30 TE at Weeks 4/8/12, zeros kept. Weekly effect neutral out of sample."
     }
   }
 }

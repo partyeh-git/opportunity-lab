@@ -109,7 +109,7 @@ VOLUME = ('attempts', 'carries', 'targets')
 DEFAULT_WORKLOAD = dict(window=4, decay=.8, prior_games=None, changed_team_prior_games=None,
                         skip_absences=False, skip_short_games=False, context=None,
                         reconcile_active_only=False, volume_override=None, role_blend=None,
-                        clean_games=False, role_prior=False, implied=None)
+                        clean_games=False, role_prior=False, implied=None, season_weights=None)
 
 
 def game_context(games):
@@ -177,7 +177,7 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
     if workload is None and CONFIG.get('workload'):
         wl = {**wl, **CONFIG['workload']}
     default_workload = not any(wl[k] != DEFAULT_WORKLOAD[k] for k in DEFAULT_WORKLOAD
-                               if k not in ('clean_games', 'role_prior', 'implied'))
+                               if k not in ('clean_games', 'role_prior', 'implied', 'season_weights'))
     partial = set()
     shares = {}
     if playing is not None and (wl['clean_games'] or wl['role_prior']):
@@ -204,6 +204,19 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
     histories = dict(tuple(history.groupby('player_id')))
     team_totals = history.groupby(['season','team','game_id'],as_index=False)[STATS].sum()
     team_forecasts = {}
+    # Phase B fix 3 (optional): whole season, newest games weighted most. Weight of a game =
+    # decay ** (games ago); last season continues the same fade, times a last-season factor.
+    sw = wl['season_weights']
+    def faded(cur, old, decay, last):
+        cur, old = np.asarray(cur, float), np.asarray(old, float)
+        n = len(cur)
+        w = decay ** np.arange(n-1, -1, -1)
+        if len(old) and last > 0:
+            w = np.concatenate([last * decay ** (n + np.arange(len(old)-1, -1, -1)), w])
+            x = np.vstack([old, cur]) if n else old
+        else:
+            x = cur
+        return (w @ x) / w.sum() if len(x) else None
     for team in current.team.unique():
         recent_ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').tail(4).game_id.tolist()
         if not recent_ids:
@@ -213,6 +226,13 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         old_mean = old_team[STATS].mean().to_dict() if len(old_team) else recent_team
         w = len(recent_ids)/(len(recent_ids)+CONFIG['team_prior_games'])
         team_forecasts[team] = {k: w*recent_team[k]+(1-w)*old_mean[k] for k in STATS}
+        if sw:
+            ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').game_id
+            cur_team = team_totals[team_totals.season.eq(season)&team_totals.team.eq(team)].set_index('game_id')[STATS]
+            cur_team = cur_team.reindex([g for g in ids if g in cur_team.index])
+            v = faded(cur_team.to_numpy(), old_team.sort_values('game_id')[STATS].to_numpy(), sw['team_decay'], sw['team_last'])
+            if v is not None:
+                team_forecasts[team] = dict(zip(STATS, v))
     players = []
     for identity in current.groupby('player_id',sort=False).tail(1).itertuples():
         team = identity.team
@@ -244,6 +264,7 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
             recent = old.tail(8)[STATS].mean().to_dict()
         if sum(recent[k] for k in ('attempts','carries','targets')) <= 0:
             continue
+        role_scale = 1.
         if len(old):
             # Retain all own observed teams; do not assign a former team's games to a new team.
             # Player appearance mean avoids assuming a missing row was a healthy zero-workload game.
@@ -254,6 +275,7 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
                 now = np.nanmean([shares.get(k, np.nan) for k in zip(own_clean.season, own_clean.week, own_clean.player_id)] or [np.nan])
                 then = np.nanmean([shares.get(k, np.nan) for k in zip(old.tail(8).season, old.tail(8).week, old.tail(8).player_id)] or [np.nan])
                 if np.isfinite(now) and np.isfinite(then) and then > 0 and now < then:
+                    role_scale = now/then
                     for key in VOLUME:
                         prior[key] *= now/then
             changed_team = old.iloc[-1].team != team
@@ -268,11 +290,21 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         base = recent.copy()
         for key in ('attempts','carries','targets'):
             base[key] = weight*recent[key]+(1-weight)*prior[key]
+        if sw and wl['clean_games']:
+            last = sw['changed_last'] if changed_team else sw['last']
+            v = faded(own_clean[list(VOLUME)].to_numpy(), old[list(VOLUME)].to_numpy()*role_scale, sw['decay'], last)
+            if v is not None:
+                base.update(zip(VOLUME, v))
         # Optional externally estimated volume (e.g. role-share blend), per player id.
         for key, value in ((wl['volume_override'] or {}).get(identity.player_id) or {}).items():
             base[key] = value
         eff = clean if wl['clean_games'] else hist
         player_totals = eff.tail(8)[STATS].sum()
+        if sw and sw.get('eff_decay'):
+            e = eff[eff.season.ge(season-1)]
+            if len(e):
+                ew = sw['eff_decay'] ** np.arange(len(e)-1, -1, -1)
+                player_totals = pd.Series(ew @ e[STATS].to_numpy(), index=STATS) * sw.get('eff_scale', 1.)
         positional = pos_totals.loc[identity.position]
         for _, (num, den, pseudo_n) in RATES.items():
             rate = (player_totals[num]+pseudo_n*positional[num]/max(1.,positional[den]))/(player_totals[den]+pseudo_n)
@@ -283,7 +315,13 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
             own_recent = eff.tail(8)
             pos_games = history[history.season.ge(season-1)&history.position.eq(identity.position)]
             base[key] = float((own_recent[key].sum()+20*pos_games[key].mean())/(len(own_recent)+20))
-        players.append(dict(id=identity.player_id, name=identity.player_display_name,
+        season_ppg = None
+        if sw and sw.get('ros_ppg_k'):
+            played_now = hist[hist.season.eq(season) & ~hist.partial]
+            if len(played_now):
+                pts = [score(r) for r in played_now[STATS].to_dict('records')]
+                season_ppg = dict(points=float(np.mean(pts)), games=len(pts))
+        players.append(dict(id=identity.player_id, name=identity.player_display_name, seasonPpg=season_ppg,
             position=identity.position, team=team, lastObservedWeek=int(own.week.max()), base=base,
             missedLastTeamGame=bool(team_ids) and int(own.week.max()) < int(prior_schedule[prior_schedule.game_id.eq(team_ids[-1])].week.iloc[0]),
             workloadEvidence=dict(recentGames=len(recent_ids), currentSeasonGames=n, recentWeight=weight, priorEquivalentGames=strength,
@@ -393,6 +431,16 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
                                 'receiving_yards','receiving_tds','completions','targets','carries','attempts'):
                         adjusted[key] *= f
                     factors = {**factors, 'implied': {'points': implied, 'factor': f}}
+            ppg = p.get('seasonPpg')
+            if ppg and game.week > cutoff_week and not p['workloadEvidence'].get('notDepthChartStarter'):
+                # Rest of season (later weeks only): mix in the player's actual points per game this
+                # season (injury-shortened games excluded); its share grows with games played.
+                model_points = score(adjusted)
+                if model_points > 1:
+                    a = ppg['games']/(ppg['games']+sw['ros_ppg_k'])
+                    f = ((1-a)*model_points + a*ppg['points'])/model_points
+                    adjusted = {k: v*f for k, v in adjusted.items()}
+                    factors = {**factors, 'seasonPpg': {**ppg, 'share': a, 'factor': f}}
             games.append(dict(week=int(game.week),opponent=game.opponent,stats=adjusted,
                 full=score(adjusted),half=score(adjusted,.5),defense=factors))
         current_game = next((g for g in games if g['week']==cutoff_week),None)
