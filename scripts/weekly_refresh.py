@@ -14,6 +14,10 @@ Steps:
       - one-week "Out" designations are never carried forward.
  4. prepare_availability.py -> build.py -> build_dst_snapshot.py, then fill any missing
     Sleeper ids from the Sleeper directory, and run the model tests.
+With --refresh-current, when no new week is ready but the site's week is still being played,
+that week is rebuilt with the latest betting lines and injury reports (daily Wed-Sun runs).
+Betting lines that drop out of the schedule feed keep their last known value
+(scripts/projections/lines-last-known.json), so a missing line never erases the adjustment.
 No fantasy rankings are read. The locked 2025 season is used only as last season's inputs.
 """
 from __future__ import annotations
@@ -33,6 +37,7 @@ PROJ = ROOT / "scripts" / "projections"
 SNAPSHOT = ROOT / "src" / "data" / "rankings-current.json"
 REVIEW = PROJ / "injury-review.json"
 AVAILABILITY = PROJ / "availability-current.json"
+LAST_LINES = PROJ / "lines-last-known.json"
 NFLVERSE = "https://github.com/nflverse/nflverse-data/releases/download"
 ROSTER_OUT = {"IR": "injured reserve", "PUP": "physically unable to perform list", "Sus": "suspension"}
 
@@ -108,6 +113,28 @@ def roll_ledger(old: dict, snapshot: dict, sleeper: dict, games: pd.DataFrame, s
                 note="Rolled automatically by scripts/weekly_refresh.py; reviewed IR entries carried inside their minimum stay.")
 
 
+def keep_last_lines(data: Path, season: int, now: str) -> int:
+    """Fill blank spread/total lines for this season from the last known values; remember new ones."""
+    path = data / "games.csv"
+    games = pd.read_csv(path, low_memory=False)
+    memory = json.loads(LAST_LINES.read_text(encoding="utf-8")) if LAST_LINES.exists() else {}
+    memory = {k: v for k, v in memory.items() if k.startswith(f"{season}_")}
+    filled = 0
+    for i in games.index[games.season.eq(season) & games.game_type.eq("REG")]:
+        gid = games.at[i, "game_id"]
+        spread, total = games.at[i, "spread_line"], games.at[i, "total_line"]
+        if pd.notna(spread) and pd.notna(total):
+            if memory.get(gid, {}).get("spread") != spread or memory.get(gid, {}).get("total") != total:
+                memory[gid] = dict(spread=float(spread), total=float(total), seenAt=now)
+        elif gid in memory and pd.isna(games.at[i, "result"]):
+            games.at[i, "spread_line"], games.at[i, "total_line"] = memory[gid]["spread"], memory[gid]["total"]
+            filled += 1
+    LAST_LINES.write_text(json.dumps(dict(sorted(memory.items())), indent=1) + "\n", encoding="utf-8")
+    if filled:
+        games.to_csv(path, index=False)
+    return filled
+
+
 def fill_sleeper_ids(sleeper: dict):
     snapshot = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
     by_gsis = {v.get("gsis_id"): k for k, v in sleeper.items() if v.get("gsis_id")}
@@ -132,15 +159,24 @@ def main():
     parser.add_argument("--season", type=int, default=2026)
     parser.add_argument("--skip-download", action="store_true", help="reuse files already in --data-dir")
     parser.add_argument("--week", type=int, help="rebuild this week even if the site already shows it")
+    parser.add_argument("--refresh-current", action="store_true",
+                        help="if no new week is ready, rebuild the week in progress with fresh lines and injuries")
     parser.add_argument("--allow-stale-snaps", action="store_true",
                         help="build even if last week's snap counts are not published yet (last retry of the week)")
     a = parser.parse_args()
     data = a.data_dir.resolve()
     fetched_at = datetime.now(timezone.utc).isoformat() if a.skip_download else fetch_inputs(data, a.season)
+    if not a.skip_download:
+        print(f"Kept last known betting lines for {keep_last_lines(data, a.season, fetched_at)} games.")
     games = pd.read_csv(data / "games.csv", low_memory=False)
     done = completed_week(games, a.season)
     target = a.week or done + 1
     snapshot = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    current = snapshot["season"] == a.season and snapshot["week"] == target
+    if a.refresh_current and not a.week and current:
+        print(f"Week {target} is in progress; rebuilding it with the latest lines and injury reports.")
+        a.week = target
+        a.allow_stale_snaps = True
     if target > done + 1:
         raise SystemExit(f"Week {target - 1} games are not all final yet.")
     if target > 18:

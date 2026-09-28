@@ -34,6 +34,8 @@ def live_status(data_dir, identities):
 def build(data_dir, existing_path, output, season, week, availability_path=None, as_of=None):
     as_of = as_of or datetime.now(timezone.utc).isoformat()
     stats, schedule = read_inputs(data_dir,[season-1,season])
+    # A mid-week rebuild (fresh lines/injuries) can see games already played this week: drop them.
+    stats = stats[~(stats.season.eq(season)&stats.week.ge(week))]
     current = stats[stats.season.eq(season)]
     if current.week.max() != week-1:
         raise ValueError('Source data must end at the previous completed week')
