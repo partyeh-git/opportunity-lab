@@ -9,12 +9,14 @@ import {
   ChevronRight,
   Gauge,
   Menu,
+  Scale,
   WalletCards,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Trades } from "@/components/rankings-trades";
 import { PersonalRankings } from "@/components/personal-rankings";
+import { StartSit } from "@/components/start-sit";
 import { WaiversFaab } from "@/components/waivers-faab";
 import { ConnectBanner, LeagueProvider, LeagueSwitcher } from "@/components/league-context";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -45,10 +47,11 @@ export const Route = createFileRoute("/")({
   ),
 });
 
-// Home and Start / Sit join the menu once they are built (no placeholder pages).
+// Home joins the menu once it is built (no placeholder pages).
 const navItems = [
   ["Overall Rankings", BarChart3],
   ["Weekly Rankings", CalendarDays],
+  ["Start / Sit", Scale],
   ["Trades", ArrowRightLeft],
   ["Waivers & FAAB", WalletCards],
 ] as const;
@@ -120,6 +123,8 @@ function Index() {
             <PersonalRankings key="rankings" />
           ) : screen === "Weekly Rankings" ? (
             <PersonalRankings key="weekly" weeklyOnly />
+          ) : screen === "Start / Sit" ? (
+            <StartSit />
           ) : screen === "Trades" ? (
             <Trades />
           ) : (
