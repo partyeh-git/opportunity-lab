@@ -4,11 +4,17 @@ name: Weekly projections
 # injury ledger forward, rebuild player projections and DST, run the model tests, and commit.
 # Idempotent: if the site already shows the upcoming week, it does nothing. It waits for the
 # week's snap counts on Tuesday/Wednesday and builds regardless on the Thursday retry.
+# Every run also refreshes the week in progress (--refresh-current) with the latest betting lines
+# and injury reports, so the daily runs through Sunday morning keep projections current.
 on:
   schedule:
     - cron: "0 14 * * 2" # Tuesday 10am Eastern, after Monday night
     - cron: "0 14 * * 3" # Wednesday retry (late stats or snap counts)
     - cron: "0 14 * * 4" # Thursday retry, before Thursday night; builds even with stale snaps
+    - cron: "0 14 * * 5,6" # Friday and Saturday 10am Eastern: fresh lines and injury reports
+    - cron: "0 22 * * 5" # Friday 6pm Eastern, after the final injury reports (game designations)
+    - cron: "30 14 * * 0" # Sunday 10:30am Eastern
+    - cron: "40 15 * * 0" # Sunday 11:40am Eastern, after inactives for the early games
   workflow_dispatch:
     inputs:
       week:
@@ -34,13 +40,13 @@ jobs:
       - run: pip install numpy pandas pyarrow
       - name: Rebuild projections
         run: |
-          ARGS=""
+          ARGS="--refresh-current"
           if [ -n "${{ github.event.inputs.week }}" ]; then ARGS="--week ${{ github.event.inputs.week }}"; fi
           if [ "${{ github.event.schedule }}" = "0 14 * * 4" ] || [ -n "${{ github.event.inputs.week }}" ]; then ARGS="$ARGS --allow-stale-snaps"; fi
           python scripts/weekly_refresh.py $ARGS
       - name: Commit changes
         run: |
-          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json
+          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json
           if git diff --cached --quiet; then
             echo "No projection changes."
             exit 0
@@ -48,6 +54,6 @@ jobs:
           WEEK=$(python -c "import json;print(json.load(open('src/data/rankings-current.json'))['week'])")
           git config user.name "projections-bot"
           git config user.email "projections-bot@users.noreply.github.com"
-          git commit -m "Weekly projections refresh for Week $WEEK"
+          git commit -m "Projections refresh for Week $WEEK (lines, injuries)"
           git pull --rebase origin main
           git push origin HEAD:main
