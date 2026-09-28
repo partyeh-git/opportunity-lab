@@ -1,7 +1,7 @@
 {
   "season": 2026,
   "week": 3,
-  "reviewedAt": "2026-09-24T22:19:19.389607+00:00",
+  "reviewedAt": "2026-09-28T02:38:28.178230+00:00",
   "records": [
     {
       "id": "00-0035676",
@@ -81,42 +81,56 @@
       "note": "Daniels is confirmed absent for Week 3. No return timetable is confirmed. Later estimates are conditional on playing; Mariota's starting adjustment applies only to Week 3."
     },
     {
-      "id": "00-0040691",
-      "team": "NYG",
+      "id": "00-0037664",
+      "team": "IND",
       "reportedStatus": "IR",
-      "injury": "Knee - Meniscus",
+      "injury": "Heel",
       "outWeeks": [
         3
       ],
-      "publishedDate": "2026-09-24",
+      "publishedDate": "2026-09-28",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
       "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
     },
     {
-      "id": "00-0033885",
-      "team": "LAC",
+      "id": "00-0032775",
+      "team": "SF",
       "reportedStatus": "IR",
-      "injury": "Lower Leg",
+      "injury": "Ankle",
       "outWeeks": [
         3
       ],
-      "publishedDate": "2026-09-24",
+      "publishedDate": "2026-09-28",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
       "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
     },
     {
-      "id": "00-0039344",
-      "team": "CAR",
+      "id": "00-0038619",
+      "team": "CIN",
       "reportedStatus": "IR",
-      "injury": "Abdomen",
+      "injury": "Thumb",
       "outWeeks": [
         3
       ],
-      "publishedDate": "2026-09-24",
+      "publishedDate": "2026-09-28",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0041496",
+      "team": "DEN",
+      "reportedStatus": "IR",
+      "injury": "Ankle",
+      "outWeeks": [
+        3
+      ],
+      "publishedDate": "2026-09-28",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -130,7 +144,49 @@
       "outWeeks": [
         3
       ],
-      "publishedDate": "2026-09-24",
+      "publishedDate": "2026-09-28",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0033885",
+      "team": "LAC",
+      "reportedStatus": "IR",
+      "injury": "Lower Leg",
+      "outWeeks": [
+        3
+      ],
+      "publishedDate": "2026-09-28",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0039344",
+      "team": "CAR",
+      "reportedStatus": "IR",
+      "injury": "Abdomen",
+      "outWeeks": [
+        3
+      ],
+      "publishedDate": "2026-09-28",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0040691",
+      "team": "NYG",
+      "reportedStatus": "IR",
+      "injury": "Knee - Meniscus",
+      "outWeeks": [
+        3
+      ],
+      "publishedDate": "2026-09-28",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
