@@ -6,6 +6,7 @@ name: Weekly projections
 # week's snap counts on Tuesday/Wednesday and builds regardless on the Thursday retry.
 # Every run also refreshes the week in progress (--refresh-current) with the latest betting lines
 # and injury reports, so the daily runs through Sunday morning keep projections current.
+# GitHub can start scheduled runs late (hours, at busy times); Sunday has two runs for that reason.
 on:
   schedule:
     - cron: "0 14 * * 2" # Tuesday 10am Eastern, after Monday night
