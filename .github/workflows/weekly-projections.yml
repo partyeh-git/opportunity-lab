@@ -45,9 +45,12 @@ jobs:
           if [ -n "${{ github.event.inputs.week }}" ]; then ARGS="--week ${{ github.event.inputs.week }}"; fi
           if [ "${{ github.event.schedule }}" = "0 14 * * 4" ] || [ -n "${{ github.event.inputs.week }}" ]; then ARGS="$ARGS --allow-stale-snaps"; fi
           python scripts/weekly_refresh.py $ARGS
+      - name: Kickoff weather forecast (display only)
+        continue-on-error: true
+        run: python scripts/weather_forecast.py
       - name: Commit changes
         run: |
-          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json
+          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json public/weather.json
           if git diff --cached --quiet; then
             echo "No projection changes."
             exit 0

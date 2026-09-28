@@ -10,6 +10,7 @@ import { playersSnapshot } from "@/lib/snapshots";
 import { fetchPublicJson } from "@/lib/live-data";
 import { ProjectionDetails } from "@/components/projection-details";
 import { PlayerCard } from "@/components/player-card";
+import { useWeather, WeatherIcons } from "@/components/weather-icons";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { boardTiers } from "@/lib/tiers";
@@ -175,6 +176,7 @@ export function PersonalRankings({
       ? { status: saved.reportedStatus, body: saved.injury || null, practice: null }
       : null;
   };
+  const weatherFor = useWeather(playersSnapshot.week);
   // The Weekly tab and the overall Rankings tab are separate boards; each has one horizon.
   const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : "ros";
   const settings = useMemo(
@@ -956,6 +958,9 @@ export function PersonalRankings({
                   )}
                   <td className="px-4 py-3 text-muted-foreground">
                     {entry.team} vs {entry.opponent}
+                    {effectiveHorizon === "week" && (
+                      <WeatherIcons weather={weatherFor(entry.team)} />
+                    )}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{entry.detail}</td>
                 </tr>
