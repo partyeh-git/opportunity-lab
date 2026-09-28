@@ -61,12 +61,14 @@ const lineupSlots = (slots?: string[]) => [
 const INJURY_LETTER: Record<string, string> = {
   Questionable: "Q",
   Doubtful: "D",
-  Out: "OUT",
+  Out: "O",
   IR: "IR",
   PUP: "PUP",
   Sus: "SUS",
 };
 type InjuryInfo = { status: string; body: string | null; practice: string | null };
+/** Designations that mean he will not play: the whole row turns red. */
+const RULED_OUT = new Set(["Out", "IR", "PUP", "Sus"]);
 
 type SortKey = "manual" | "model" | "value" | "points" | "ros" | "impact" | "name";
 type Sort = { key: SortKey; reversed: boolean };
@@ -759,7 +761,7 @@ export function PersonalRankings({
                   )}
                 <tr
                   data-player-id={entry.id}
-                  className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : "transition-colors hover:bg-accent/50"}`}
+                  className={`border-t ${dropTarget === entry.id ? "bg-primary/10 outline outline-primary" : RULED_OUT.has(injuryOf(entry)?.status ?? "") ? "bg-red-100 text-red-700 transition-colors hover:bg-red-200/70 dark:bg-red-950/60 dark:text-red-300 dark:hover:bg-red-950" : "transition-colors hover:bg-accent/50"}`}
                 >
                   <td className="px-2 py-2 tabular-nums text-muted-foreground">
                     <div className="flex items-center gap-1">
