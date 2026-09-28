@@ -18,6 +18,7 @@ import {
 } from "@/lib/faab";
 import { playersSnapshot as snapshot } from "@/lib/snapshots";
 import { fetchPublicJson } from "@/lib/live-data";
+import { useWeekStatus, WeekOverStrip } from "@/components/weather-icons";
 
 const HURT = new Set(["Out", "IR", "Doubtful", "PUP", "Sus"]);
 const SKILL = ["QB", "RB", "WR", "TE"];
@@ -87,6 +88,7 @@ type Row = {
 
 export function WaiversFaab() {
   const league = useLeague();
+  const weekStatus = useWeekStatus(snapshot.week);
   const selected = league.selected;
   const claims = useClaims(selected?.league_id);
   const users = useJson<{ user_id: string; display_name: string }[]>(
@@ -223,10 +225,11 @@ export function WaiversFaab() {
 
   return (
     <div className="space-y-4">
+      {weekStatus.weekOver && <WeekOverStrip week={snapshot.week} />}
       <section className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="broadcast-tag text-xs uppercase">
-            {snapshot.season} · Week {snapshot.week} waivers
+            {snapshot.season} · Week {weekStatus.decisionWeek} waivers
           </p>
         </div>
         <details className="min-w-64 max-w-xl text-sm">

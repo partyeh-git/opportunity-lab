@@ -36,14 +36,56 @@ export function useWeather(week: number) {
   return (team: string) => (file ? { game: file.teams[team], updated: file.generatedAt } : null);
 }
 
+/** Kickoff times in weather.json are Eastern wall-clock times with no zone attached. */
+function kickoffDate(kickoff: string) {
+  const asUtc = new Date(`${kickoff}:00Z`);
+  const wall = (timeZone: string) => new Date(asUtc.toLocaleString("en-US", { timeZone }));
+  return new Date(asUtc.getTime() + wall("UTC").getTime() - wall("America/New_York").getTime());
+}
+
+const GAME_HOURS = 4;
+
+/**
+ * Whether the week on the site has been played. A game counts as over four hours after kickoff;
+ * the week is over once its last game is. Unknown (no kickoff times) reads as not over.
+ */
+export function useWeekStatus(week: number) {
+  const query = useQuery({
+    queryKey: ["weather"],
+    queryFn: () => fetchPublicJson<WeatherFile>("weather.json"),
+    staleTime: 30 * 60 * 1000,
+  });
+  const teams = query.data?.week === week ? query.data.teams : {};
+  const overAt = (kickoff: string) => kickoffDate(kickoff).getTime() + GAME_HOURS * 3600 * 1000;
+  const ends = Object.values(teams).map((game) => overAt(game.kickoff));
+  const now = Date.now();
+  const weekOver = ends.length > 0 && Math.max(...ends) < now && week < 18;
+  return {
+    weekOver,
+    /** The week a manager is deciding for: next week once this one has been played. */
+    decisionWeek: weekOver ? week + 1 : week,
+    gameOver: (team: string) => !!teams[team] && overAt(teams[team].kickoff) < now,
+  };
+}
+
+/** One plain line for the top of a page once the week on the site has been played. */
+export function WeekOverStrip({ week }: { week: number }) {
+  return (
+    <p className="rounded-md border border-warning/30 bg-warning-soft/50 px-3 py-2 text-sm">
+      <strong>Week {week} games are over.</strong> Week {week + 1} projections post Tuesday morning.
+    </p>
+  );
+}
+
 const ICONS = { rain: CloudRain, snow: Snowflake, wind: Wind } as const;
 const LABELS = { rain: "Rain", snow: "Snow", wind: "Wind" } as const;
 
 function kickoffLabel(kickoff: string) {
-  const d = new Date(`${kickoff}:00`);
+  const d = kickoffDate(kickoff);
+  const timeZone = "America/New_York";
   return Number.isNaN(d.getTime())
     ? kickoff
-    : `${d.toLocaleDateString(undefined, { weekday: "short" })} ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} ET`;
+    : `${d.toLocaleDateString(undefined, { weekday: "short", timeZone })} ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", timeZone })} ET`;
 }
 
 /** One icon per weather flag; click for the forecast numbers behind it. */

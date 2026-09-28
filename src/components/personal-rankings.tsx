@@ -10,7 +10,7 @@ import { playersSnapshot } from "@/lib/snapshots";
 import { fetchPublicJson } from "@/lib/live-data";
 import { ProjectionDetails } from "@/components/projection-details";
 import { PlayerCard } from "@/components/player-card";
-import { useWeather, WeatherIcons } from "@/components/weather-icons";
+import { useWeather, useWeekStatus, WeatherIcons, WeekOverStrip } from "@/components/weather-icons";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { boardTiers } from "@/lib/tiers";
@@ -30,6 +30,7 @@ const genericSettings = { rec: 1, pass_int: -2 };
 const teamLabel = (team: string) => (team === "LA" ? "LAR" : team);
 const labelFor = (position: string) =>
   ({
+    All: "All positions",
     WRRB_FLEX: "WR/RB FLEX",
     SUPER_FLEX: "SUPERFLEX",
     FLEX: "FLEX",
@@ -42,19 +43,16 @@ const positionChip: Record<string, string> = {
   TE: "bg-amber-100 text-amber-800 dark:bg-amber-400/20 dark:text-amber-200",
   DEF: "bg-slate-200 text-slate-700 dark:bg-slate-400/20 dark:text-slate-200",
 };
-const positionOptions = (slots?: string[]) => [
-  "All",
-  ...new Set(
-    ["QB", "RB", "WR", "TE", "FLEX", "SUPER_FLEX", "DEF", ...(slots ?? [])].filter(
-      (slot) => !["BN", "IR", "TAXI", "RESERVE"].includes(slot),
-    ),
-  ),
-];
 /** The league's own starting slots, in lineup order, once each. No mixed "All" board. */
 const lineupSlots = (slots?: string[]) => [
   ...new Set(
     (slots ?? DEFAULT_LINEUP).filter((slot) => !["BN", "IR", "TAXI", "RESERVE"].includes(slot)),
   ),
+];
+/** Overall board filter: everyone, or one of the league's slots. Defenses are weekly only. */
+const positionOptions = (slots?: string[]) => [
+  "All",
+  ...lineupSlots(slots).filter((slot) => slot !== "DEF"),
 ];
 
 /** Official game designations, shown as the familiar red letter next to a player's name. */
@@ -179,6 +177,7 @@ export function PersonalRankings({
       : null;
   };
   const weatherFor = useWeather(playersSnapshot.week);
+  const weekStatus = useWeekStatus(playersSnapshot.week);
   // The Weekly tab and the overall Rankings tab are separate boards; each has one horizon.
   const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : "ros";
   const settings = useMemo(
@@ -235,8 +234,9 @@ export function PersonalRankings({
         : myIds.has(entry.sleeperId)
           ? "My roster"
           : allRostered.has(entry.sleeperId)
-            ? "Other roster"
+            ? "On other teams"
             : "Available";
+  const rosterFilters = ["All", "My roster", "Available", "On other teams"];
   const impacts = useMemo(() => {
     if (!rosterLoaded) return new Map<string, number>();
     const slots = league.selected!.roster_positions;
@@ -299,6 +299,20 @@ export function PersonalRankings({
       ),
     [entries, valueModel],
   );
+  // Weekly boards show the season rank within the player's position, e.g. QB12.
+  const positionRanks = useMemo(() => {
+    const counts = new Map<string, number>();
+    return new Map(
+      entries
+        .filter((entry) => rosRanks.has(entry.id))
+        .sort((a, b) => rosRanks.get(a.id)! - rosRanks.get(b.id)!)
+        .map((entry) => {
+          const rank = (counts.get(entry.position) ?? 0) + 1;
+          counts.set(entry.position, rank);
+          return [entry.id, `${labelFor(entry.position)}${rank}`];
+        }),
+    );
+  }, [entries, rosRanks]);
   // Weekly boards show points IF the player plays, plus the chance he plays; the model order
   // ranks on chance x points (Phase B fix 1: 63.8% to 69.3% start/sit pairs right on 2024).
   // Ruled-out players have a zeroed projection, so use their matchup-neutral line instead.
@@ -406,7 +420,13 @@ export function PersonalRankings({
         : `Tier ${tier}`;
   // Tier lines only make sense when the list runs best to worst.
   const showTiers = ["manual", "model", "value", "points"].includes(sort.key) && !sort.reversed;
-  const columnCount = 6 + (weeklyBoard ? 1 : 0) + (showValue ? 1 : 0) + (rosterLoaded ? 2 : 0);
+  const weekColumns = effectiveHorizon === "week";
+  const columnCount =
+    4 +
+    (weekColumns ? 2 : 0) +
+    (weeklyBoard ? 1 : 0) +
+    (showValue ? 1 : 0) +
+    (rosterLoaded ? 2 : 0);
   const ranked = ordered.filter((entry) => {
     if (
       !defensesOnly &&
@@ -452,52 +472,54 @@ export function PersonalRankings({
   const covered = entries.filter((e) => myIds.has(e.sleeperId)).length;
   return (
     <div className="space-y-3">
-      <section className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="broadcast-tag text-xs uppercase">
-            {playersSnapshot.season} ·{" "}
-            {effectiveHorizon === "ros"
-              ? `Rest of season · Weeks ${playersSnapshot.week}–18`
-              : `Week ${playersSnapshot.week}`}
-          </p>
-        </div>
+      {weekStatus.weekOver && <WeekOverStrip week={playersSnapshot.week} />}
+      <section className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="broadcast-tag text-xs uppercase">
+          {playersSnapshot.season} ·{" "}
+          {effectiveHorizon === "ros"
+            ? `Rest of season · Weeks ${playersSnapshot.week}–18`
+            : `Week ${playersSnapshot.week}${weekStatus.weekOver ? " · Final" : ""}`}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Updated{" "}
+          {new Date(playersSnapshot.generatedAt).toLocaleString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </p>
       </section>
-      <details className="rounded-md border border-warning/30 bg-warning-soft/50 px-3 py-2 text-xs leading-5">
-        <summary className="cursor-pointer">
-          Projection notes · stats through Week {playersSnapshot.dataThroughWeek} · confirmed
-          absences excluded; other points assume the player plays
-        </summary>
-        <div className="mt-2">
-          {defensesOnly ? (
+      <details className="text-xs leading-5 text-muted-foreground">
+        <summary className="cursor-pointer text-primary">How these work</summary>
+        <ul className="mt-2 list-disc space-y-1 rounded-md border bg-card p-3 pl-7">
+          {defensesOnly || (weeklyBoard && effectivePosition === "DEF") ? (
             <>
-              <strong>DST preview:</strong> Opposing offense drives 65% of each matchup estimate;
-              defense history drives 35%. The 2025 historical check showed modest separation, so
-              tiers are broad. The formula does not yet use live injury or quarterback news.
+              <li>
+                A defense's week depends mostly on the offense it faces (65%), then on its own track
+                record (35%).
+              </li>
+              <li>Tiers are broad on purpose: defenses are hard to separate week to week.</li>
             </>
           ) : (
             <>
-              <strong>Early-season estimate:</strong> {playersSnapshot.candidateCount} modeled
-              players plus 32 DSTs, using NFL statistics through Week{" "}
-              {playersSnapshot.dataThroughWeek}. Recent usage is blended with prior-season history.
-              Separate defensive adjustments apply to rushing, receiving, and passing by position.
-              Remaining points sum each future matchup, excluding byes. Confirmed absences
-              contribute zero; other estimates assume the player plays. Uncertain injuries and
-              returns are labeled below. Teammate workload changes use observed roles where
-              available. Unobserved players are omitted; outcome ranges are not calibrated.
+              <li>
+                Our own projections, built from each player's workload this season and last, his
+                opponent, and the betting lines. No outside rankings.
+              </li>
+              <li>
+                {effectiveHorizon === "week"
+                  ? "Points are what we expect if he plays. A % next to them is his chance to play when there is real doubt."
+                  : "Season points add up every remaining game; bye weeks and games a player is ruled out for count as zero."}
+              </li>
+              <li>
+                Injury letters refresh several times a day; projections refresh Tuesday through
+                Sunday morning.
+              </li>
             </>
           )}
-        </div>
-        {!defensesOnly && (
-          <p className="text-xs leading-5 text-muted-foreground">
-            Injury check:{" "}
-            {playersSnapshot.availabilitySummary.reviewedAt.slice(0, 16).replace("T", " ")} UTC.{" "}
-            {playersSnapshot.availabilitySummary.confirmedOutPlayers} confirmed absences in the
-            modeled player pool. The injury-report feed currently ends at Week{" "}
-            {playersSnapshot.availabilitySummary.latestInjuryReportWeek}; selected official team and
-            NFL updates supplement it. No flag means availability is unconfirmed, not that the
-            player has been cleared. Saved snapshot; refresh before lineup decisions.
-          </p>
-        )}
+        </ul>
       </details>
       <section className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4">
         {!league.selected && (
@@ -538,8 +560,10 @@ export function PersonalRankings({
               aria-label="League availability"
               className="h-9 rounded-md border border-input bg-background px-3 text-sm"
             >
-              {["All", "My roster", "Available", "Other roster"].map((v) => (
-                <option key={v}>{v}</option>
+              {rosterFilters.map((v) => (
+                <option key={v} value={v}>
+                  {v === "All" ? "All players" : v}
+                </option>
               ))}
             </select>
           </>
@@ -627,7 +651,7 @@ export function PersonalRankings({
         {saveMessage}
       </p>
       <div data-rankings-scroll className="max-h-[70vh] overflow-auto rounded-lg border bg-card">
-        <table className="w-full min-w-[780px] text-sm">
+        <table className={`w-full text-sm ${weekColumns ? "min-w-[780px]" : "min-w-[560px]"}`}>
           <thead className="sticky top-0 z-10 bg-broadcast text-left text-xs font-semibold uppercase tracking-wide text-broadcast-foreground">
             <tr>
               <SortHeader label="My rank" sortKey="manual" sort={sort} onSort={sortBy}>
@@ -642,7 +666,7 @@ export function PersonalRankings({
               <SortHeader label="Model" sortKey="model" sort={sort} onSort={sortBy}>
                 <p>
                   {showValue
-                    ? "Where our model ranks the player on this board: by value above the worst league-wide starter (the Above starter column)."
+                    ? "Where our model ranks the player on this board: by value above the worst league-wide starter (the Value column)."
                     : "Where our model ranks the player on this board: points if he plays times his chance to play. A healthy player keeps nearly all his points; a Questionable one is discounted."}
                 </p>
               </SortHeader>
@@ -654,28 +678,21 @@ export function PersonalRankings({
               </SortHeader>
               {weeklyBoard && (
                 <SortHeader
-                  label="ROS rank"
+                  label="Season rank"
                   sortKey="ros"
                   sort={sort}
                   onSort={sortBy}
                   align="right"
                 >
                   <p>
-                    The player's overall rank for the rest of the season across all positions, as on
-                    the Overall rankings tab: value above the worst league-wide starter in this
-                    league. Useful for spotting a low weekly projection on a player who still
-                    matters.
+                    Where the player ranks at his own position for the rest of the season in this
+                    league, so QB12 is the 12th best quarterback from here on. Useful for spotting a
+                    low weekly projection on a player who still matters.
                   </p>
                 </SortHeader>
               )}
               {showValue && (
-                <SortHeader
-                  label="Above starter"
-                  sortKey="value"
-                  sort={sort}
-                  onSort={sortBy}
-                  align="right"
-                >
+                <SortHeader label="Value" sortKey="value" sort={sort} onSort={sortBy} align="right">
                   <p>
                     Rest-of-season points above the worst starter at the player's position in this
                     league. We fill every team's starting lineup, including flex and superflex, with
@@ -708,7 +725,11 @@ export function PersonalRankings({
               )}
               <SortHeader
                 label={
-                  effectiveHorizon === "week" ? `Week ${playersSnapshot.week} pts` : "Remaining pts"
+                  effectiveHorizon !== "week"
+                    ? "Season pts"
+                    : defenseBoard
+                      ? `Week ${playersSnapshot.week} pts`
+                      : `Week ${playersSnapshot.week} pts (if he plays)`
                 }
                 sortKey="points"
                 sort={sort}
@@ -725,24 +746,24 @@ export function PersonalRankings({
               </SortHeader>
               {rosterLoaded && (
                 <SortHeader
-                  label="Lineup impact"
+                  label="Helps my lineup"
                   sortKey="impact"
                   sort={sort}
                   onSort={sortBy}
                   align="right"
                 >
                   <p>
-                    How much your best projected lineup changes if an outside player joins your
-                    team, or if one of your players is removed. It does not deduct a trade return,
-                    required drop or keeper cost. Zero means no projected lineup change.
+                    Points your best lineup gains if you add this player, or loses if one of your
+                    own players is gone. A dash means your lineup would not change. It does not
+                    count what you would give up in a trade or have to drop.
                   </p>
                 </SortHeader>
               )}
               {rosterLoaded && <th className="px-3 py-2">League status</th>}
-              <th className="px-3 py-2">
-                {effectiveHorizon === "ros" ? `Week ${playersSnapshot.week} game` : "Matchup"}
-              </th>
-              <th className="px-3 py-2">Week {playersSnapshot.week} projected usage</th>
+              {weekColumns && <th className="px-3 py-2">Matchup</th>}
+              {weekColumns && (
+                <th className="px-3 py-2">Week {playersSnapshot.week} projected usage</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -906,7 +927,7 @@ export function PersonalRankings({
                   </td>
                   {weeklyBoard && (
                     <td className="px-4 py-3 text-right font-display text-lg tabular-nums text-muted-foreground">
-                      {rosRanks.get(entry.id) ?? "—"}
+                      {positionRanks.get(entry.id) ?? "—"}
                     </td>
                   )}
                   {showValue && (
@@ -937,20 +958,34 @@ export function PersonalRankings({
                     )}
                   </td>
                   {rosterLoaded && (
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      +{Math.max(0, impacts.get(entry.id) ?? 0).toFixed(1)}
+                    <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums">
+                      {(impacts.get(entry.id) ?? 0) < 0.05 ? (
+                        "—"
+                      ) : myIds.has(entry.sleeperId) ? (
+                        <>
+                          -{impacts.get(entry.id)!.toFixed(1)}{" "}
+                          <span className="text-xs text-muted-foreground">if lost</span>
+                        </>
+                      ) : (
+                        <>
+                          +{impacts.get(entry.id)!.toFixed(1)}{" "}
+                          <span className="text-xs text-muted-foreground">if added</span>
+                        </>
+                      )}
                     </td>
                   )}
                   {rosterLoaded && (
                     <td className="px-4 py-3 text-muted-foreground">{statusOf(entry)}</td>
                   )}
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {entry.team} vs {entry.opponent}
-                    {effectiveHorizon === "week" && (
+                  {weekColumns && (
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {entry.team} vs {entry.opponent}
                       <WeatherIcons weather={weatherFor(entry.team)} />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{entry.detail}</td>
+                    </td>
+                  )}
+                  {weekColumns && (
+                    <td className="px-4 py-3 text-muted-foreground">{entry.detail}</td>
+                  )}
                 </tr>
               </Fragment>
             ))}
@@ -973,9 +1008,11 @@ export function PersonalRankings({
               onOpenChange={(open) => !open && setCardId("")}
               summary={[
                 {
-                  label: `Week ${playersSnapshot.week} vs ${card.opponent}`,
+                  label: weekStatus.gameOver(card.team)
+                    ? `Week ${playersSnapshot.week} vs ${card.opponent} · game over`
+                    : `Week ${playersSnapshot.week} vs ${card.opponent}`,
                   value:
-                    `${ifPlays(card).toFixed(1)} pts` +
+                    `${ifPlays(card).toFixed(1)} ${weekStatus.gameOver(card.team) ? "projected" : "pts"}` +
                     (chanceOf(card) < 0.9 ? ` · ${Math.round(chanceOf(card) * 100)}% to play` : ""),
                 },
                 {
