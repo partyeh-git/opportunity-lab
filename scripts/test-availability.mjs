@@ -18,8 +18,12 @@ const q = chanceToPlay("Questionable", 0);
 const d = chanceToPlay("Doubtful", 0);
 const out = chanceToPlay("Out", 0);
 assert.ok(healthy > 0.95 && healthy > q && q > d && d > out && out < 0.1);
-// Missing the last game with no designation (usually IR) is a strong warning sign.
-assert.ok(chanceToPlay("None", 1) < 0.5);
+// Healthy (no designation) players are never penalized for games they just missed.
+assert.equal(chanceToPlay("None", 1), healthy);
+assert.equal(chanceToPlay("None", 2), healthy);
+assert.equal(chanceReason("None", 1), "no injury designation");
+// Designated players still carry the missed-game history.
+assert.ok(chanceToPlay("Questionable", 1) !== undefined);
 // Unseen combinations fall back to a broader rate instead of failing.
 assert.ok(chanceToPlay("Doubtful", 2, "Full") > 0 && chanceToPlay("Doubtful", 2, "Full") < 1);
 

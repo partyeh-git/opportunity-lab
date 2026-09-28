@@ -4,13 +4,31 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from model import CAMEL, CONFIG, STATS, forecast, read_inputs
+import pandas as pd
+from model import CAMEL, CONFIG, STATS, forecast, game_context, read_inputs
+from playing_time import flag_games, read_injury_reports
 from roles import read_roles
 from availability import apply_availability, load_evidence
 
 
 def public_stats(s):
     return {CAMEL[k]:round(float(s[k]),6) for k in STATS}
+
+
+def live_status(data_dir, identities):
+    """From Sleeper's player directory: players who cannot play (IR/PUP/suspended/Out) and each
+    team's depth-chart QB1, as nflverse ids (our snapshot's id map first, Sleeper's gsis_id second)."""
+    path = Path(data_dir)/'sleeper_players.json'
+    if not path.exists():
+        return set(), None
+    sleeper = json.loads(path.read_text(encoding='utf-8'))
+    to_gsis = {p['sleeperId']: pid for pid, p in identities.items() if p.get('sleeperId')}
+    gsis = lambda sid, v: to_gsis.get(sid) or (v.get('gsis_id') or '').strip() or None
+    fix = {'LAR':'LA','JAC':'JAX','WSH':'WAS'}
+    out = {gsis(k, v) for k, v in sleeper.items() if v.get('injury_status') in ('IR','PUP','Sus','Out','NA')} - {None}
+    qb1 = {fix.get(v['team'],v['team']): gsis(k, v) for k, v in sleeper.items()
+           if v.get('team') and v.get('depth_chart_position')=='QB' and v.get('depth_chart_order')==1 and gsis(k, v)}
+    return out, qb1
 
 
 def build(data_dir, existing_path, output, season, week, availability_path=None, as_of=None):
@@ -26,7 +44,12 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
     original = json.loads(Path(existing_path).read_text(encoding='utf-8'))
     identities = {p['id']:p for p in original['players']}
     roles = read_roles(data_dir,[season-1,season])
-    projections = forecast(stats,schedule,season,week,roles=roles)
+    # Minimal-playing-time rule and betting-implied points (see protocol.json "workload").
+    playing = flag_games(stats,roles,schedule,read_injury_reports(data_dir,[season-1,season]))
+    lines = game_context(pd.read_csv(Path(data_dir)/'games.csv',low_memory=False))
+    unavailable, qb1 = live_status(data_dir, identities)
+    projections = forecast(stats,schedule,season,week,roles=roles,playing=playing,lines=lines,
+                           unavailable=unavailable,qb1=qb1)
     evidence, allocations = None, []
     if availability_path:
         evidence = load_evidence(availability_path,season,week,as_of)

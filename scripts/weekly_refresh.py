@@ -52,6 +52,7 @@ def fetch_inputs(data: Path, season: int) -> str:
         f"snap_counts_{season - 1}.parquet": f"{NFLVERSE}/snap_counts/snap_counts_{season - 1}.parquet",
         f"snap_counts_{season}.parquet": f"{NFLVERSE}/snap_counts/snap_counts_{season}.parquet",
         "players.csv": f"{NFLVERSE}/players/players.csv",
+        f"injuries_{season - 1}.csv": f"{NFLVERSE}/injuries/injuries_{season - 1}.csv",
         f"injuries_{season}.csv": f"{NFLVERSE}/injuries/injuries_{season}.csv",
     }
     for name, url in files.items():

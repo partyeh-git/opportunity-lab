@@ -1,6 +1,6 @@
 {
-  "model": "sample_aware_matchup_role_v2",
-  "status": "role blend (Phase B fix 2) adopted 2026-09-24 after 2023 fit / 2024 check; earlier parameters unchanged",
+  "model": "sample_aware_matchup_role_v3",
+  "status": "v3 adopted 2026-09-27: minimal-playing-time rule, known-out players excluded from team volume, depth-chart QB1, betting-implied points (weekly). Fit 2023, checked 2024, tested once on held-out 2025.",
   "created": "2026-09-22",
   "development": 2023,
   "validation": 2024,
@@ -90,6 +90,56 @@
         0.534
       ],
       "note": "Weights fit on 2023 by non-negative least squares; 2024 not used in fitting. Same player cohort, zeros kept, chance-to-play applied. Consensus used only as a benchmark."
+    }
+  },
+  "workload": {
+    "clean_games": true,
+    "role_prior": true,
+    "implied": {
+      "QB": 0.0133,
+      "RB": 0.0111,
+      "TE": 0.0035,
+      "WR": 0.0179
+    }
+  },
+  "playing_time_fix": {
+    "rule": "Game excluded everywhere (volume, efficiency, last-season baseline, snap-share role) when snap share < 50% of the player's usual (median of previous 8) AND he missed the next game or was on the next injury report. Missed games are skipped, never zeros. Known-out players (IR/PUP/suspended/Out) do not use team volume. QBs: only the depth-chart QB1 or last week's starter gets volume; last week's starter loses it when the chart QB1 is back from injury with no designation, unless the fill-in has 3+ straight starts.",
+    "implied": "Weekly only: scoring output x (1 + k x (team implied points - 22)), k per position fit on 2023, capped 0.8-1.25.",
+    "evaluation": {
+      "2024_mae": [
+        5.776,
+        5.717
+      ],
+      "2024_mae_p": 0.007,
+      "2024_pairs": [
+        65.2,
+        65.7
+      ],
+      "2024_pairs_p": 0.0064,
+      "2024_qb_mae": [
+        6.675,
+        6.447
+      ],
+      "2025_heldout_mae": [
+        5.728,
+        5.623
+      ],
+      "2025_mae_p": 0.0001,
+      "2025_pairs": [
+        64.7,
+        65.3
+      ],
+      "2025_pairs_p": 0.025,
+      "2025_qb_mae": [
+        6.664,
+        6.325
+      ],
+      "2025_qb_mae_p": 0.0088,
+      "2025_qb_bias": [
+        -1.56,
+        -0.27
+      ],
+      "note": "Same players, players who played, v2 projection >= 5. Paired t-tests (player-weeks for error, weeks for pairs). Implied k fit on 2023 only. 2024 cases were inspected while shaping the QB depth rule, so 2025 (first use) is the clean test."
     }
   }
 }

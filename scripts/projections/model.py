@@ -108,7 +108,8 @@ VOLUME = ('attempts', 'carries', 'targets')
 # candidates are evaluated through these switches before any default changes.
 DEFAULT_WORKLOAD = dict(window=4, decay=.8, prior_games=None, changed_team_prior_games=None,
                         skip_absences=False, skip_short_games=False, context=None,
-                        reconcile_active_only=False, volume_override=None, role_blend=None)
+                        reconcile_active_only=False, volume_override=None, role_blend=None,
+                        clean_games=False, role_prior=False, implied=None)
 
 
 def game_context(games):
@@ -155,10 +156,42 @@ def player_window(own, team_game_ids, position, wl):
     return dict(zip(VOLUME, (w @ vol.to_numpy()) / w.sum())), int(keep.sum())
 
 
-def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=None, roles=None):
+def clean_window(own, window, decay):
+    """Volume from the player's last `window` clean games (played, not cut short), newest weighted most."""
+    rows = own.sort_values(['season','week']).tail(window)
+    if rows.empty:
+        return None
+    w = decay ** np.arange(len(rows)-1, -1, -1)
+    return dict(zip(STATS, (w @ rows[STATS].to_numpy()) / w.sum()))
+
+
+def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=None, roles=None,
+             playing=None, lines=None, unavailable=None, qb1=None):
+    """playing: playing_time.flag_games output (needed for clean_games / role_prior).
+    lines: game_context(games) output (needed for implied).
+    unavailable: player ids known pregame to miss the forecast week (IR, cut, ruled Out); they
+    keep a projection for later weeks but do not use up this team's volume.
+    qb1: {team: player id} depth-chart starting QB this week. Only one QB plays: other QBs on that
+    team get no volume (a backup's old fill-in starts do not make him a starter again)."""
     wl = {**DEFAULT_WORKLOAD, **(workload or {})}
-    default_workload = workload is None
+    if workload is None and CONFIG.get('workload'):
+        wl = {**wl, **CONFIG['workload']}
+    default_workload = not any(wl[k] != DEFAULT_WORKLOAD[k] for k in DEFAULT_WORKLOAD
+                               if k not in ('clean_games', 'role_prior', 'implied'))
+    partial = set()
+    shares = {}
+    if playing is not None and (wl['clean_games'] or wl['role_prior']):
+        from playing_time import partial_keys
+        if wl['clean_games']:
+            partial = partial_keys(playing, season, cutoff_week)
+        pl = playing[(playing.season.lt(season)) | (playing.season.eq(season)&playing.week.lt(cutoff_week))]
+        shares = dict(zip(zip(pl.season, pl.week, pl.player_id), pl.snap_share))
     history = stats[(stats.season.lt(season)) | (stats.season.eq(season)&stats.week.lt(cutoff_week))].copy()
+    if partial:
+        keys = list(zip(history.season, history.week, history.player_id))
+        history['partial'] = [k in partial for k in keys]
+    else:
+        history['partial'] = False
     history = history[history.position.isin(POSITIONS)].sort_values(['season','week','player_id'])
     current = history[history.season.eq(season)]
     previous = history[history.season.eq(season-1)]
@@ -190,20 +223,39 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         team_ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').game_id.tolist()
         recent_ids = team_ids[-4:]
         own = hist[hist.season.eq(season)&hist.team.eq(team)]
-        if default_workload:
+        clean = hist[~hist.partial]
+        own_clean = own[~own.partial]
+        if wl['clean_games']:
+            recent = clean_window(own_clean, wl['window'], wl['decay'])
+            evidence_games = len(own_clean)
+        elif default_workload:
             recent = weighted_window(own, recent_ids)
             evidence_games = len(team_ids)
         else:
             ctx = wl['context'] and {**wl['context'], 'team': team}
             volume, evidence_games = player_window(own, team_ids, identity.position, {**wl, 'context': ctx})
             recent = {**weighted_window(own, recent_ids), **volume}
+        old = (clean if wl['clean_games'] else hist)
+        old = old[old.season.eq(season-1)]
+        if recent is None:
+            # Every current-season game was cut short: rely on last season (clean games only).
+            if not len(old):
+                continue
+            recent = old.tail(8)[STATS].mean().to_dict()
         if sum(recent[k] for k in ('attempts','carries','targets')) <= 0:
             continue
-        old = hist[hist.season.eq(season-1)]
         if len(old):
             # Retain all own observed teams; do not assign a former team's games to a new team.
             # Player appearance mean avoids assuming a missing row was a healthy zero-workload game.
             prior = old.tail(8)[STATS].mean().to_dict()
+            if wl['role_prior'] and len(own_clean):
+                # Last season's volume counts only at this season's playing-time level (a starter
+                # last year who is a backup now does not keep a starter's share of team volume).
+                now = np.nanmean([shares.get(k, np.nan) for k in zip(own_clean.season, own_clean.week, own_clean.player_id)] or [np.nan])
+                then = np.nanmean([shares.get(k, np.nan) for k in zip(old.tail(8).season, old.tail(8).week, old.tail(8).player_id)] or [np.nan])
+                if np.isfinite(now) and np.isfinite(then) and then > 0 and now < then:
+                    for key in VOLUME:
+                        prior[key] *= now/then
             changed_team = old.iloc[-1].team != team
             key = 'changed_team_prior_games' if changed_team else 'prior_games'
             strength = wl[key] if wl[key] is not None else CONFIG['changed_team_prior_games' if changed_team else 'player_prior_games']
@@ -219,7 +271,8 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         # Optional externally estimated volume (e.g. role-share blend), per player id.
         for key, value in ((wl['volume_override'] or {}).get(identity.player_id) or {}).items():
             base[key] = value
-        player_totals = hist.tail(8)[STATS].sum()
+        eff = clean if wl['clean_games'] else hist
+        player_totals = eff.tail(8)[STATS].sum()
         positional = pos_totals.loc[identity.position]
         for _, (num, den, pseudo_n) in RATES.items():
             rate = (player_totals[num]+pseudo_n*positional[num]/max(1.,positional[den]))/(player_totals[den]+pseudo_n)
@@ -227,7 +280,7 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
         # Rare scoring events use a substantial historical rate prior, not two-game repeats.
         for key in ('fumbles_lost_total','passing_2pt_conversions','rushing_2pt_conversions',
                     'receiving_2pt_conversions','special_teams_tds','fumble_recovery_tds'):
-            own_recent = hist.tail(8)
+            own_recent = eff.tail(8)
             pos_games = history[history.season.ge(season-1)&history.position.eq(identity.position)]
             base[key] = float((own_recent[key].sum()+20*pos_games[key].mean())/(len(own_recent)+20))
         players.append(dict(id=identity.player_id, name=identity.player_display_name,
@@ -237,6 +290,49 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
                 priorAvailable=bool(len(old)), changedTeam=bool(changed_team),
                 recentCarries=recent['carries'], priorCarries=prior['carries'],
                 recentTargets=recent['targets'], priorTargets=prior['targets']), future=future))
+    if qb1:
+        # Starter of each team's most recent game (most pass attempts). Depth charts can lag, so a QB
+        # keeps his volume if he started last week even when the chart lists someone else.
+        last_starter, streak = {}, {}
+        for team in team_forecasts:
+            ids = prior_schedule[prior_schedule.season.eq(season)&prior_schedule.team.eq(team)].sort_values('week').game_id.tolist()
+            starters = []
+            for gid in ids:
+                g = history[history.game_id.eq(gid)&history.team.eq(team)&history.position.eq('QB')]
+                starters.append(g.loc[g.attempts.idxmax(), 'player_id'] if len(g) and g.attempts.max() > 0 else None)
+            if starters and starters[-1]:
+                last_starter[team] = starters[-1]
+                n = 0
+                for x in reversed(starters):
+                    if x != starters[-1]:
+                        break
+                    n += 1
+                streak[team] = n
+        # ...unless the chart's QB1 is returning from injury (his last game was cut short, or he was on
+        # the injury report for the game he then missed): then last week's starter was the fill-in.
+        returning = set()
+        if playing is not None:
+            pl = playing[(playing.season.lt(season)) | (playing.season.eq(season)&playing.week.lt(cutoff_week))]
+            last_rows = pl.sort_values(['season','week']).groupby('player_id').tail(1).set_index('player_id')
+            for team, starter in qb1.items():
+                if starter in last_rows.index and last_starter.get(team) not in (None, starter):
+                    r = last_rows.loc[starter]
+                    injured_then = bool(r.reported_next) or (int(r.season), int(r.week), starter) in partial
+                    # Only a cleared starter is "back": no designation for this week's game.
+                    cleared = (season, cutoff_week, starter) not in playing.attrs.get('reports', set())
+                    if injured_then and cleared:
+                        returning.add(team)
+        for p in players:
+            starter = qb1.get(p['team'])
+            # A fill-in with 3+ straight starts has the job, whatever the chart says.
+            keeps_job = last_starter.get(p['team']) == p['id'] and (
+                p['team'] not in returning or streak.get(p['team'], 0) >= 3)
+            if p['position'] == 'QB' and starter and p['id'] != starter and not keeps_job:
+                for key in VOLUME:
+                    p['base'][key] = 0.
+                for num in [num for num, den, _ in RATES.values()]:
+                    p['base'][num] = 0.
+                p['workloadEvidence']['notDepthChartStarter'] = True
     # Reconcile candidate opportunity totals downward to independently estimated team totals.
     # Missing candidates do not cause artificial increases in covered players' workloads.
     def reconcile():
@@ -244,7 +340,8 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
             members = [p for p in players if p['team']==team]
             for key in ('attempts','carries','targets'):
                 # Optionally, players who sat out the team's last game don't use up team volume.
-                active = [p for p in members if not (wl['reconcile_active_only'] and p['missedLastTeamGame'])]
+                active = [p for p in members if not (wl['reconcile_active_only'] and p['missedLastTeamGame'])
+                          and p['id'] not in (unavailable or ())]
                 total = sum(p['base'][key] for p in active)
                 cap = team_forecasts[team]['attempts' if key=='targets' else key]
                 factor = min(1.,cap/total) if total > 0 else 1.
@@ -258,7 +355,8 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
     # carries with his recent snap-share role; dependent yards, catches and TDs scale with them.
     blend_cfg = wl['role_blend'] or CONFIG.get('role_blend')
     if roles is not None and blend_cfg:
-        inputs = role_inputs(stats, roles, season, cutoff_week, blend_cfg['position_rates'], blend_cfg['pseudo_snaps'])
+        inputs = role_inputs(stats, roles, season, cutoff_week, blend_cfg['position_rates'], blend_cfg['pseudo_snaps'],
+                             exclude=partial)
         for p in players:
             info = inputs.get(p['id'])
             if not info or info['position'] != p['position'] or info['team'] != p['team']:
@@ -285,6 +383,16 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
             if not include_ros and game.week!=cutoff_week:
                 continue
             adjusted, factors = apply_matchup(p['base'],game.opponent,p['position'],defenses,game.week-cutoff_week)
+            if wl['implied'] and lines and game.week == cutoff_week:
+                # Weekly only: scale scoring output by the team's betting-implied points vs a 22-point average.
+                implied = lines.get((game.game_id, p['team']), (0., 22.))[1]
+                if implied == implied:
+                    k = wl['implied'].get(p['position'], 0.)
+                    f = float(np.clip(1+k*(implied-22.), .8, 1.25))
+                    for key in ('passing_yards','passing_tds','rushing_yards','rushing_tds','receptions',
+                                'receiving_yards','receiving_tds','completions','targets','carries','attempts'):
+                        adjusted[key] *= f
+                    factors = {**factors, 'implied': {'points': implied, 'factor': f}}
             games.append(dict(week=int(game.week),opponent=game.opponent,stats=adjusted,
                 full=score(adjusted),half=score(adjusted,.5),defense=factors))
         current_game = next((g for g in games if g['week']==cutoff_week),None)

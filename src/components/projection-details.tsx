@@ -36,7 +36,7 @@ type DetailPlayer = {
   };
   matchupFactors: Record<
     string,
-    { factor: number; weightedOpportunities: number; reliability: number }
+    { factor: number; weightedOpportunities?: number; reliability?: number; points?: number }
   >;
   weeklyForecasts: {
     week: number;
@@ -87,6 +87,8 @@ export function ProjectionDetails({
     .filter((m) => Math.abs(m.change) >= 1)
     .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
     .slice(0, 2);
+  // Betting line (v3, weekly only): team's implied points vs a 22-point average.
+  const implied = player.matchupFactors["implied"];
   const usage = player.workloadEvidence;
   const flagged = player.availability && player.availability.state !== "unverified";
   const boost = player.roleAdjustments?.[0];
@@ -138,6 +140,13 @@ export function ProjectionDetails({
                 .join(" · ")
             : "about average."}
         </p>
+        {implied?.points !== undefined && Math.abs(implied.factor - 1) >= 0.01 && (
+          <p>
+            <span className="text-foreground">Betting line:</span> team expected to score{" "}
+            {implied.points.toFixed(1)} ({implied.factor >= 1 ? "+" : ""}
+            {((implied.factor - 1) * 100).toFixed(0)}%).
+          </p>
+        )}
         {boost && (
           <p>
             <span className="text-foreground">Role:</span> +{boost.added.toFixed(1)}{" "}

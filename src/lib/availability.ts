@@ -27,8 +27,15 @@ export function gamesJustMissed(team: string, lastPlayedWeek: number, week: numb
   return Math.min(2, weeks.filter((w) => w > lastPlayedWeek && w < week).length);
 }
 
-/** Most specific learned rate available: status x missed x practice, then status x missed, then status. */
+/**
+ * Most specific learned rate available: status x missed x practice, then status x missed, then status.
+ * Rule (9/25): a player with no designation is healthy, so games he just missed never lower his chance.
+ * The 2023 "no designation but missed" rates were mostly IR players (IR is never on the injury report);
+ * live, IR arrives as its own status. Checked on 2023-24: active starters with no designation after a
+ * missed game who did not play were almost all fill-in QBs returning to the bench (a role question).
+ */
 export function chanceToPlay(s: GameStatus, missed: number, practice = "None"): number {
+  if (s === "None") missed = 0;
   return (
     cell[`${s}|${missed}|${practice}`] ??
     statusMissed[`${s}|${missed}`] ??
@@ -41,6 +48,7 @@ export function chanceToPlay(s: GameStatus, missed: number, practice = "None"): 
 export function chanceReason(s: GameStatus, missed: number): string {
   const parts = [];
   if (s !== "None") parts.push(s);
-  if (missed > 0) parts.push(missed === 1 ? "missed last game" : "missed last 2+ games");
+  if (missed > 0 && s !== "None")
+    parts.push(missed === 1 ? "missed last game" : "missed last 2+ games");
   return parts.join(" · ") || "no injury designation";
 }

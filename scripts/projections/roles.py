@@ -42,7 +42,7 @@ def position_rates(stats, roles, seasons):
             for pos, g in x.groupby('position') if pos in ROLE_POSITIONS for key in ('targets', 'carries')}
 
 
-def role_inputs(stats, roles, season, cutoff_week, rates, pseudo_snaps):
+def role_inputs(stats, roles, season, cutoff_week, rates, pseudo_snaps, exclude=None):
     """Per player: last-2-games volume and role volume (snap share x team plays x per-snap rate).
 
     Uses only games before the cutoff. Games the player missed are skipped, not counted as zero.
@@ -50,6 +50,9 @@ def role_inputs(stats, roles, season, cutoff_week, rates, pseudo_snaps):
     before = lambda f: f[(f.season < season) | (f.season.eq(season) & f.week.lt(cutoff_week))]
     s = before(stats[stats.position.isin(ROLE_POSITIONS)])
     games = s.merge(before(roles), on=['season', 'week', 'player_id', 'team'], how='inner')
+    if exclude:
+        # Games cut short by injury (playing_time rule) say nothing about the player's role.
+        games = games[[k not in exclude for k in zip(games.season, games.week, games.player_id)]]
     games = games.sort_values(['player_id', 'season', 'week'])
     plays = (before(roles)[lambda f: f.season.eq(season)].drop_duplicates(['game_id', 'team'])
              .groupby('team').team_plays.mean().to_dict())
