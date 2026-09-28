@@ -3,7 +3,7 @@ import { ArrowLeftRight, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProjectionDetails } from "@/components/projection-details";
-import { LeaguePicker, useLeague } from "@/components/league-context";
+import { useLeague } from "@/components/league-context";
 import { entriesFor, optimizeLineup, scorePlayer } from "@/lib/research-scoring";
 import { scoreRemainingGames } from "@/lib/projection-scoring";
 import { playersSnapshot as snapshot, type PlayersSnapshot } from "@/lib/snapshots";
@@ -408,7 +408,6 @@ export function Trades() {
         description="Compare players using projected rest-of-season points above a position replacement level. This is a starting point for a trade discussion, not a personalized verdict."
       />
       <Caveat trades />
-      <LeaguePicker />
       <section className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4">
         {connected.selected ? (
           <p className="text-sm text-muted-foreground">

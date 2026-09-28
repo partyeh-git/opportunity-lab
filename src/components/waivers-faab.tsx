@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { LeaguePicker, useLeague } from "@/components/league-context";
+import { useLeague } from "@/components/league-context";
 import { Input } from "@/components/ui/input";
 import { entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
 import { DEFAULT_LINEUP } from "@/lib/league-value";
@@ -228,7 +228,6 @@ export function WaiversFaab() {
           <p className="broadcast-tag text-xs uppercase">
             {snapshot.season} · Week {snapshot.week} waivers
           </p>
-          <h2 className="mt-1 font-display text-2xl font-semibold">Waivers & FAAB</h2>
         </div>
         <details className="min-w-64 max-w-xl text-sm">
           <summary className="cursor-pointer text-primary">How the bid is set</summary>
@@ -254,8 +253,6 @@ export function WaiversFaab() {
           </div>
         </details>
       </section>
-
-      <LeaguePicker />
 
       {!selected ? (
         <p className="rounded-lg border border-dashed bg-card p-6 text-sm text-muted-foreground">

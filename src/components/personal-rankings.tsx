@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { LeaguePicker, useLeague } from "@/components/league-context";
+import { useLeague } from "@/components/league-context";
 import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
 import { playersSnapshot } from "@/lib/snapshots";
 import { fetchPublicJson } from "@/lib/live-data";
@@ -448,11 +448,6 @@ export function PersonalRankings({
     if (rank && id !== target) move(id, rank);
   }
   const covered = entries.filter((e) => myIds.has(e.sleeperId)).length;
-  const title = defensesOnly
-    ? "DST streaming tiers"
-    : weeklyOnly
-      ? "Weekly rankings"
-      : "Overall rankings";
   return (
     <div className="space-y-3">
       <section className="flex flex-wrap items-end justify-between gap-3">
@@ -463,16 +458,7 @@ export function PersonalRankings({
               ? `Rest of season · Weeks ${playersSnapshot.week}–18`
               : `Week ${playersSnapshot.week}`}
           </p>
-          <h2 className="mt-1 font-display text-2xl font-semibold">{title}</h2>
         </div>
-        <details className="min-w-64 text-sm">
-          <summary className="cursor-pointer text-primary">
-            {league.selected ? league.selected.name : "League & scoring settings"}
-          </summary>
-          <div className="mt-2">
-            <LeaguePicker />
-          </div>
-        </details>
       </section>
       <details className="rounded-md border border-warning/30 bg-warning-soft/50 px-3 py-2 text-xs leading-5">
         <summary className="cursor-pointer">

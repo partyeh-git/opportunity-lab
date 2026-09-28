@@ -152,59 +152,74 @@ export function useLeague() {
   return value;
 }
 
-export function LeaguePicker() {
+// Top-bar switcher: one connection drives every page.
+export function LeagueSwitcher() {
+  const league = useLeague();
+  if (league.loading && !league.selected)
+    return <span className="text-xs text-muted-foreground">Connecting to Sleeper…</span>;
+  if (!league.selected) return null;
+  return (
+    <div className="flex items-center gap-2">
+      <select
+        value={league.selected.league_id}
+        onChange={(e) => league.select(e.target.value)}
+        aria-label="Active league"
+        className="h-9 max-w-[180px] rounded-md border border-input bg-background px-2 text-sm font-semibold md:max-w-[260px]"
+      >
+        {league.leagues.map((l) => (
+          <option key={l.league_id} value={l.league_id}>
+            {l.name}
+          </option>
+        ))}
+      </select>
+      <span className="hidden text-xs text-muted-foreground xl:inline">
+        {league.selected.total_rosters} teams ·{" "}
+        {league.selected.scoring_settings["rec"] === 0.5 ? "Half" : "Full"} PPR · {league.username}
+      </span>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="hidden md:inline-flex"
+        onClick={league.disconnect}
+      >
+        Disconnect
+      </Button>
+    </div>
+  );
+}
+
+// Shown at the top of every page until a league is connected.
+export function ConnectBanner() {
   const league = useLeague();
   const [name, setName] = useState("");
+  if (league.selected || (league.loading && !name)) return null;
   function submit(event: FormEvent) {
     event.preventDefault();
     void league.connect(name);
   }
   return (
-    <section className="rounded-lg border bg-card p-4">
-      {league.selected ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="text-sm font-semibold">
-            Your Sleeper league
-            <select
-              value={league.selected.league_id}
-              onChange={(e) => league.select(e.target.value)}
-              className="ml-3 h-9 max-w-[280px] rounded-md border border-input bg-background px-3 text-sm font-normal"
-            >
-              {league.leagues.map((l) => (
-                <option key={l.league_id} value={l.league_id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <span className="text-xs text-muted-foreground">
-            {league.selected.total_rosters} teams ·{" "}
-            {league.selected.scoring_settings["rec"] === 0.5 ? "Half" : "Full"} PPR ·{" "}
-            {league.username}
-          </span>
-          <Button size="sm" variant="ghost" onClick={league.disconnect}>
-            Disconnect
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
-          <label className="text-sm font-semibold">
-            Connect your Sleeper leagues for personal rankings
-            <Input
-              className="mt-2 w-56"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Sleeper username"
-            />
-          </label>
-          <Button type="submit" disabled={!name.trim() || league.loading}>
-            {league.loading ? "Connecting…" : "Connect"}
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            Read-only. Username saved only in this browser; rosters stay in memory.
-          </span>
-        </form>
-      )}
+    <section className="mb-6 rounded-lg border-2 border-volt bg-card p-5">
+      <h2 className="font-display text-xl font-semibold">Connect your Sleeper league</h2>
+      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+        Rankings, trades and waivers then use your league's scoring, lineup and your roster. Or keep
+        browsing general rankings below.
+      </p>
+      <form onSubmit={submit} className="mt-4 flex flex-wrap items-center gap-3">
+        <Input
+          className="w-56"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Sleeper username"
+          aria-label="Sleeper username"
+        />
+        <Button type="submit" disabled={!name.trim() || league.loading}>
+          {league.loading ? "Connecting…" : "Connect"}
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          Read-only. We look up your public Sleeper leagues; your username is saved only in this
+          browser.
+        </span>
+      </form>
       {league.error && (
         <p role="alert" className="mt-3 text-sm text-warning">
           {league.error}
