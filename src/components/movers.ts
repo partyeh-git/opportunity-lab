@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPublicJson } from "@/lib/live-data";
-import { playersSnapshot } from "@/lib/snapshots";
+import { playersSnapshot, type PlayersSnapshot } from "@/lib/snapshots";
 
 type LastWeekFile = {
   season: number;
@@ -19,7 +19,10 @@ export const BIG_MOVE = 2;
  * points a game over the same remaining weeks. Empty until a new week has been built on the same
  * model version as the week before (a model change moves everyone, which is not news).
  */
-export function useMovers(settings: Record<string, number>) {
+export function useMovers(
+  settings: Record<string, number>,
+  snapshot: PlayersSnapshot = playersSnapshot,
+) {
   const file = useQuery({
     queryKey: ["last-week"],
     queryFn: () => fetchPublicJson<LastWeekFile>("last-week.json"),
@@ -30,13 +33,13 @@ export function useMovers(settings: Record<string, number>) {
     const last = file.data;
     if (
       !last ||
-      last.season !== playersSnapshot.season ||
-      last.week !== playersSnapshot.week - 1 ||
-      last.model !== playersSnapshot.model
+      last.season !== snapshot.season ||
+      last.week !== snapshot.week - 1 ||
+      last.model !== snapshot.model
     )
       return moves;
     const scoring = (settings["rec"] ?? 1) >= 0.75 ? "full" : "half";
-    for (const player of playersSnapshot.players) {
+    for (const player of snapshot.players) {
       const before = last.players[player.id];
       if (!before) continue;
       let was = 0;
@@ -52,5 +55,5 @@ export function useMovers(settings: Record<string, number>) {
       if (games) moves.set(player.id, (now - was) / games);
     }
     return moves;
-  }, [file.data, settings]);
+  }, [file.data, settings, snapshot]);
 }

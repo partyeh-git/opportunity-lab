@@ -6,9 +6,13 @@ name: Weekly projections
 # week's snap counts on Tuesday/Wednesday and builds regardless on the Thursday retry.
 # Every run also refreshes the week in progress (--refresh-current) with the latest betting lines
 # and injury reports, so the daily runs through Sunday morning keep projections current.
+# Monday runs also build next week early from Sunday's games (--early-next), for the season-long
+# pages (waivers, trades, overall); the weekly pages stay on the week in progress.
 # GitHub can start scheduled runs late (hours, at busy times); Sunday has two runs for that reason.
 on:
   schedule:
+    - cron: "0 14 * * 1" # Monday 10am Eastern: early build of next week from Sunday's games
+    - cron: "0 19 * * 1" # Monday 3pm Eastern retry (late box scores or snap counts)
     - cron: "0 14 * * 2" # Tuesday 10am Eastern, after Monday night
     - cron: "0 14 * * 3" # Wednesday retry (late stats or snap counts)
     - cron: "0 14 * * 4" # Thursday retry, before Thursday night; builds even with stale snaps
@@ -41,7 +45,7 @@ jobs:
       - run: pip install numpy pandas pyarrow
       - name: Rebuild projections
         run: |
-          ARGS="--refresh-current"
+          ARGS="--refresh-current --early-next"
           if [ -n "${{ github.event.inputs.week }}" ]; then ARGS="--week ${{ github.event.inputs.week }}"; fi
           if [ "${{ github.event.schedule }}" = "0 14 * * 4" ] || [ -n "${{ github.event.inputs.week }}" ]; then ARGS="$ARGS --allow-stale-snaps"; fi
           python scripts/weekly_refresh.py $ARGS
@@ -50,7 +54,7 @@ jobs:
         run: python scripts/weather_forecast.py
       - name: Commit changes
         run: |
-          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json public/weather.json public/last-week.json
+          git add src/data/rankings-current.json src/data/rankings-next.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json public/weather.json public/last-week.json
           if git diff --cached --quiet; then
             echo "No projection changes."
             exit 0

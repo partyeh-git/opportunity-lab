@@ -52,9 +52,12 @@ export function scoreDefense(defense: DefenseProjection, settings: Record<string
   return events + pointsBuckets + yardsBuckets;
 }
 
-export function entriesFor(settings: Record<string, number>): ResearchEntry[] {
+export function entriesFor(
+  settings: Record<string, number>,
+  snapshot: PlayersSnapshot = playersSnapshot,
+): ResearchEntry[] {
   return [
-    ...playersSnapshot.players.map((p) => {
+    ...snapshot.players.map((p) => {
       const weekPoints = scorePlayer(p, settings);
       return {
         id: p.id,

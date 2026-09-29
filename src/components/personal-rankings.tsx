@@ -5,20 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLeague } from "@/components/league-context";
 import { eligible, entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
-import { playersSnapshot } from "@/lib/snapshots";
+import { playersSnapshot, seasonSnapshot } from "@/lib/snapshots";
 import { ProjectionDetails } from "@/components/projection-details";
 import { PlayerCard } from "@/components/player-card";
+import { EarlyBuildNote } from "@/components/early-build-note";
 import { useWeather, useWeekStatus, WeatherIcons, WeekOverStrip } from "@/components/weather-icons";
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { boardTiers } from "@/lib/tiers";
 import { FANTASY_LAST_WEEK } from "@/lib/projection-scoring";
-import {
-  INJURY_LETTER,
-  RULED_OUT,
-  projectionById,
-  useWeekOutlook,
-} from "@/components/week-outlook";
+import { INJURY_LETTER, RULED_OUT, projectionsOf, useWeekOutlook } from "@/components/week-outlook";
 
 const genericSettings = { rec: 1, pass_int: -2 };
 const teamLabel = (team: string) => (team === "LA" ? "LAR" : team);
@@ -117,6 +113,9 @@ export function PersonalRankings({
   defensesOnly?: boolean;
 }) {
   const league = useLeague();
+  // The overall board is a season-long page: it reads the early build when there is one.
+  const snap = weeklyOnly || defensesOnly ? playersSnapshot : seasonSnapshot;
+  const projectionById = projectionsOf(snap);
   const [genericPpr, setGenericPpr] = useState<"full" | "half">("full");
   const [position, setPosition] = useState("All");
   const [search, setSearch] = useState("");
@@ -139,8 +138,8 @@ export function PersonalRankings({
   } | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [cardId, setCardId] = useState("");
-  const weatherFor = useWeather(playersSnapshot.week);
-  const weekStatus = useWeekStatus(playersSnapshot.week);
+  const weatherFor = useWeather(snap.week);
+  const weekStatus = useWeekStatus(snap.week);
   // The Weekly tab and the overall Rankings tab are separate boards; each has one horizon.
   const effectiveHorizon = weeklyOnly || defensesOnly ? "week" : "ros";
   const settings = useMemo(
@@ -151,7 +150,7 @@ export function PersonalRankings({
       },
     [league.selected, genericPpr],
   );
-  const entries = useMemo(() => entriesFor(settings), [settings]);
+  const entries = useMemo(() => entriesFor(settings, snap), [settings, snap]);
   // Weekly player boards are one roster slot at a time, taken from the league's lineup.
   const weeklyBoard = effectiveHorizon === "week" && !defensesOnly;
   const options = weeklyBoard
@@ -160,8 +159,8 @@ export function PersonalRankings({
   const effectivePosition = options.includes(position) ? position : options[0]!;
   const showValue = !defensesOnly && !weeklyBoard;
   const storageKey = rankingStorageKey(
-    playersSnapshot.season,
-    playersSnapshot.week,
+    snap.season,
+    snap.week,
     effectiveHorizon,
     league.selected?.league_id ?? "general",
     settings,
@@ -276,7 +275,11 @@ export function PersonalRankings({
         }),
     );
   }, [entries, rosRanks]);
-  const { injuryOf, ifPlays, chances, chanceOf, expectedFor } = useWeekOutlook(entries, settings);
+  const { injuryOf, ifPlays, chances, chanceOf, expectedFor } = useWeekOutlook(
+    entries,
+    settings,
+    snap,
+  );
   const pointsFor = (entry: ResearchEntry) =>
     effectiveHorizon === "week" ? ifPlays(entry) : (entry.rosPoints ?? 0);
   const modelOrder = entries
@@ -417,17 +420,18 @@ export function PersonalRankings({
   const covered = entries.filter((e) => myIds.has(e.sleeperId)).length;
   return (
     <div className="space-y-3">
-      {weekStatus.weekOver && <WeekOverStrip week={playersSnapshot.week} />}
+      {weekStatus.weekOver && <WeekOverStrip week={snap.week} />}
+      <EarlyBuildNote snapshot={snap} />
       <section className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <p className="broadcast-tag text-xs uppercase">
-          {playersSnapshot.season} ·{" "}
+          {snap.season} ·{" "}
           {effectiveHorizon === "ros"
-            ? `Rest of season · Weeks ${playersSnapshot.week}–${FANTASY_LAST_WEEK}`
-            : `Week ${playersSnapshot.week}${weekStatus.weekOver ? " · Final" : ""}`}
+            ? `Rest of season · Weeks ${snap.week}–${FANTASY_LAST_WEEK}`
+            : `Week ${snap.week}${weekStatus.weekOver ? " · Final" : ""}`}
         </p>
         <p className="text-xs text-muted-foreground">
           Updated{" "}
-          {new Date(playersSnapshot.generatedAt).toLocaleString(undefined, {
+          {new Date(snap.generatedAt).toLocaleString(undefined, {
             weekday: "short",
             month: "short",
             day: "numeric",
@@ -680,8 +684,8 @@ export function PersonalRankings({
                   effectiveHorizon !== "week"
                     ? "Season pts"
                     : defenseBoard
-                      ? `Week ${playersSnapshot.week} pts`
-                      : `Week ${playersSnapshot.week} pts (if he plays)`
+                      ? `Week ${snap.week} pts`
+                      : `Week ${snap.week} pts (if he plays)`
                 }
                 sortKey="points"
                 sort={sort}
@@ -690,8 +694,8 @@ export function PersonalRankings({
               >
                 <p>
                   {effectiveHorizon === "week"
-                    ? `Projected fantasy points in Week ${playersSnapshot.week} if the player plays, in this league's scoring. When there is real doubt, the % beside it is his chance to play, from the injury designation and games just missed (learned from past injury reports).`
-                    : `Projected fantasy points for Weeks ${playersSnapshot.week} to ${FANTASY_LAST_WEEK} (the end of the fantasy season) in this league's scoring, added up game by game against each opponent. Byes excluded.`}{" "}
+                    ? `Projected fantasy points in Week ${snap.week} if the player plays, in this league's scoring. When there is real doubt, the % beside it is his chance to play, from the injury designation and games just missed (learned from past injury reports).`
+                    : `Projected fantasy points for Weeks ${snap.week} to ${FANTASY_LAST_WEEK} (the end of the fantasy season) in this league's scoring, added up game by game against each opponent. Byes excluded.`}{" "}
                   Confirmed absences count as zero; otherwise we assume the player plays. Click the
                   "i" next to a player's number for how it was built.
                 </p>
@@ -713,9 +717,7 @@ export function PersonalRankings({
               )}
               {rosterLoaded && <th className="px-3 py-2">League status</th>}
               {weekColumns && <th className="px-3 py-2">Matchup</th>}
-              {weekColumns && (
-                <th className="px-3 py-2">Week {playersSnapshot.week} projected usage</th>
-              )}
+              {weekColumns && <th className="px-3 py-2">Week {snap.week} projected usage</th>}
             </tr>
           </thead>
           <tbody>
@@ -956,13 +958,14 @@ export function PersonalRankings({
               player={projectionById.get(cardId)!}
               settings={settings}
               connected={!!league.selected}
+              fromWeek={snap.week}
               open
               onOpenChange={(open) => !open && setCardId("")}
               summary={[
                 {
                   label: weekStatus.gameOver(card.team)
-                    ? `Week ${playersSnapshot.week} vs ${card.opponent} · game over`
-                    : `Week ${playersSnapshot.week} vs ${card.opponent}`,
+                    ? `Week ${snap.week} vs ${card.opponent} · game over`
+                    : `Week ${snap.week} vs ${card.opponent}`,
                   value:
                     `${ifPlays(card).toFixed(1)} ${weekStatus.gameOver(card.team) ? "projected" : "pts"}` +
                     (chanceOf(card) < 0.9 ? ` · ${Math.round(chanceOf(card) * 100)}% to play` : ""),
@@ -981,10 +984,10 @@ export function PersonalRankings({
         })()}
       {defensesOnly && (
         <p className="text-xs leading-5 text-muted-foreground">
-          Tier 1 is the top five defenses by projected Week {playersSnapshot.week} points in this
-          league; Tier 2 is ranks 6–12, Tier 3 is 13–20. Estimates use the opponent's prior sacks
-          allowed, turnovers, scoring, and yardage together with defensive production. DST
-          touchdowns are heavily regressed toward the league average.
+          Tier 1 is the top five defenses by projected Week {snap.week} points in this league; Tier
+          2 is ranks 6–12, Tier 3 is 13–20. Estimates use the opponent's prior sacks allowed,
+          turnovers, scoring, and yardage together with defensive production. DST touchdowns are
+          heavily regressed toward the league average.
         </p>
       )}
     </div>

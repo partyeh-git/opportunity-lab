@@ -31,7 +31,7 @@ def live_status(data_dir, identities):
     return out, qb1
 
 
-def build(data_dir, existing_path, output, season, week, availability_path=None, as_of=None):
+def build(data_dir, existing_path, output, season, week, availability_path=None, as_of=None, early=False):
     as_of = as_of or datetime.now(timezone.utc).isoformat()
     stats, schedule = read_inputs(data_dir,[season-1,season])
     # A mid-week rebuild (fresh lines/injuries) can see games already played this week: drop them.
@@ -41,8 +41,17 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         raise ValueError('Source data must end at the previous completed week')
     expected = set(schedule[schedule.season.eq(season)&schedule.week.eq(week-1)].game_id)
     observed = set(current[current.week.eq(week-1)].game_id)
+    pending_teams = []
     if expected != observed:
-        raise ValueError('Previous week is incomplete')
+        # An early build (Monday morning) may run before the week's last games are played. Those
+        # games leave the schedule entirely: their teams are projected from the week before.
+        pending = expected - observed
+        results = pd.read_csv(Path(data_dir)/'games.csv',low_memory=False)
+        played = set(results[results.result.notna()].game_id)
+        if not early or observed - expected or pending & played or not observed:
+            raise ValueError('Previous week is incomplete')
+        pending_teams = sorted(set(schedule[schedule.game_id.isin(pending)].team))
+        schedule = schedule[~schedule.game_id.isin(pending)]
     original = json.loads(Path(existing_path).read_text(encoding='utf-8'))
     identities = {p['id']:p for p in original['players']}
     roles = read_roles(data_dir,[season-1,season])
@@ -85,6 +94,8 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         source='nflverse weekly player statistics, schedule and PFR snap counts; reviewed official availability and public status flags; no external rankings',
         candidateCount=len(rows),unmappedIdentityCount=sum(not p['sleeperId'] for p in rows),methodology=CONFIG,sourceHashes=hashes,
         modelHash=hashlib.sha256(Path(__file__).with_name('model.py').read_bytes()).hexdigest(),players=rows)
+    if early:
+        payload['pendingTeams'] = pending_teams
     if evidence:
         payload['methodology'] = {**CONFIG, 'limitations':[
             'Verified absences are applied by a separate prospective overlay. Unresolved availability, return workload, routes run, red-zone locations, coaching, weather, and designed-run/scramble split are not quantified; snap share informs WR/TE/RB volume.'
@@ -112,5 +123,6 @@ if __name__=='__main__':
     parser.add_argument('--week',type=int,default=3)
     parser.add_argument('--availability',required=True,help='Reviewed, week-specific availability snapshot')
     parser.add_argument('--as-of',help='Frozen evidence cutoff (ISO timestamp); defaults to now')
+    parser.add_argument('--early',action='store_true',help="allow last week's unplayed games to be missing (Monday morning build)")
     args=parser.parse_args()
-    build(args.data_dir,args.identities,args.output,args.season,args.week,args.availability,args.as_of)
+    build(args.data_dir,args.identities,args.output,args.season,args.week,args.availability,args.as_of,args.early)

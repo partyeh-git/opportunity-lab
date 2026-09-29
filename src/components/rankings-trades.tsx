@@ -6,7 +6,8 @@ import { useLeague } from "@/components/league-context";
 import { useWeekStatus, WeekOverStrip } from "@/components/weather-icons";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { FANTASY_LAST_WEEK, scoreProjectedStats } from "@/lib/projection-scoring";
-import { playersSnapshot as snapshot } from "@/lib/snapshots";
+import { seasonSnapshot as snapshot } from "@/lib/snapshots";
+import { EarlyBuildNote } from "@/components/early-build-note";
 import {
   groupStrength,
   positionChanges,
@@ -330,6 +331,7 @@ export function Trades() {
   return (
     <div className="space-y-4">
       {weekStatus.weekOver && <WeekOverStrip week={snapshot.week} />}
+      <EarlyBuildNote snapshot={snapshot} />
       <section className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <p className="broadcast-tag text-xs uppercase">
           {snapshot.season} · Trades · Weeks {firstWeek}–{LAST_WEEK}

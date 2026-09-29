@@ -14,6 +14,11 @@ Steps:
       - one-week "Out" designations are never carried forward.
  4. prepare_availability.py -> build.py -> build_dst_snapshot.py, then fill any missing
     Sleeper ids from the Sleeper directory, and run the model tests.
+With --early-next, once all but the last game or two of a week are played (Monday morning), next
+week is also built from the games played so far and saved beside the site's snapshot
+(src/data/rankings-next.json). The season-long pages read it, so waiver and trade advice counts
+Sunday's games; the weekly pages stay on the week in progress until its last game is final. The
+teams still to play are projected from the week before and listed in the file (pendingTeams).
 With --refresh-current, when no new week is ready but the site's week is still being played,
 that week is rebuilt with the latest betting lines and injury reports (daily Wed-Sun runs).
 Betting lines that drop out of the schedule feed keep their last known value
@@ -37,6 +42,9 @@ import last_week
 ROOT = Path(__file__).resolve().parents[1]
 PROJ = ROOT / "scripts" / "projections"
 SNAPSHOT = ROOT / "src" / "data" / "rankings-current.json"
+NEXT = ROOT / "src" / "data" / "rankings-next.json"
+# An early build waits until at most this many of the week's games are still to be played.
+EARLY_PENDING_GAMES = 2
 REVIEW = PROJ / "injury-review.json"
 AVAILABILITY = PROJ / "availability-current.json"
 LAST_LINES = PROJ / "lines-last-known.json"
@@ -137,8 +145,8 @@ def keep_last_lines(data: Path, season: int, now: str) -> int:
     return filled
 
 
-def fill_sleeper_ids(sleeper: dict):
-    snapshot = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+def fill_sleeper_ids(sleeper: dict, path: Path = SNAPSHOT):
+    snapshot = json.loads(path.read_text(encoding="utf-8"))
     by_gsis = {v.get("gsis_id"): k for k, v in sleeper.items() if v.get("gsis_id")}
     filled = 0
     for p in snapshot["players"]:
@@ -146,8 +154,47 @@ def fill_sleeper_ids(sleeper: dict):
             p["sleeperId"] = by_gsis[p["id"]]
             filled += 1
     snapshot["unmappedIdentityCount"] = sum(not p["sleeperId"] for p in snapshot["players"])
-    SNAPSHOT.write_text(json.dumps(snapshot, separators=(",", ":")), encoding="utf-8")
+    path.write_text(json.dumps(snapshot, separators=(",", ":")), encoding="utf-8")
     return filled
+
+
+def early_next(data: Path, season: int, fetched_at: str, games: pd.DataFrame, done: int):
+    """Build next week from the games played so far, while this week's last games are pending."""
+    week, snapshot = done + 1, json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    if snapshot["season"] != season or snapshot["week"] != week or week >= 18:
+        print("Early build: the site is not on the week in progress; nothing to do.")
+        return
+    g = games[games.season.eq(season) & games.game_type.eq("REG") & games.week.eq(week)]
+    played, pending = set(g[g.result.notna()].game_id), set(g[g.result.isna()].game_id)
+    if not played or not pending or len(pending) > EARLY_PENDING_GAMES:
+        print(f"Early build: Week {week} has {len(pending)} games still to play; nothing to do.")
+        return
+    stats = pd.read_csv(data / f"stats_player_week_{season}.csv", usecols=["week", "game_id"], low_memory=False)
+    snaps = pd.read_parquet(data / f"snap_counts_{season}.parquet", columns=["week", "game_id", "game_type"])
+    have_stats = set(stats[stats.week.eq(week)].game_id)
+    have_snaps = set(snaps[snaps.game_type.eq("REG") & snaps.week.eq(week)].game_id)
+    if played - have_stats or played - have_snaps:
+        print(f"Early build: waiting for Week {week} box scores and snap counts "
+              f"({len(played - have_stats)} games without stats, {len(played - have_snaps)} without snaps).")
+        return
+    target = week + 1
+    print(f"Early build: Week {target} from Week {week} games played so far ({len(pending)} still to play).")
+    sleeper = json.loads((data / "sleeper_players.json").read_text(encoding="utf-8"))
+    now = datetime.now(timezone.utc).isoformat()
+    # The committed injury ledger and availability files belong to the week in progress: work on copies.
+    review, availability = data / "early-injury-review.json", data / "early-availability.json"
+    ledger = roll_ledger(json.loads(REVIEW.read_text(encoding="utf-8")), snapshot, sleeper, games, season, target, now)
+    review.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
+    staged = data / "snapshot-for-early-availability.json"
+    staged.write_text(json.dumps({**snapshot, "week": target}), encoding="utf-8")
+    run(PROJ / "prepare_availability.py", "--snapshot", staged, "--sleeper", data / "sleeper_players.json",
+        "--injuries", data / f"injuries_{season}.csv", "--games", data / "games.csv", "--review", review,
+        "--fetched-at", fetched_at, "--output", availability)
+    run(PROJ / "build.py", "--data-dir", data, "--identities", SNAPSHOT, "--output", NEXT,
+        "--season", season, "--week", target, "--availability", availability, "--early")
+    fill_sleeper_ids(sleeper, NEXT)
+    print(last_week.save(snapshot, json.loads(NEXT.read_text(encoding="utf-8"))["model"]))
+    print(f"Early Week {target} projections saved.")
 
 
 def run(*args):
@@ -165,6 +212,8 @@ def main():
                         help="if no new week is ready, rebuild the week in progress with fresh lines and injuries")
     parser.add_argument("--allow-stale-snaps", action="store_true",
                         help="build even if last week's snap counts are not published yet (last retry of the week)")
+    parser.add_argument("--early-next", action="store_true",
+                        help="also build next week early once all but the week's last game or two are played")
     a = parser.parse_args()
     data = a.data_dir.resolve()
     fetched_at = datetime.now(timezone.utc).isoformat() if a.skip_download else fetch_inputs(data, a.season)
@@ -172,6 +221,12 @@ def main():
         print(f"Kept last known betting lines for {keep_last_lines(data, a.season, fetched_at)} games.")
     games = pd.read_csv(data / "games.csv", low_memory=False)
     done = completed_week(games, a.season)
+    refresh(a, data, fetched_at, games, done)
+    if a.early_next and not a.week:
+        early_next(data, a.season, fetched_at, games, done)
+
+
+def refresh(a, data: Path, fetched_at: str, games: pd.DataFrame, done: int):
     target = a.week or done + 1
     snapshot = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
     current = snapshot["season"] == a.season and snapshot["week"] == target

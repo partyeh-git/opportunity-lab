@@ -26,7 +26,8 @@ import {
   worthDollars,
   type Claim,
 } from "@/lib/faab";
-import { playersSnapshot as snapshot } from "@/lib/snapshots";
+import { seasonSnapshot as snapshot } from "@/lib/snapshots";
+import { EarlyBuildNote } from "@/components/early-build-note";
 import { fetchPublicJson } from "@/lib/live-data";
 import { useWeekStatus, WeekOverStrip } from "@/components/weather-icons";
 
@@ -140,7 +141,7 @@ export function WaiversFaab() {
     [users.data],
   );
   const styles = useMemo(() => managerStyles(claims.data ?? []), [claims.data]);
-  const moves = useMovers(settings);
+  const moves = useMovers(settings, snapshot);
   // Games already played do not count; the fantasy season ends in Week 17.
   const firstWeek = weekStatus.decisionWeek;
   const weeks = useMemo(
@@ -173,7 +174,7 @@ export function WaiversFaab() {
 
   const rows = useMemo<Row[]>(() => {
     if (!myRoster || !lookup.data) return [];
-    const entries = entriesFor(settings).filter((e) => SKILL.includes(e.position));
+    const entries = entriesFor(settings, snapshot).filter((e) => SKILL.includes(e.position));
     const bySleeper = new Map(entries.map((e) => [e.sleeperId, e]));
     const rostered = new Set(league.rosters.flatMap((r) => r.players ?? []));
     const status = (e: ResearchEntry) => injuries.data?.players[e.sleeperId]?.status ?? null;
@@ -354,6 +355,7 @@ export function WaiversFaab() {
   return (
     <div className="space-y-4">
       {weekStatus.weekOver && <WeekOverStrip week={snapshot.week} />}
+      <EarlyBuildNote snapshot={snapshot} />
       <section className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="broadcast-tag text-xs uppercase">

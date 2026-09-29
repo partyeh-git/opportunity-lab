@@ -133,7 +133,10 @@ export function PlayerCard({
   summary,
   open,
   onOpenChange,
+  fromWeek = playersSnapshot.week,
 }: {
+  /** First week of the game-by-game outlook (the early build starts a week later). */
+  fromWeek?: number;
   player: Projection;
   settings: Record<string, number>;
   connected: boolean;
@@ -198,10 +201,7 @@ export function PlayerCard({
     ? playedPoints.reduce((a, b) => a + b, 0) / playedPoints.length
     : null;
   const forecastByWeek = new Map(player.weeklyForecasts.map((g) => [g.week, g]));
-  const upcoming = Array.from(
-    { length: FANTASY_LAST_WEEK - playersSnapshot.week + 1 },
-    (_, i) => playersSnapshot.week + i,
-  );
+  const upcoming = Array.from({ length: FANTASY_LAST_WEEK - fromWeek + 1 }, (_, i) => fromWeek + i);
   const sleeper = info.data;
   const injury = [sleeper?.injury_status, sleeper?.injury_body_part].filter(Boolean).join(" · ");
   const practice = sleeper?.practice_description ?? sleeper?.practice_participation;
