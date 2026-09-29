@@ -5,7 +5,13 @@ import { useLeague } from "@/components/league-context";
 import { Input } from "@/components/ui/input";
 import { entriesFor, type ResearchEntry } from "@/lib/research-scoring";
 import { FANTASY_LAST_WEEK, scoreProjectedStats } from "@/lib/projection-scoring";
-import { gainFromAdding, REAL_CHANGE, simulateSeason, type SimPlayer } from "@/lib/trade-sim";
+import {
+  gainFromAdding,
+  keepValues,
+  REAL_CHANGE,
+  simulateSeason,
+  type SimPlayer,
+} from "@/lib/trade-sim";
 import { BIG_MOVE, useMovers } from "@/components/movers";
 import { DEFAULT_LINEUP } from "@/lib/league-value";
 import {
@@ -296,33 +302,34 @@ export function WaiversFaab() {
     .filter((r) => !picks.some((p) => p.entry.id === r.entry.id) && (r.move ?? 0) >= BIG_MOVE)
     .sort((a, b) => b.move! - a.move!)
     .slice(0, 3);
-  // Who to let go: the modeled player my lineup misses least. Injured-reserve players hold no spot.
+  // Who to let go: the player who is easiest to replace. Judged against the best free agent at
+  // his position (scarcity) and as injury cover. Injured-reserve players hold no roster spot.
   const drop = useMemo(() => {
     if (!myRoster || !selected) return null;
     const parked = new Set(myRoster.reserve ?? []);
-    const roster = snapshot.players
-      .filter((p) => (myRoster.players ?? []).includes(p.sleeperId))
-      .flatMap((p) => sim.get(p.id) ?? []);
     const full = (myRoster.players?.length ?? 0) - parked.size >= slots.length;
     if (!full) return { needed: false as const };
-    const base = simulateSeason(roster, lineupSlots, weeks).total;
-    const costs = snapshot.players
-      .filter((p) => (myRoster.players ?? []).includes(p.sleeperId) && !parked.has(p.sleeperId))
-      .map((p) => ({
-        name: p.name,
-        position: p.position,
-        cost:
-          base -
-          simulateSeason(
-            roster.filter((r) => r.id !== p.id),
-            lineupSlots,
-            weeks,
-          ).total,
-        points: [...(sim.get(p.id)?.weekly.values() ?? [])].reduce((sum, v) => sum + v, 0),
-      }))
-      .sort((a, b) => a.cost - b.cost || a.points - b.points);
-    return { needed: true as const, player: costs[0] ?? null };
-  }, [myRoster, selected, sim, slots, lineupSlots, weeks]);
+    const owned = new Set(myRoster.players ?? []);
+    const rostered = new Set(league.rosters.flatMap((r) => r.players ?? []));
+    const hurt = (sleeperId: string) => HURT.has(injuries.data?.players[sleeperId]?.status ?? "");
+    const modeled = snapshot.players.filter((p) => SKILL.includes(p.position) && sim.has(p.id));
+    const roster = modeled.filter((p) => owned.has(p.sleeperId));
+    const values = keepValues(
+      roster.map((p) => sim.get(p.id)!),
+      modeled
+        .filter((p) => p.sleeperId && !rostered.has(p.sleeperId) && !hurt(p.sleeperId))
+        .map((p) => sim.get(p.id)!),
+      new Set(roster.filter((p) => hurt(p.sleeperId)).map((p) => p.id)),
+      lineupSlots,
+      weeks,
+    );
+    const onRoster = new Set(roster.filter((p) => !parked.has(p.sleeperId)).map((p) => p.id));
+    const ranked = values
+      .filter((v) => onRoster.has(v.id))
+      .sort((a, b) => Number(a.core) - Number(b.core) || a.value - b.value);
+    return { needed: true as const, player: ranked[0] ?? null, ranked };
+  }, [myRoster, selected, sim, slots, lineupSlots, weeks, league.rosters, injuries.data]);
+  const topGain = picks[0]?.rosGain ?? 0;
 
   const useful = (r: Row) => r.rosGain > 0.05 || (r.move ?? 0) >= BIG_MOVE || !!r.starterHurt;
   const searching = search.trim().length > 0;
@@ -431,13 +438,53 @@ export function WaiversFaab() {
                   </ol>
                 </div>
               )}
-              {picks.length > 0 && drop?.needed && drop.player && (
-                <p className="text-sm leading-6">
-                  <strong>To make room, drop {drop.player.name}</strong> ({drop.player.position}):{" "}
-                  {drop.player.cost < 0.05
-                    ? "your lineup would not miss him."
-                    : `he costs your lineup the least, ${drop.player.cost.toFixed(0)} points over the rest of the season.`}
-                </p>
+              {picks.length > 0 &&
+                drop?.needed &&
+                drop.player &&
+                (drop.player.core || drop.player.value >= topGain ? (
+                  <p className="text-sm leading-6 text-warning">
+                    <strong>Your roster has no easy drop.</strong> The cheapest is{" "}
+                    {drop.player.name} ({drop.player.position}),{" "}
+                    {drop.player.core
+                      ? `but he is part of the depth you need at ${drop.player.position}.`
+                      : `and letting him go costs about ${drop.player.value.toFixed(0)} points, more than the pickup adds.`}{" "}
+                    Only make the move if you see it differently.
+                  </p>
+                ) : (
+                  <p className="text-sm leading-6">
+                    <strong>To make room, drop {drop.player.name}</strong> ({drop.player.position}
+                    ):{" "}
+                    {drop.player.reason === "replaceable"
+                      ? `free agents at ${drop.player.position} are just as good, and he is not needed as cover.`
+                      : drop.player.reason === "cover"
+                        ? `he is the easiest to replace. He is cover if ${drop.player.covers} misses time, but you have other depth there.`
+                        : drop.player.reason === "covers injury"
+                          ? `he is the easiest to replace, though with ${drop.player.covers} out he is worth about ${drop.player.value.toFixed(0)} points to you.`
+                          : `he is the easiest to replace, costing about ${drop.player.value.toFixed(0)} points over the rest of the season.`}
+                  </p>
+                ))}
+              {drop?.needed && drop.ranked.length > 0 && (
+                <details className="text-sm">
+                  <summary className="cursor-pointer text-primary">
+                    What each of my players is worth keeping
+                  </summary>
+                  <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs leading-5 sm:grid-cols-2">
+                    {drop.ranked.map((v) => (
+                      <li key={v.id} className="flex justify-between gap-2 tabular-nums">
+                        <span>
+                          {v.name} <span className="text-muted-foreground">{v.position}</span>
+                        </span>
+                        <span className="text-muted-foreground">
+                          {v.value.toFixed(0)} pts
+                          {v.reason === "cover" && ` · cover for ${v.covers}`}
+                          {v.reason === "covers injury" && ` · with ${v.covers} out`}
+                          {v.reason === "replaceable" && " · replaceable"}
+                          {v.core && " · needed depth"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               )}
               {rising.length > 0 && (
                 <p className="text-sm leading-6 text-muted-foreground">

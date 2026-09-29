@@ -115,6 +115,122 @@ export function gainFromAdding(
   });
 }
 
+/** How much a "what if a starter at his position misses time" loss counts against a loss today. */
+export const COVER_WEIGHT = 0.5;
+/**
+ * How much of a dropped player's value a free agent is assumed to give back. Not all of it: the
+ * free agent you want may be gone when you need him, and adding him costs another roster spot.
+ */
+export const REPLACEMENT_CREDIT = 0.5;
+
+export type KeepValue = {
+  id: string;
+  name: string;
+  position: string;
+  /** Season points the roster stands to lose by letting him go. */
+  value: number;
+  /** Why he is worth that: he starts, he covers an injury, or he is the cover if someone misses. */
+  reason: "starts" | "covers injury" | "cover" | "replaceable";
+  /** The teammate he covers for, when that is the reason. */
+  covers: string;
+  /**
+   * Part of the depth every roster should hold: enough healthy players to fill the position's
+   * own lineup spots (superflex counts as a quarterback spot) plus one backup. Never the first
+   * choice to drop, whatever the projections say.
+   */
+  core: boolean;
+};
+
+/**
+ * What each player is worth keeping, for deciding who to drop. Three things count:
+ * - the lineup points lost without him, with the players who are ruled out right now missing;
+ * - his worth as cover: the same loss if a starter at his position also misses time;
+ * - position scarcity: how much of that a free agent at his position could give back. A spare
+ *   receiver is easy to replace; a quarterback in a superflex league fills a lineup spot nobody
+ *   on waivers fills as well.
+ */
+export function keepValues(
+  roster: SimPlayer[],
+  freeAgents: SimPlayer[],
+  ruledOut: Set<string>,
+  slots: string[],
+  weeks: number[],
+): KeepValue[] {
+  const total = (p: SimPlayer) => weeks.reduce((sum, w) => sum + (p.weekly.get(w) ?? 0), 0);
+  const replacement = new Map<string, SimPlayer>();
+  for (const agent of freeAgents) {
+    const best = replacement.get(agent.position);
+    if (!best || total(agent) > total(best)) replacement.set(agent.position, agent);
+  }
+  const seasons = new Map<string, ReturnType<typeof simulateSeason>>();
+  const play = (team: SimPlayer[]) => {
+    const key = team
+      .map((p) => p.id)
+      .sort()
+      .join();
+    if (!seasons.has(key)) seasons.set(key, simulateSeason(team, slots, weeks));
+    return seasons.get(key)!;
+  };
+  const loss = (team: SimPlayer[], player: SimPlayer) => {
+    const agent = replacement.get(player.position);
+    const without = team.filter((p) => p.id !== player.id);
+    const lost = play(team).total - play(without).total;
+    const givenBack = agent ? play([...without, agent]).total - play(without).total : 0;
+    return Math.max(0, lost - REPLACEMENT_CREDIT * givenBack);
+  };
+  const core = new Set<string>();
+  for (const position of POSITIONS) {
+    const spots = slots.filter(
+      (slot) => slot === position || (position === "QB" && slot === "SUPER_FLEX"),
+    ).length;
+    roster
+      // Depth means someone who would actually score: about 3 points a week or more.
+      .filter((p) => p.position === position && !ruledOut.has(p.id) && total(p) >= 3 * weeks.length)
+      .sort((a, b) => total(b) - total(a))
+      .slice(0, spots + 1)
+      .forEach((p) => core.add(p.id));
+  }
+  return roster.map((player) => {
+    // The roster as it really is: without the teammates who are ruled out right now.
+    const hurt = roster.filter((p) => ruledOut.has(p.id) && p.id !== player.id);
+    const real = roster.filter((p) => !hurt.includes(p));
+    const hurtHere = hurt.filter((p) => p.position === player.position);
+    const options: { value: number; reason: KeepValue["reason"]; covers: string }[] = [
+      { value: loss(roster, player), reason: "starts", covers: "" },
+    ];
+    if (hurt.length)
+      options.push({
+        value: loss(real, player),
+        reason: hurtHere.length ? "covers injury" : "starts",
+        covers: hurtHere.map((p) => p.name).join(" and "),
+      });
+    for (const starter of real)
+      if (
+        starter.id !== player.id &&
+        starter.position === player.position &&
+        play(real).starts.has(starter.id)
+      )
+        options.push({
+          value:
+            COVER_WEIGHT *
+            loss(
+              real.filter((p) => p.id !== starter.id),
+              player,
+            ),
+          reason: "cover",
+          covers: starter.name,
+        });
+    const best = options.sort((a, b) => b.value - a.value)[0]!;
+    return {
+      id: player.id,
+      name: player.name,
+      position: player.position,
+      core: core.has(player.id),
+      ...(best.value < 0.05 ? { value: 0, reason: "replaceable" as const, covers: "" } : best),
+    };
+  });
+}
+
 /** Points a week that count as a real change to a lineup; smaller is noise. */
 export const REAL_CHANGE = 0.5;
 
