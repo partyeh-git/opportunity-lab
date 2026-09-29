@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
+import { ArrowUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLeague } from "@/components/league-context";
 import { Input } from "@/components/ui/input";
-import { entriesFor, optimizeLineup, type ResearchEntry } from "@/lib/research-scoring";
+import { entriesFor, type ResearchEntry } from "@/lib/research-scoring";
+import { FANTASY_LAST_WEEK, scoreProjectedStats } from "@/lib/projection-scoring";
+import { gainFromAdding, REAL_CHANGE, simulateSeason, type SimPlayer } from "@/lib/trade-sim";
+import { BIG_MOVE, useMovers } from "@/components/movers";
 import { DEFAULT_LINEUP } from "@/lib/league-value";
 import {
   EARLY_WEEKS,
@@ -73,8 +77,16 @@ function useJson<T>(key: string, url: string, enabled = true) {
 
 type Row = {
   entry: ResearchEntry;
+  /** Points added to my best lineup over the rest of the season, played week by week. */
   rosGain: number;
+  /** Points added in the week being decided. */
   weekGain: number;
+  /** Weeks he would be in my lineup. */
+  weeksStarting: number;
+  /** Change in his projected points a game since last week, when known. */
+  move: number | null;
+  /** Not among the most obvious pickups, but he helps this roster. */
+  hidden: boolean;
   worth: number;
   starterHurt: string | null;
   ownStatus: string | null;
@@ -106,6 +118,7 @@ export function WaiversFaab() {
   );
   const [position, setPosition] = useState("All");
   const [search, setSearch] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   const settings = useMemo(
     () => selected?.scoring_settings ?? { rec: 1, pass_int: -2 },
@@ -121,6 +134,36 @@ export function WaiversFaab() {
     [users.data],
   );
   const styles = useMemo(() => managerStyles(claims.data ?? []), [claims.data]);
+  const moves = useMovers(settings);
+  // Games already played do not count; the fantasy season ends in Week 17.
+  const firstWeek = weekStatus.decisionWeek;
+  const weeks = useMemo(
+    () => Array.from({ length: FANTASY_LAST_WEEK - firstWeek + 1 }, (_, i) => firstWeek + i),
+    [firstWeek],
+  );
+  const lineupSlots = useMemo(
+    () => slots.filter((slot) => !["BN", "IR", "TAXI", "RESERVE", "DEF"].includes(slot)),
+    [slots],
+  );
+  const sim = useMemo(
+    () =>
+      new Map(
+        snapshot.players.map((p): [string, SimPlayer] => [
+          p.id,
+          {
+            id: p.id,
+            name: p.name,
+            position: p.position,
+            weekly: new Map(
+              p.weeklyForecasts
+                .filter((g) => g.week >= firstWeek && g.week <= FANTASY_LAST_WEEK)
+                .map((g) => [g.week, scoreProjectedStats(g.projected, settings)]),
+            ),
+          },
+        ]),
+      ),
+    [settings, firstWeek],
+  );
 
   const rows = useMemo<Row[]>(() => {
     if (!myRoster || !lookup.data) return [];
@@ -129,8 +172,8 @@ export function WaiversFaab() {
     const rostered = new Set(league.rosters.flatMap((r) => r.players ?? []));
     const status = (e: ResearchEntry) => injuries.data?.players[e.sleeperId]?.status ?? null;
     const owned = (myRoster.players ?? []).flatMap((id) => bySleeper.get(id) ?? []);
-    const baseRos = optimizeLineup(owned, slots, "ros");
-    const baseWeek = optimizeLineup(owned, slots, "week");
+    const mine = owned.flatMap((e) => sim.get(e.id) ?? []);
+    const base = simulateSeason(mine, lineupSlots, weeks);
     // How much each other team would gain: his points over their weakest starter at the position.
     const starters = (pos: string) => Math.max(1, slots.filter((s) => s === pos).length);
     const teams = league.rosters
@@ -157,10 +200,12 @@ export function WaiversFaab() {
       .filter((e) => e.sleeperId && !rostered.has(e.sleeperId) && (e.rosPoints ?? 0) > 0)
       .sort((a, b) => (b.rosPoints ?? 0) - (a.rosPoints ?? 0))
       .slice(0, 120);
+    const obvious = new Set(available.slice(0, 10).map((e) => e.id));
     return available
       .map((entry) => {
-        const rosGain = optimizeLineup([...owned, entry], slots, "ros") - baseRos;
-        const weekGain = optimizeLineup([...owned, entry], slots, "week") - baseWeek;
+        const gains = gainFromAdding(mine, sim.get(entry.id)!, lineupSlots, weeks, base);
+        const rosGain = gains.reduce((sum, v) => sum + v, 0);
+        const weekGain = gains[0] ?? 0;
         const ahead = entries.find(
           (e) =>
             e.team === entry.team &&
@@ -186,6 +231,9 @@ export function WaiversFaab() {
           entry,
           rosGain,
           weekGain,
+          weeksStarting: gains.filter((v) => v > 0).length,
+          move: moves.get(entry.id) ?? null,
+          hidden: !obvious.has(entry.id),
           worth,
           starterHurt: ahead ? `${ahead.name} (${status(ahead)})` : null,
           ownStatus: status(entry),
@@ -209,10 +257,78 @@ export function WaiversFaab() {
     claims.data,
     early,
     budgetLeft,
+    sim,
+    lineupSlots,
+    weeks,
+    moves,
   ]);
 
+  // The answer: the pickups that change my lineup, best first.
+  // Chosen one at a time: after the best pickup, the next must still help with him on the team,
+  // so the list never offers two players for the same job.
+  const picks = useMemo(() => {
+    if (!myRoster) return [];
+    const owned = new Set(myRoster.players ?? []);
+    let roster = snapshot.players
+      .filter((p) => owned.has(p.sleeperId))
+      .flatMap((p) => sim.get(p.id) ?? []);
+    const chosen: Row[] = [];
+    while (chosen.length < 3) {
+      const base = simulateSeason(roster, lineupSlots, weeks);
+      const best = rows
+        .filter((r) => !chosen.some((c) => c.entry.id === r.entry.id))
+        .map((r) => {
+          const gains = gainFromAdding(roster, sim.get(r.entry.id)!, lineupSlots, weeks, base);
+          return {
+            ...r,
+            rosGain: gains.reduce((sum, v) => sum + v, 0),
+            weeksStarting: gains.filter((v) => v > 0).length,
+          };
+        })
+        .sort((x, y) => y.rosGain - x.rosGain)[0];
+      if (!best || best.rosGain / weeks.length < REAL_CHANGE) break;
+      chosen.push(best);
+      roster = [...roster, sim.get(best.entry.id)!];
+    }
+    return chosen;
+  }, [rows, myRoster, sim, lineupSlots, weeks]);
+  const rising = rows
+    .filter((r) => !picks.some((p) => p.entry.id === r.entry.id) && (r.move ?? 0) >= BIG_MOVE)
+    .sort((a, b) => b.move! - a.move!)
+    .slice(0, 3);
+  // Who to let go: the modeled player my lineup misses least. Injured-reserve players hold no spot.
+  const drop = useMemo(() => {
+    if (!myRoster || !selected) return null;
+    const parked = new Set(myRoster.reserve ?? []);
+    const roster = snapshot.players
+      .filter((p) => (myRoster.players ?? []).includes(p.sleeperId))
+      .flatMap((p) => sim.get(p.id) ?? []);
+    const full = (myRoster.players?.length ?? 0) - parked.size >= slots.length;
+    if (!full) return { needed: false as const };
+    const base = simulateSeason(roster, lineupSlots, weeks).total;
+    const costs = snapshot.players
+      .filter((p) => (myRoster.players ?? []).includes(p.sleeperId) && !parked.has(p.sleeperId))
+      .map((p) => ({
+        name: p.name,
+        position: p.position,
+        cost:
+          base -
+          simulateSeason(
+            roster.filter((r) => r.id !== p.id),
+            lineupSlots,
+            weeks,
+          ).total,
+        points: [...(sim.get(p.id)?.weekly.values() ?? [])].reduce((sum, v) => sum + v, 0),
+      }))
+      .sort((a, b) => a.cost - b.cost || a.points - b.points);
+    return { needed: true as const, player: costs[0] ?? null };
+  }, [myRoster, selected, sim, slots, lineupSlots, weeks]);
+
+  const useful = (r: Row) => r.rosGain > 0.05 || (r.move ?? 0) >= BIG_MOVE || !!r.starterHurt;
+  const searching = search.trim().length > 0;
   const shown = rows.filter(
     (r) =>
+      (showAll || searching || useful(r)) &&
       (position === "All" || r.entry.position === position) &&
       r.entry.name.toLowerCase().includes(search.toLowerCase().trim()),
   );
@@ -236,11 +352,11 @@ export function WaiversFaab() {
           <summary className="cursor-pointer text-primary">How the bid is set</summary>
           <div className="mt-2 space-y-2 rounded-md border bg-card p-3 text-sm leading-6 text-muted-foreground">
             <p>
-              <span className="text-foreground">Worth to you:</span> how many rest-of-season points
-              he adds to your best lineup, as a share of your remaining budget: every{" "}
-              {POINTS_FOR_FULL_BUDGET} points = your whole budget, capped at{" "}
-              {Math.round(MAX_BUDGET_SHARE * 100)}%. A player adding 30 points is worth 30% of what
-              you have left. This is the most you should pay.
+              <span className="text-foreground">Worth to you:</span> how many points he adds to your
+              best lineup through Week {FANTASY_LAST_WEEK}, played out week by week so bye weeks and
+              depth count, as a share of your remaining budget: every {POINTS_FOR_FULL_BUDGET}{" "}
+              points = your whole budget, capped at {Math.round(MAX_BUDGET_SHARE * 100)}%. A player
+              adding 30 points is worth 30% of what you have left. This is the most you should pay.
             </p>
             <p>
               <span className="text-foreground">Price to win:</span> what has won about 70% of this
@@ -263,6 +379,82 @@ export function WaiversFaab() {
         </p>
       ) : (
         <>
+          {myRoster && lookup.data && (
+            <section className="space-y-3 rounded-lg border-2 border-volt bg-card p-4">
+              {picks.length === 0 ? (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    This week's answer
+                  </p>
+                  <p className="mt-1 font-display text-2xl md:text-3xl">Save your budget</p>
+                  <p className="mt-2 text-sm leading-6">
+                    Nobody available would add even {REAL_CHANGE} points a week to your lineup. You
+                    have {money(budgetLeft)} left for when someone does.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Go get {picks.length === 1 ? "him" : "them"}
+                  </p>
+                  <ol className="mt-2 space-y-3">
+                    {picks.map((r, i) => (
+                      <li
+                        key={r.entry.id}
+                        className="flex flex-wrap items-baseline gap-x-3 gap-y-1"
+                      >
+                        <span className="font-display text-2xl">
+                          {i + 1}. {r.entry.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {r.entry.position} · {r.entry.team}
+                        </span>
+                        <span className="rounded-sm bg-volt px-2 py-0.5 text-sm font-bold text-black">
+                          Bid {money(r.bid)}
+                        </span>
+                        <span className="w-full text-sm leading-6">
+                          {i === 0 ? "Adds" : "On top of that, adds"}{" "}
+                          {(r.rosGain / weeks.length).toFixed(1)} points a week to your lineup (
+                          {r.rosGain.toFixed(0)} by Week {FANTASY_LAST_WEEK}); he would start for
+                          you in {r.weeksStarting} of {weeks.length} weeks.
+                          {(r.move ?? 0) >= BIG_MOVE &&
+                            ` His outlook jumped ${r.move!.toFixed(1)} points a game this week.`}
+                          {r.starterHurt && ` Starter ahead of him is hurt: ${r.starterHurt}.`}
+                          {r.hidden &&
+                            " Not one of the obvious names, but he fits a hole on your roster."}
+                          {r.rivals.length > 0
+                            ? ` ${r.rivals.length} other team${r.rivals.length > 1 ? "s" : ""} could use him.`
+                            : " No other team clearly needs him."}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {picks.length > 0 && drop?.needed && drop.player && (
+                <p className="text-sm leading-6">
+                  <strong>To make room, drop {drop.player.name}</strong> ({drop.player.position}):{" "}
+                  {drop.player.cost < 0.05
+                    ? "your lineup would not miss him."
+                    : `he costs your lineup the least, ${drop.player.cost.toFixed(0)} points over the rest of the season.`}
+                </p>
+              )}
+              {rising.length > 0 && (
+                <p className="text-sm leading-6 text-muted-foreground">
+                  <strong className="text-foreground">
+                    Rising, but not a fit for you right now:
+                  </strong>{" "}
+                  {rising
+                    .map(
+                      (r) => `${r.entry.name} (${r.entry.position}, +${r.move!.toFixed(1)} a game)`,
+                    )
+                    .join(", ")}
+                  .
+                </p>
+              )}
+            </section>
+          )}
+
           <section className="grid gap-3 md:grid-cols-[auto,1fr]">
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs uppercase text-muted-foreground">Your FAAB left</p>
@@ -321,6 +513,14 @@ export function WaiversFaab() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={showAll}
+                onChange={(e) => setShowAll(e.target.checked)}
+              />
+              Show players who would not help my lineup
+            </label>
             {claims.isError && (
               <span className="text-sm text-warning">
                 League bid history couldn't load; using defaults.
@@ -336,8 +536,8 @@ export function WaiversFaab() {
                 <thead className="bg-broadcast text-left text-xs uppercase text-broadcast-foreground">
                   <tr>
                     <th className="px-3 py-2">Available player</th>
-                    <th className="px-3 py-2 text-right">Adds to you (ROS)</th>
-                    <th className="px-3 py-2 text-right">This week</th>
+                    <th className="px-3 py-2 text-right">Adds to my lineup (season)</th>
+                    <th className="px-3 py-2 text-right">Week {firstWeek}</th>
                     <th className="px-3 py-2 text-right">Worth to you</th>
                     <th className="px-3 py-2 text-right">Price to win</th>
                     <th className="px-3 py-2 text-right">Suggested bid</th>
@@ -356,6 +556,18 @@ export function WaiversFaab() {
                         {r.ownStatus && (
                           <span className="ml-2 text-xs font-bold text-red-600 dark:text-red-400">
                             {r.ownStatus}
+                          </span>
+                        )}
+                        {r.move !== null && Math.abs(r.move) >= BIG_MOVE && (
+                          <span
+                            title="Change in projected points a game since last week"
+                            className={`ml-2 inline-flex items-center text-xs font-bold ${r.move > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                          >
+                            <ArrowUp
+                              className={`h-3 w-3 ${r.move > 0 ? "" : "rotate-180"}`}
+                              aria-hidden="true"
+                            />
+                            {Math.abs(r.move).toFixed(1)}
                           </span>
                         )}
                         {r.rookie && (
@@ -408,7 +620,11 @@ export function WaiversFaab() {
                 </tbody>
               </table>
               {shown.length === 0 && (
-                <p className="p-4 text-sm text-muted-foreground">No available players match.</p>
+                <p className="p-4 text-sm text-muted-foreground">
+                  {showAll || searching
+                    ? "No available players match."
+                    : "No available player improves your lineup. Tick the box above to see everyone."}
+                </p>
               )}
             </div>
           )}

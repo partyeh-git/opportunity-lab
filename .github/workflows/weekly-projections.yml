@@ -50,7 +50,7 @@ jobs:
         run: python scripts/weather_forecast.py
       - name: Commit changes
         run: |
-          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json public/weather.json
+          git add src/data/rankings-current.json src/data/dst-current.json scripts/projections/injury-review.json scripts/projections/availability-current.json scripts/projections/lines-last-known.json public/weather.json public/last-week.json
           if git diff --cached --quiet; then
             echo "No projection changes."
             exit 0

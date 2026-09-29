@@ -32,6 +32,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import last_week
+
 ROOT = Path(__file__).resolve().parents[1]
 PROJ = ROOT / "scripts" / "projections"
 SNAPSHOT = ROOT / "src" / "data" / "rankings-current.json"
@@ -205,6 +207,9 @@ def main():
         "--fetched-at", fetched_at, "--output", AVAILABILITY)
     run(PROJ / "build.py", "--data-dir", data, "--identities", SNAPSHOT, "--output", SNAPSHOT,
         "--season", a.season, "--week", target, "--availability", AVAILABILITY)
+    if snapshot["season"] == a.season and snapshot["week"] == target - 1:
+        # A new week: keep last week's numbers so the site can show risers and fallers.
+        print(last_week.save(snapshot, json.loads(SNAPSHOT.read_text(encoding="utf-8"))["model"]))
     print(f"Filled {fill_sleeper_ids(sleeper)} missing Sleeper ids.")
     run(ROOT / "scripts" / "build_dst_snapshot.py", "--data-dir", data, "--season", a.season, "--week", target)
     run("-m", "unittest", "discover", "-s", PROJ, "-p", "test_*.py")

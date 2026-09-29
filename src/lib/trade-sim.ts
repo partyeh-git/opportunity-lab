@@ -60,6 +60,8 @@ export function bestLineup(
 export function simulateSeason(roster: SimPlayer[], slots: string[], weeks: number[]) {
   const starts = new Map<string, { weeks: number; points: number }>();
   const byWeek: number[] = [];
+  /** Each week's weakest starter, or 0 when a lineup spot sits empty: the bar a newcomer must beat. */
+  const bar: number[] = [];
   let total = 0;
   for (const week of weeks) {
     const lineup = bestLineup(
@@ -68,6 +70,13 @@ export function simulateSeason(roster: SimPlayer[], slots: string[], weeks: numb
     );
     total += lineup.total;
     byWeek.push(lineup.total);
+    bar.push(
+      lineup.starters.length < slots.length
+        ? 0
+        : Math.min(
+            ...lineup.starters.map((id) => roster.find((p) => p.id === id)!.weekly.get(week) ?? 0),
+          ),
+    );
     for (const id of lineup.starters) {
       const player = roster.find((p) => p.id === id)!;
       const points = player.weekly.get(week) ?? 0;
@@ -77,7 +86,33 @@ export function simulateSeason(roster: SimPlayer[], slots: string[], weeks: numb
       starts.set(id, row);
     }
   }
-  return { total, starts, byWeek };
+  return { total, starts, byWeek, bar };
+}
+
+/**
+ * Points a roster's lineup gains each week by adding one player. Same answer as playing the
+ * season with and without him, but skips the weeks where he cannot beat the weakest starter.
+ */
+export function gainFromAdding(
+  roster: SimPlayer[],
+  candidate: SimPlayer,
+  slots: string[],
+  weeks: number[],
+  base: { byWeek: number[]; bar: number[] },
+) {
+  return weeks.map((week, i) => {
+    const points = candidate.weekly.get(week) ?? 0;
+    if (points <= base.bar[i]!) return 0;
+    const lineup = bestLineup(
+      [...roster, candidate].map((p) => ({
+        id: p.id,
+        position: p.position,
+        points: p.weekly.get(week) ?? 0,
+      })),
+      slots,
+    );
+    return Math.max(0, lineup.total - base.byWeek[i]!);
+  });
 }
 
 /** Points a week that count as a real change to a lineup; smaller is noise. */
