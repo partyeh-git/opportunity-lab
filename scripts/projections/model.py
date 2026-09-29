@@ -371,12 +371,24 @@ def forecast(stats, schedule, season, cutoff_week, include_ros=True, workload=No
                     cleared = (season, cutoff_week, starter) not in playing.attrs.get('reports', set())
                     if injured_then and cleared:
                         returning.add(team)
+        def hurt_starter(p):
+            # Depth charts move an injured starter down. A QB who cannot play this week and started
+            # the last game he played this season keeps his projection for the weeks he is back
+            # (the return fade decides when); he uses none of the team's volume this week.
+            if p['id'] not in (unavailable or ()):
+                return False
+            own = histories[p['id']]
+            own = own[own.season.eq(season) & own.team.eq(p['team'])]
+            if own.empty:
+                return False
+            g = qb_games.get((own.iloc[-1].game_id, p['team']), empty)
+            return bool(len(g)) and g.attempts.max() > 0 and g.loc[g.attempts.idxmax(), 'player_id'] == p['id']
         for p in players:
             starter = qb1.get(p['team'])
             # A fill-in with 3+ straight starts has the job, whatever the chart says.
             keeps_job = last_starter.get(p['team']) == p['id'] and (
                 p['team'] not in returning or streak.get(p['team'], 0) >= 3)
-            if p['position'] == 'QB' and starter and p['id'] != starter and not keeps_job:
+            if p['position'] == 'QB' and starter and p['id'] != starter and not keeps_job and not hurt_starter(p):
                 for key in VOLUME:
                     p['base'][key] = 0.
                 for num in [num for num, den, _ in RATES.values()]:
