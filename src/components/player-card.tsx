@@ -206,6 +206,10 @@ export function PlayerCard({
   const injury = [sleeper?.injury_status, sleeper?.injury_body_part].filter(Boolean).join(" · ");
   const practice = sleeper?.practice_description ?? sleeper?.practice_participation;
   const flagged = player.availability && player.availability.state !== "unverified";
+  // Ruled out now: the chance he plays each coming game, from how past players in his spot returned.
+  const comeback = (player.weeklyForecasts as { week: number; returnChance?: number }[]).filter(
+    (g) => g.returnChance != null && g.week >= fromWeek,
+  );
   // Real games are whole numbers; projected touchdowns and interceptions keep a decimal.
   const fmt = (n: number, label: string, projected = false) =>
     projected && ["Pass TD", "TD", "INT"].includes(label) ? n.toFixed(1) : n.toFixed(0);
@@ -228,7 +232,7 @@ export function PlayerCard({
         </SheetHeader>
 
         <div className="mt-4 space-y-5 text-sm">
-          {(injury || flagged || practice || sleeper?.injury_notes) && (
+          {(injury || flagged || practice || sleeper?.injury_notes || comeback.length > 0) && (
             <section className="space-y-1 rounded-md border border-warning/40 bg-warning-soft/60 p-3 text-sm leading-6">
               {injury && (
                 <p>
@@ -237,6 +241,18 @@ export function PlayerCard({
                 </p>
               )}
               {sleeper?.injury_notes && <p>{sleeper.injury_notes}</p>}
+              {comeback.length > 0 && (
+                <p>
+                  <span className="font-semibold text-foreground">Coming back:</span> ruled out now,
+                  so his games are counted at{" "}
+                  {comeback
+                    .slice(0, 4)
+                    .map((g) => `${Math.round(g.returnChance! * 100)}% in Week ${g.week}`)
+                    .join(", ")}
+                  {comeback.length > 4 && ", rising from there"}. That is how often players in his
+                  spot have been back, not a report on his injury.
+                </p>
+              )}
               {flagged && (
                 <p>
                   <span className="font-semibold text-foreground">In our projections:</span>{" "}

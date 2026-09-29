@@ -460,7 +460,7 @@ export function PersonalRankings({
               <li>
                 {effectiveHorizon === "week"
                   ? "Points are what we expect if he plays. A % next to them is his chance to play when there is real doubt."
-                  : "Season points add up every remaining game; bye weeks and games a player is ruled out for count as zero."}
+                  : "Season points add up every remaining game; bye weeks count as zero. A player who is ruled out now is faded back in: each coming game counts at the rate players in his spot have returned."}
               </li>
               <li>
                 Injury letters refresh several times a day; projections refresh Tuesday through
