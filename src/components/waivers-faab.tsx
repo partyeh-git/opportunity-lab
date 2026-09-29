@@ -326,7 +326,12 @@ export function WaiversFaab() {
     const onRoster = new Set(roster.filter((p) => !parked.has(p.sleeperId)).map((p) => p.id));
     const ranked = values
       .filter((v) => onRoster.has(v.id))
-      .sort((a, b) => Number(a.core) - Number(b.core) || a.value - b.value);
+      .sort(
+        (a, b) =>
+          Number(a.core) - Number(b.core) ||
+          Number(a.scarce) - Number(b.scarce) ||
+          a.value - b.value,
+      );
     return { needed: true as const, player: ranked[0] ?? null, ranked };
   }, [myRoster, selected, sim, slots, lineupSlots, weeks, league.rosters, injuries.data]);
   const topGain = picks[0]?.rosGain ?? 0;
@@ -441,13 +446,15 @@ export function WaiversFaab() {
               {picks.length > 0 &&
                 drop?.needed &&
                 drop.player &&
-                (drop.player.core || drop.player.value >= topGain ? (
+                (drop.player.core || drop.player.scarce || drop.player.value >= topGain ? (
                   <p className="text-sm leading-6 text-warning">
                     <strong>Your roster has no easy drop.</strong> The cheapest is{" "}
                     {drop.player.name} ({drop.player.position}),{" "}
                     {drop.player.core
                       ? `but he is part of the depth you need at ${drop.player.position}.`
-                      : `and letting him go costs about ${drop.player.value.toFixed(0)} points, more than the pickup adds.`}{" "}
+                      : drop.player.scarce
+                        ? "but starting quarterbacks are hard to get back in a superflex league. Try to trade him before you drop him."
+                        : `and letting him go costs about ${drop.player.value.toFixed(0)} points, more than the pickup adds.`}{" "}
                     Only make the move if you see it differently.
                   </p>
                 ) : (
@@ -480,6 +487,7 @@ export function WaiversFaab() {
                           {v.reason === "covers injury" && ` · with ${v.covers} out`}
                           {v.reason === "replaceable" && " · replaceable"}
                           {v.core && " · needed depth"}
+                          {!v.core && v.scarce && " · starting QB, hard to replace"}
                         </span>
                       </li>
                     ))}

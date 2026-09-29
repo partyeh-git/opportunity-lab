@@ -139,6 +139,11 @@ export type KeepValue = {
    * choice to drop, whatever the projections say.
    */
   core: boolean;
+  /**
+   * A quarterback who plays, in a league with a superflex spot. Every team wants one and few are
+   * ever free, so he is offered as a drop only after every other spare player, and with a warning.
+   */
+  scarce: boolean;
 };
 
 /**
@@ -178,6 +183,7 @@ export function keepValues(
     const givenBack = agent ? play([...without, agent]).total - play(without).total : 0;
     return Math.max(0, lost - REPLACEMENT_CREDIT * givenBack);
   };
+  const superflex = slots.includes("SUPER_FLEX");
   const core = new Set<string>();
   for (const position of POSITIONS) {
     const spots = slots.filter(
@@ -226,6 +232,7 @@ export function keepValues(
       name: player.name,
       position: player.position,
       core: core.has(player.id),
+      scarce: superflex && player.position === "QB" && total(player) >= 8 * weeks.length,
       ...(best.value < 0.05 ? { value: 0, reason: "replaceable" as const, covers: "" } : best),
     };
   });
