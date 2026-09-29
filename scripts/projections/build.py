@@ -10,6 +10,7 @@ from playing_time import flag_games, read_injury_reports
 from roles import read_roles
 from availability import apply_availability, load_evidence
 from returns import apply_returns
+from timelines import read_timelines, with_overrides
 
 
 def public_stats(s):
@@ -29,9 +30,18 @@ def live_status(data_dir, identities):
     out = {gsis(k, v) for k, v in sleeper.items() if v.get('injury_status') in ('IR','PUP','Sus','Out','NA')} - {None}
     qb1 = {fix.get(v['team'],v['team']): gsis(k, v) for k, v in sleeper.items()
            if v.get('team') and v.get('depth_chart_position')=='QB' and v.get('depth_chart_order')==1 and gsis(k, v)}
-    status = {gsis(k, v): v['injury_status'] for k, v in sleeper.items()
-              if v.get('injury_status') in ('IR','PUP','Out','NA') and gsis(k, v)}
+    status = {gsis(k, v): v['injury_status'] for k, v in sleeper.items() if v.get('injury_status') and gsis(k, v)}
     return out, qb1, status
+
+
+def reported_timelines(data_dir, identities, season, as_of):
+    """Each player's own reported recovery timeline, from the archived notes (timelines.py)."""
+    path, root = Path(data_dir)/'sleeper_players.json', Path(__file__).resolve().parents[2]
+    if not path.exists():
+        return {}
+    ids = {p['sleeperId']: pid for pid, p in identities.items() if p.get('sleeperId')}
+    found = read_timelines(root/'public'/'notes', json.loads(path.read_text(encoding='utf-8')), ids, season, as_of)
+    return with_overrides(found, Path(__file__).with_name('timeline-overrides.json'))
 
 
 def build(data_dir, existing_path, output, season, week, availability_path=None, as_of=None, early=False):
@@ -69,7 +79,8 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         evidence = load_evidence(availability_path,season,week,as_of)
         projections, allocations = apply_availability(projections,stats,evidence,season,week)
     # Ruled-out players fade back in over the following games (returns.py).
-    faded = apply_returns(projections,statuses,stats,schedule,pd.read_csv(Path(data_dir)/'games.csv',low_memory=False),season,week,as_of)
+    faded = apply_returns(projections,statuses,stats,schedule,pd.read_csv(Path(data_dir)/'games.csv',low_memory=False),season,week,as_of,
+                          reported_timelines(data_dir,identities,season,as_of))
     rows = []
     for p in projections:
         current_game = p['week']
@@ -99,6 +110,7 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         Path(data_dir)/f'snap_counts_{season-1}.parquet',Path(data_dir)/f'snap_counts_{season}.parquet',Path(data_dir)/'players.csv']}
     payload = dict(season=season,week=week,dataThroughWeek=week-1,
         generatedAt=as_of,model=CONFIG['model'],returnFadePlayers=faded,
+        reportedTimelinePlayers=sum('timeline' in p.get('returnOutlook',{}) for p in rows),
         source='nflverse weekly player statistics, schedule and PFR snap counts; reviewed official availability and public status flags; no external rankings',
         candidateCount=len(rows),unmappedIdentityCount=sum(not p['sleeperId'] for p in rows),methodology=CONFIG,sourceHashes=hashes,
         modelHash=hashlib.sha256(Path(__file__).with_name('model.py').read_bytes()).hexdigest(),players=rows)

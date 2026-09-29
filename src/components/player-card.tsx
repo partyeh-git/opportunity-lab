@@ -210,6 +210,31 @@ export function PlayerCard({
   const comeback = (player.weeklyForecasts as { week: number; returnChance?: number }[]).filter(
     (g) => g.returnChance != null && g.week >= fromWeek,
   );
+  // His own reported timeline (read from the player notes) replaces the league-wide average.
+  const timeline = (
+    player as {
+      returnOutlook?: {
+        timeline?: {
+          kind: "week" | "game" | "season";
+          shortest: number | null;
+          longest: number | null;
+          outThroughWeek: number;
+          source: string;
+          published: string;
+        };
+      };
+    }
+  ).returnOutlook?.timeline;
+  const timelineLength = !timeline
+    ? ""
+    : timeline.kind === "season"
+      ? "out for the season"
+      : `${timeline.longest == null ? "at least " : ""}${timeline.shortest}${
+          timeline.longest != null && timeline.longest !== timeline.shortest
+            ? ` to ${timeline.longest}`
+            : ""
+        } ${timeline.kind}${(timeline.longest ?? timeline.shortest) === 1 ? "" : "s"}`;
+  const back = comeback.filter((g) => g.returnChance! > 0);
   // Real games are whole numbers; projected touchdowns and interceptions keep a decimal.
   const fmt = (n: number, label: string, projected = false) =>
     projected && ["Pass TD", "TD", "INT"].includes(label) ? n.toFixed(1) : n.toFixed(0);
@@ -241,7 +266,28 @@ export function PlayerCard({
                 </p>
               )}
               {sleeper?.injury_notes && <p>{sleeper.injury_notes}</p>}
-              {comeback.length > 0 && (
+              {timeline && (
+                <p>
+                  <span className="font-semibold text-foreground">Reported timeline:</span>{" "}
+                  {timelineLength} ({timeline.source.replace("_", " ")},{" "}
+                  {new Date(timeline.published).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  ).{" "}
+                  {timeline.kind === "season"
+                    ? "His remaining games are counted as zero."
+                    : `Counted as out through Week ${timeline.outThroughWeek}${
+                        back.length
+                          ? `, then ${back
+                              .slice(0, 3)
+                              .map((g) => `${Math.round(g.returnChance! * 100)}% in Week ${g.week}`)
+                              .join(", ")}, rising from there`
+                          : ""
+                      }.`}
+                </p>
+              )}
+              {!timeline && comeback.length > 0 && (
                 <p>
                   <span className="font-semibold text-foreground">Coming back:</span> ruled out now,
                   so his games are counted at{" "}
