@@ -55,7 +55,12 @@ export function useWeekOutlook(
   const injuries = useQuery({
     queryKey: ["injuries"],
     queryFn: async () => {
-      const file = await fetchPublicJson<{ players: Record<string, InjuryInfo> }>("injuries.json");
+      const file = await fetchPublicJson<{
+        players: Record<string, InjuryInfo>;
+        /** The week the practice levels are for, and each player's final practice level. */
+        week?: number;
+        practice?: Record<string, string>;
+      }>("injuries.json");
       if (!file) throw new Error("No injury file");
       return file;
     },
@@ -103,6 +108,10 @@ export function useWeekOutlook(
             : p.availability?.reportedStatus;
           const status = gameStatus(info);
           const missed = gamesJustMissed(p.team, p.lastObservedWeek, snapshot.week);
+          // Final practice level of the week, once his team's game designations are posted.
+          const practice =
+            (injuries.data?.week === snapshot.week && injuries.data.practice?.[entry.sleeperId]) ||
+            undefined;
           const game = (p.weeklyForecasts as ReturnGame[]).find((g) => g.week === snapshot.week);
           const timeline = !!(p as ReturnOutlook).returnOutlook?.timeline;
           if (
@@ -121,7 +130,10 @@ export function useWeekOutlook(
             ];
           return [
             entry.id,
-            { value: chanceToPlay(status, missed), reason: chanceReason(status, missed) },
+            {
+              value: chanceToPlay(status, missed, practice),
+              reason: chanceReason(status, missed, practice),
+            },
           ];
         }),
       ),

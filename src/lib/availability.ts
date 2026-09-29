@@ -2,10 +2,11 @@ import rates from "../data/availability-rates.json" with { type: "json" };
 import teamWeeks from "../data/team-weeks-2026.json" with { type: "json" };
 
 /**
- * Chance a player plays this week, from pregame information only: the injury designation,
- * practice participation (when known) and how many team games he has just missed in a row.
- * Rates were learned from 2023 injury reports and confirmed on 2024 (Phase B fix 1): ranking
- * on chance x points-if-playing raised start/sit accuracy from 63.8% to 69.3% on 2024.
+ * Chance a player plays this week, from pregame information only: the injury designation, his
+ * final practice level of the week (when posted) and how many team games he has just missed in
+ * a row. Ranking on chance x points-if-playing raised start/sit accuracy from 63.8% to 69.3% on
+ * 2024 (Phase B fix 1). Rates refit 9/28 on 2019-2023 injury reports with practice levels:
+ * chance-to-play error (Brier) 0.0875 to 0.0760 on 2024 and 0.0706 to 0.0661 on 2025.
  */
 export type GameStatus = "Out" | "Doubtful" | "Questionable" | "None";
 
@@ -45,9 +46,14 @@ export function chanceToPlay(s: GameStatus, missed: number, practice = "None"): 
 }
 
 /** Short reason for the chance, e.g. "Questionable" or "missed last 2 games". */
-export function chanceReason(s: GameStatus, missed: number): string {
+export function chanceReason(s: GameStatus, missed: number, practice?: string): string {
   const parts = [];
   if (s !== "None") parts.push(s);
+  if (practice && s !== "Out")
+    parts.push(
+      { DNP: "did not practice", Limited: "limited practice", Full: "full practice" }[practice] ??
+        practice,
+    );
   if (missed > 0 && s !== "None")
     parts.push(missed === 1 ? "missed last game" : "missed last 2+ games");
   return parts.join(" · ") || "no injury designation";

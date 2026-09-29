@@ -32,4 +32,10 @@ assert.equal(gamesJustMissed("SEA", 2, 3), 0);
 assert.equal(gamesJustMissed("SEA", 1, 3), 1);
 assert.equal(gamesJustMissed("SEA", 0, 3), 2);
 assert.equal(chanceReason("Questionable", 1), "Questionable · missed last game");
+// Practice level moves a questionable player: full practice > limited > did not practice.
+const [full, limited, dnp] = ["Full", "Limited", "DNP"].map((p) => chanceToPlay("Questionable", 0, p));
+assert.ok(full > limited && limited > dnp && full > 0.85 && dnp < 0.6);
+// Ruled out and doubtful players almost never play, whatever the practice level.
+assert.ok(chanceToPlay("Out", 0, "Limited") < 0.01 && chanceToPlay("Doubtful", 0, "Limited") < 0.05);
+assert.equal(chanceReason("Questionable", 0, "Limited"), "Questionable · limited practice");
 console.log("Availability checks passed.");
