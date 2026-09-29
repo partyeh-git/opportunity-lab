@@ -5,7 +5,7 @@ Runs unattended (GitHub Actions, .github/workflows/weekly-projections.yml) or lo
 
 Steps:
  1. Download nflverse box scores (this and last season), schedule, PFR snap counts, player ids,
-    injury reports, and Sleeper's public player directory.
+    injury reports, weekly rosters, and Sleeper's public player directory.
  2. Find the newest week whose games are all final. If the site already shows the next week,
     stop (nothing to do). The projection build itself rejects an incomplete week.
  3. Injury ledger (scripts/projections/injury-review.json), rolled to the new week:
@@ -69,6 +69,8 @@ def fetch_inputs(data: Path, season: int) -> str:
         "players.csv": f"{NFLVERSE}/players/players.csv",
         f"injuries_{season - 1}.csv": f"{NFLVERSE}/injuries/injuries_{season - 1}.csv",
         f"injuries_{season}.csv": f"{NFLVERSE}/injuries/injuries_{season}.csv",
+        # Games served on injured reserve (Sleeper has no injury start date).
+        f"roster_weekly_{season}.csv": f"{NFLVERSE}/weekly_rosters/roster_weekly_{season}.csv",
     }
     for name, url in files.items():
         download(url, data / name)

@@ -9,7 +9,7 @@ from model import CAMEL, CONFIG, STATS, forecast, game_context, read_inputs
 from playing_time import flag_games, read_injury_reports
 from roles import read_roles
 from availability import apply_availability, load_evidence
-from returns import apply_returns
+from returns import apply_returns, read_listed
 from timelines import read_timelines, with_overrides
 
 
@@ -80,7 +80,8 @@ def build(data_dir, existing_path, output, season, week, availability_path=None,
         projections, allocations = apply_availability(projections,stats,evidence,season,week)
     # Ruled-out players fade back in over the following games (returns.py).
     faded = apply_returns(projections,statuses,stats,schedule,pd.read_csv(Path(data_dir)/'games.csv',low_memory=False),season,week,as_of,
-                          reported_timelines(data_dir,identities,season,as_of))
+                          reported_timelines(data_dir,identities,season,as_of),
+                          read_listed(Path(data_dir)/f'roster_weekly_{season}.csv',season),pending_teams)
     rows = []
     for p in projections:
         current_game = p['week']
