@@ -235,6 +235,10 @@ export function PlayerCard({
             : ""
         } ${timeline.kind}${(timeline.longest ?? timeline.shortest) === 1 ? "" : "s"}`;
   const back = comeback.filter((g) => g.returnChance! > 0);
+  // Games counted as zero before his first chance to play (a timeline, or the 4 games on a list).
+  const firstBack = back[0]?.week ?? Infinity;
+  const sitting = comeback.filter((g) => g.returnChance === 0 && g.week < firstBack);
+  const outThrough = sitting.at(-1)?.week ?? null;
   // Real games are whole numbers; projected touchdowns and interceptions keep a decimal.
   const fmt = (n: number, label: string, projected = false) =>
     projected && ["Pass TD", "TD", "INT"].includes(label) ? n.toFixed(1) : n.toFixed(0);
@@ -277,7 +281,7 @@ export function PlayerCard({
                   ).{" "}
                   {timeline.kind === "season"
                     ? "His remaining games are counted as zero."
-                    : `Counted as out through Week ${timeline.outThroughWeek}${
+                    : `Counted as out through Week ${outThrough ?? timeline.outThroughWeek}${
                         back.length
                           ? `, then ${back
                               .slice(0, 3)
@@ -290,13 +294,16 @@ export function PlayerCard({
               {!timeline && comeback.length > 0 && (
                 <p>
                   <span className="font-semibold text-foreground">Coming back:</span> ruled out now,
-                  so his games are counted at{" "}
-                  {comeback
+                  so his games are counted{" "}
+                  {outThrough != null &&
+                    `as out through Week ${outThrough}${back.length ? ", then " : ""}`}
+                  {back.length > 0 && "at "}
+                  {back
                     .slice(0, 4)
                     .map((g) => `${Math.round(g.returnChance! * 100)}% in Week ${g.week}`)
                     .join(", ")}
-                  {comeback.length > 4 && ", rising from there"}. That is how often players in his
-                  spot have been back, not a report on his injury.
+                  {back.length > 4 && ", rising from there"}. That is how often players in his spot
+                  have been back, not a report on his injury.
                 </p>
               )}
               {flagged && (

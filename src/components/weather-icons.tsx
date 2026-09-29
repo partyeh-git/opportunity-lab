@@ -37,7 +37,7 @@ export function useWeather(week: number) {
 }
 
 /** Kickoff times in weather.json are Eastern wall-clock times with no zone attached. */
-function kickoffDate(kickoff: string) {
+export function kickoffDate(kickoff: string) {
   const asUtc = new Date(`${kickoff}:00Z`);
   const wall = (timeZone: string) => new Date(asUtc.toLocaleString("en-US", { timeZone }));
   return new Date(asUtc.getTime() + wall("UTC").getTime() - wall("America/New_York").getTime());

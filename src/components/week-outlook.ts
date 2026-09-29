@@ -4,7 +4,14 @@ import { fetchPublicJson } from "@/lib/live-data";
 import { playersSnapshot, type PlayersSnapshot } from "@/lib/snapshots";
 import { chanceReason, chanceToPlay, gameStatus, gamesJustMissed } from "@/lib/availability";
 import { scoreProjectedStats } from "@/lib/projection-scoring";
+import { kickoffDate } from "@/components/weather-icons";
 import type { ResearchEntry } from "@/lib/research-scoring";
+
+/** Same cutoff as the projections build: a status this close to kickoff is for this week's game. */
+const FRESH_HOURS = 48;
+type Kickoffs = { week: number; teams: Record<string, { kickoff: string }> };
+type ReturnGame = { week: number; returnChance?: number };
+type ReturnOutlook = { returnOutlook?: { timeline?: unknown } };
 
 /** Official game designations, shown as the familiar red letter next to a player's name. */
 export const INJURY_LETTER: Record<string, string> = {
@@ -68,6 +75,23 @@ export function useWeekOutlook(
       ? entry.weekPoints
       : scoreProjectedStats(p.neutralProjected, settings);
   };
+  // A ruled-out tag seen days before kickoff is left over from his last game. For that case the
+  // projections already hold the chance he plays this game (his reported timeline, or how often
+  // players in his spot are back), so the week line and the season total never disagree.
+  const kickoffs = useQuery({
+    queryKey: ["weather"],
+    queryFn: () => fetchPublicJson<Kickoffs>("weather.json"),
+    staleTime: 30 * 60 * 1000,
+  });
+  const statusIsForThisGame = (team: string) => {
+    if (!kickoffs.data) return true;
+    // The season pages' early build is a week ahead of the kickoff file: nothing is fresh for it.
+    if (kickoffs.data.week !== snapshot.week) return false;
+    const kickoff = kickoffs.data.teams[team]?.kickoff;
+    if (!kickoff) return true;
+    const hours = (kickoffDate(kickoff).getTime() - Date.now()) / 3600000;
+    return hours <= FRESH_HOURS;
+  };
   const chances = useMemo(
     () =>
       new Map(
@@ -79,13 +103,30 @@ export function useWeekOutlook(
             : p.availability?.reportedStatus;
           const status = gameStatus(info);
           const missed = gamesJustMissed(p.team, p.lastObservedWeek, snapshot.week);
+          const game = (p.weeklyForecasts as ReturnGame[]).find((g) => g.week === snapshot.week);
+          const timeline = !!(p as ReturnOutlook).returnOutlook?.timeline;
+          if (
+            game?.returnChance != null &&
+            (status === "Out" || (status === "None" && timeline)) &&
+            !statusIsForThisGame(p.team)
+          )
+            return [
+              entry.id,
+              {
+                value: game.returnChance,
+                reason: timeline
+                  ? "his reported injury timeline"
+                  : "how often players in his spot are back by this game",
+              },
+            ];
           return [
             entry.id,
             { value: chanceToPlay(status, missed), reason: chanceReason(status, missed) },
           ];
         }),
       ),
-    [entries, injuries.data, projectionById, snapshot],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- statusIsForThisGame follows kickoffs.data
+    [entries, injuries.data, kickoffs.data, projectionById, snapshot],
   );
   const chanceOf = (entry: ResearchEntry) => chances.get(entry.id)?.value ?? 1;
   const expectedFor = (entry: ResearchEntry) => chanceOf(entry) * ifPlays(entry);
