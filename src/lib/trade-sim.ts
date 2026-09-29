@@ -59,6 +59,7 @@ export function bestLineup(
  */
 export function simulateSeason(roster: SimPlayer[], slots: string[], weeks: number[]) {
   const starts = new Map<string, { weeks: number; points: number }>();
+  const byWeek: number[] = [];
   let total = 0;
   for (const week of weeks) {
     const lineup = bestLineup(
@@ -66,14 +67,17 @@ export function simulateSeason(roster: SimPlayer[], slots: string[], weeks: numb
       slots,
     );
     total += lineup.total;
+    byWeek.push(lineup.total);
     for (const id of lineup.starters) {
+      const player = roster.find((p) => p.id === id)!;
+      const points = player.weekly.get(week) ?? 0;
       const row = starts.get(id) ?? { weeks: 0, points: 0 };
       row.weeks += 1;
-      row.points += roster.find((p) => p.id === id)!.weekly.get(week) ?? 0;
+      row.points += points;
       starts.set(id, row);
     }
   }
-  return { total, starts };
+  return { total, starts, byWeek };
 }
 
 /** Points a week that count as a real change to a lineup; smaller is noise. */
@@ -109,4 +113,102 @@ export function tradeVerdict(mine: number, theirs: number | null) {
           ? `Tilted ${side}`
           : `Lopsided ${side}`;
   return { headline, fairness };
+}
+
+export const POSITIONS = ["QB", "RB", "WR", "TE"] as const;
+
+/**
+ * How strong each position group is on its own: each week, the points from the roster's best
+ * players at the position, as many as the lineup has spots just for them (superflex counts as a
+ * quarterback spot). Shared flex spots are left out so that adding a running back does not make
+ * the receivers look worse; a bye or a thin bench shows up as a weaker week.
+ */
+export function groupStrength(roster: SimPlayer[], slots: string[], weeks: number[]) {
+  const strength = new Map<string, number>();
+  for (const position of POSITIONS) {
+    const spots = slots.filter(
+      (slot) => slot === position || (position === "QB" && slot === "SUPER_FLEX"),
+    ).length;
+    const group = roster.filter((p) => p.position === position);
+    let total = 0;
+    for (const week of weeks)
+      total += group
+        .map((p) => p.weekly.get(week) ?? 0)
+        .sort((a, b) => b - a)
+        .slice(0, spots)
+        .reduce((sum, v) => sum + v, 0);
+    strength.set(position, total);
+  }
+  return strength;
+}
+
+export type PositionChange = {
+  position: string;
+  /** Points a week from the group's starters, before and after. */
+  before: number;
+  after: number;
+  /** Where the group ranks among the league's teams (1 is best). */
+  rankBefore: number;
+  rankAfter: number;
+};
+
+/**
+ * One team's position groups before and after, ranked against every other team in the league.
+ * `others` holds the other teams' points a week by position, as they will be after the trade.
+ */
+export function positionChanges(
+  before: Map<string, number>,
+  after: Map<string, number>,
+  othersBefore: Map<string, number>[],
+  othersAfter: Map<string, number>[],
+  weeks: number,
+): PositionChange[] {
+  const rank = (value: number, position: string, others: Map<string, number>[]) =>
+    1 + others.filter((team) => (team.get(position) ?? 0) / weeks > value + 1e-9).length;
+  return POSITIONS.map((position) => {
+    const b = (before.get(position) ?? 0) / weeks;
+    const a = (after.get(position) ?? 0) / weeks;
+    return {
+      position,
+      before: b,
+      after: a,
+      rankBefore: rank(b, position, othersBefore),
+      rankAfter: rank(a, position, othersAfter),
+    };
+  });
+}
+
+const ordinal = (n: number) =>
+  `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th")}`;
+
+/** Plain sentences on what the trade does to each position group. */
+export function positionStory(changes: PositionChange[], teams: number, who: "You" | "They") {
+  const your = who === "You" ? "your" : "their";
+  const strong = (rank: number) => rank <= Math.ceil(teams / 3);
+  const weak = (rank: number) => rank > Math.floor((teams * 2) / 3);
+  const lines: string[] = [];
+  for (const c of changes) {
+    const change = c.after - c.before;
+    if (Math.abs(change) < REAL_CHANGE) continue;
+    const ranks =
+      c.rankBefore === c.rankAfter
+        ? `still ${ordinal(c.rankAfter)} of ${teams}`
+        : `${ordinal(c.rankBefore)} to ${ordinal(c.rankAfter)} of ${teams}`;
+    const size = `${Math.abs(change).toFixed(1)} points a week`;
+    if (change < 0)
+      lines.push(
+        strong(c.rankBefore) && !weak(c.rankAfter)
+          ? `${who} trade from a strength: ${your} ${c.position}s give up ${size} but stay solid (${ranks}).`
+          : weak(c.rankAfter)
+            ? `This leaves ${your} ${c.position}s thin: down ${size}, ${ranks} in the league.`
+            : `${who === "You" ? "Your" : "Their"} ${c.position}s get weaker: down ${size} (${ranks}).`,
+      );
+    else
+      lines.push(
+        weak(c.rankBefore)
+          ? `This fixes a weak spot: ${your} ${c.position}s gain ${size} (${ranks}).`
+          : `${who === "You" ? "Your" : "Their"} ${c.position}s get stronger: up ${size} (${ranks}).`,
+      );
+  }
+  return lines;
 }

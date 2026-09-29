@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { playersSnapshot, type PlayersSnapshot } from "@/lib/snapshots";
 import { fetchPublicJson } from "@/lib/live-data";
-import { scoreProjectedStats } from "@/lib/projection-scoring";
+import { FANTASY_LAST_WEEK, scoreProjectedStats } from "@/lib/projection-scoring";
 
 type Projection = PlayersSnapshot["players"][number];
 type Projected = Projection["weeklyForecasts"][number]["projected"];
@@ -199,7 +199,7 @@ export function PlayerCard({
     : null;
   const forecastByWeek = new Map(player.weeklyForecasts.map((g) => [g.week, g]));
   const upcoming = Array.from(
-    { length: 18 - playersSnapshot.week + 1 },
+    { length: FANTASY_LAST_WEEK - playersSnapshot.week + 1 },
     (_, i) => playersSnapshot.week + i,
   );
   const sleeper = info.data;

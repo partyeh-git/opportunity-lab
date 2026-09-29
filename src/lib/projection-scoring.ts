@@ -35,10 +35,13 @@ export function scoreProjectedStats(p: ProjectedStats, settings: Record<string, 
   );
 }
 
+/** Fantasy seasons end in Week 17 (playoffs are Weeks 15 to 17); NFL Week 18 does not count. */
+export const FANTASY_LAST_WEEK = 17;
+
 export function scoreRemainingGames(
   player: { weeklyForecasts: { week: number; projected: ProjectedStats }[] },
   settings: Record<string, number>,
-  endWeek = 18,
+  endWeek = FANTASY_LAST_WEEK,
 ) {
   return player.weeklyForecasts
     .filter((g) => g.week <= endWeek)

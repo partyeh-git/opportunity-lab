@@ -12,6 +12,7 @@ import { useWeather, useWeekStatus, WeatherIcons, WeekOverStrip } from "@/compon
 import { moveToRank, parseOrder, rankingStorageKey, reconcileOrder } from "@/lib/ranking-order";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
 import { boardTiers } from "@/lib/tiers";
+import { FANTASY_LAST_WEEK } from "@/lib/projection-scoring";
 import {
   INJURY_LETTER,
   RULED_OUT,
@@ -421,7 +422,7 @@ export function PersonalRankings({
         <p className="broadcast-tag text-xs uppercase">
           {playersSnapshot.season} ·{" "}
           {effectiveHorizon === "ros"
-            ? `Rest of season · Weeks ${playersSnapshot.week}–18`
+            ? `Rest of season · Weeks ${playersSnapshot.week}–${FANTASY_LAST_WEEK}`
             : `Week ${playersSnapshot.week}${weekStatus.weekOver ? " · Final" : ""}`}
         </p>
         <p className="text-xs text-muted-foreground">
@@ -690,7 +691,7 @@ export function PersonalRankings({
                 <p>
                   {effectiveHorizon === "week"
                     ? `Projected fantasy points in Week ${playersSnapshot.week} if the player plays, in this league's scoring. When there is real doubt, the % beside it is his chance to play, from the injury designation and games just missed (learned from past injury reports).`
-                    : `Projected fantasy points for Weeks ${playersSnapshot.week} to 18 in this league's scoring, added up game by game against each opponent. Byes excluded.`}{" "}
+                    : `Projected fantasy points for Weeks ${playersSnapshot.week} to ${FANTASY_LAST_WEEK} (the end of the fantasy season) in this league's scoring, added up game by game against each opponent. Byes excluded.`}{" "}
                   Confirmed absences count as zero; otherwise we assume the player plays. Click the
                   "i" next to a player's number for how it was built.
                 </p>

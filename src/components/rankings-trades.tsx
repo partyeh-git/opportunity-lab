@@ -5,11 +5,20 @@ import { Input } from "@/components/ui/input";
 import { useLeague } from "@/components/league-context";
 import { useWeekStatus, WeekOverStrip } from "@/components/weather-icons";
 import { DEFAULT_LINEUP, leagueValues } from "@/lib/league-value";
-import { scoreProjectedStats } from "@/lib/projection-scoring";
+import { FANTASY_LAST_WEEK, scoreProjectedStats } from "@/lib/projection-scoring";
 import { playersSnapshot as snapshot } from "@/lib/snapshots";
-import { REAL_CHANGE, simulateSeason, tradeVerdict, type SimPlayer } from "@/lib/trade-sim";
+import {
+  groupStrength,
+  positionChanges,
+  positionStory,
+  REAL_CHANGE,
+  simulateSeason,
+  tradeVerdict,
+  type PositionChange,
+  type SimPlayer,
+} from "@/lib/trade-sim";
 
-const LAST_WEEK = 18;
+const LAST_WEEK = FANTASY_LAST_WEEK;
 const MAX_PER_SIDE = 4;
 const genericSettings = { rec: 1, pass_int: -2 };
 const signed = (value: number, digits = 1) => `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
@@ -237,17 +246,40 @@ export function Trades() {
       ...incoming,
     ];
     const side = (roster: TradePlayer[], out: TradePlayer[], incoming: TradePlayer[]) => {
+      const traded = swap(roster, out, incoming);
       const before = simulateSeason(roster, slots, weeks);
-      const after = simulateSeason(swap(roster, out, incoming), slots, weeks);
-      return { before, after, perWeek: (after.total - before.total) / weeks.length };
+      const after = simulateSeason(traded, slots, weeks);
+      return {
+        before,
+        after,
+        perWeek: (after.total - before.total) / weeks.length,
+        groupsBefore: groupStrength(roster, slots, weeks),
+        groupsAfter: groupStrength(traded, slots, weeks),
+      };
     };
+    const me = connected ? side(mine, giving, getting) : null;
+    const them = connected && partner ? side(theirs, getting, giving) : null;
+    // Every other team in the league, to see where each position group ranks.
+    const rest = league.rosters
+      .filter((r) => r !== myRoster && r !== partner)
+      .map((r) => groupStrength(rosterOf(r.players), slots, weeks));
+    const groups = (team: NonNullable<typeof me>, other: typeof me): PositionChange[] =>
+      positionChanges(
+        team.groupsBefore,
+        team.groupsAfter,
+        [...rest, ...(other ? [other.groupsBefore] : [])],
+        [...rest, ...(other ? [other.groupsAfter] : [])],
+        weeks.length,
+      );
     return {
-      me: connected ? side(mine, giving, getting) : null,
-      them: connected && partner ? side(theirs, getting, giving) : null,
+      me,
+      them,
+      myGroups: me ? groups(me, them) : [],
+      theirGroups: them && me ? groups(them, me) : [],
     };
     // giving/getting are rebuilt each render; their identity follows give/get.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, give, get, mine, theirs, slots, weeks, connected, partner]);
+  }, [ready, give, get, mine, theirs, slots, weeks, connected, partner, league.rosters]);
 
   const valueOut = giving.reduce((sum, p) => sum + p.value, 0);
   const valueIn = getting.reduce((sum, p) => sum + p.value, 0);
@@ -258,11 +290,12 @@ export function Trades() {
   const rosterCount = (myRoster?.players?.length ?? 0) - (myRoster?.reserve?.length ?? 0);
   const mustDrop = connected ? rosterCount - giving.length + getting.length - spots : 0;
 
+  const theirStory = result?.them ? positionStory(result.theirGroups, teams, "They") : [];
   const reasons = (() => {
     if (!result?.me) return [];
     const { before, after } = result.me;
     const games = (s: typeof before, id: string) => s.starts.get(id) ?? { weeks: 0, points: 0 };
-    const lines: string[] = [];
+    const lines: string[] = positionStory(result.myGroups, teams, "You");
     for (const p of getting) {
       const g = games(after, p.id);
       lines.push(
@@ -419,6 +452,88 @@ export function Trades() {
                   ))}
                 </ul>
               </div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                {[
+                  { label: "Your team by position", groups: result.myGroups },
+                  { label: `${partnerName} by position`, groups: result.theirGroups },
+                ]
+                  .filter((block) => block.groups.length > 0)
+                  .map(({ label, groups }) => (
+                    <div key={label} className="overflow-x-auto rounded-md border">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted text-left text-xs uppercase text-muted-foreground">
+                          <tr>
+                            <th className="px-3 py-2">{label}</th>
+                            <th className="px-3 py-2 text-right">Now</th>
+                            <th className="px-3 py-2 text-right">After</th>
+                            <th className="px-3 py-2 text-right">Change</th>
+                            <th className="px-3 py-2 text-right">League rank</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {groups.map((g) => {
+                            const change = g.after - g.before;
+                            return (
+                              <tr key={g.position} className="border-t tabular-nums">
+                                <td className="px-3 py-1.5 font-semibold">{g.position}</td>
+                                <td className="px-3 py-1.5 text-right">{g.before.toFixed(1)}</td>
+                                <td className="px-3 py-1.5 text-right">{g.after.toFixed(1)}</td>
+                                <td
+                                  className={`px-3 py-1.5 text-right font-semibold ${change <= -REAL_CHANGE ? "text-red-600 dark:text-red-400" : change >= REAL_CHANGE ? "text-volt" : "text-muted-foreground"}`}
+                                >
+                                  {Math.abs(change) < 0.05 ? "—" : signed(change)}
+                                </td>
+                                <td className="px-3 py-1.5 text-right text-muted-foreground">
+                                  {g.rankBefore === g.rankAfter
+                                    ? `#${g.rankAfter}`
+                                    : `#${g.rankBefore} to #${g.rankAfter}`}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+              </div>
+              {result.them && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    What it does for {partnerName}
+                  </p>
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-sm leading-6">
+                    {(theirStory.length ? theirStory : ["No real change at any position."]).map(
+                      (line) => (
+                        <li key={line}>{line}</li>
+                      ),
+                    )}
+                  </ul>
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Your lineup week by week
+                </p>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {weeks.map((week, i) => {
+                    const change = result.me!.after.byWeek[i]! - result.me!.before.byWeek[i]!;
+                    return (
+                      <div
+                        key={week}
+                        title={`Week ${week}: ${result.me!.before.byWeek[i]!.toFixed(1)} to ${result.me!.after.byWeek[i]!.toFixed(1)}`}
+                        className="min-w-14 rounded-md bg-muted px-2 py-1 text-center"
+                      >
+                        <p className="text-[10px] uppercase text-muted-foreground">Wk {week}</p>
+                        <p
+                          className={`text-sm font-semibold tabular-nums ${change <= -REAL_CHANGE ? "text-red-600 dark:text-red-400" : change >= REAL_CHANGE ? "text-volt" : "text-muted-foreground"}`}
+                        >
+                          {signed(change)}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               {mustDrop > 0 && (
                 <p className="text-sm text-warning">
                   You would have to drop {mustDrop} player{mustDrop > 1 ? "s" : ""} to make room.
@@ -455,6 +570,11 @@ export function Trades() {
           <li>
             We play out the rest of the season week by week, before and after the trade, fielding
             each team's best lineup every week. Byes, ruled-out weeks and bench depth all count.
+          </li>
+          <li>
+            Position numbers are the points a week from each group's starters (the spots only that
+            position can fill; superflex counts as a quarterback spot). The rank compares the group
+            with every other team in the league. Flex gains show up in the lineup total.
           </li>
           <li>
             A change under {REAL_CHANGE} points a week is treated as no real change. Fair, tilted
