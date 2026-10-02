@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-02T00:29:27.813Z",
+ "updatedAt": "2026-10-02T16:32:29.110Z",
  "week": 4,
  "players": {
   "1479": {
@@ -95,7 +95,7 @@
   "7021": {
    "status": "Out",
    "body": "Toe",
-   "practice": null
+   "practice": "DNP"
   },
   "7204": {
    "status": "Questionable",
@@ -138,8 +138,8 @@
    "practice": null
   },
   "8155": {
-   "status": "Doubtful",
-   "body": "Thigh",
+   "status": "Out",
+   "body": "Quadriceps",
    "practice": null
   },
   "8195": {
@@ -193,7 +193,7 @@
    "practice": null
   },
   "11566": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Elbow",
    "practice": "Limited"
   },
@@ -218,7 +218,7 @@
    "practice": "Limited"
   },
   "11625": {
-   "status": "Doubtful",
+   "status": "Out",
    "body": "Finger",
    "practice": null
   },
@@ -263,7 +263,7 @@
    "practice": null
   },
   "12498": {
-   "status": "Doubtful",
+   "status": "Out",
    "body": "Thumb",
    "practice": null
   },
@@ -298,7 +298,7 @@
    "practice": null
   },
   "13296": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Ankle",
    "practice": null
   },
@@ -344,6 +344,7 @@
   }
  },
  "practice": {
+  "7021": "DNP",
   "8136": "DNP",
   "8210": "Limited",
   "11566": "Limited",
