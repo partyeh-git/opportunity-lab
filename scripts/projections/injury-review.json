@@ -1,7 +1,7 @@
 {
   "season": 2026,
   "week": 4,
-  "reviewedAt": "2026-10-03T00:57:45.723133+00:00",
+  "reviewedAt": "2026-10-03T17:52:33.255330+00:00",
   "records": [
     {
       "id": "00-0035676",
@@ -62,20 +62,6 @@
       "sourceUrl": "https://www.newyorkjets.com/team/transactions/",
       "sourceTitle": "Jets transactions: September 22 injured-reserve placements",
       "note": "Minimum four-game IR absence begins with Week 3. Return date remains unconfirmed."
-    },
-    {
-      "id": "00-0040737",
-      "team": "LA",
-      "reportedStatus": "IR",
-      "injury": "Ankle",
-      "outWeeks": [
-        4
-      ],
-      "publishedDate": "2026-10-03",
-      "sourceKind": "roster_status",
-      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
-      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
-      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
     },
     {
       "id": "00-0037557",
@@ -250,6 +236,20 @@
       "team": "MIA",
       "reportedStatus": "IR",
       "injury": "Knee - ACL",
+      "outWeeks": [
+        4
+      ],
+      "publishedDate": "2026-10-03",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0040737",
+      "team": "LA",
+      "reportedStatus": "IR",
+      "injury": "Ankle",
       "outWeeks": [
         4
       ],
