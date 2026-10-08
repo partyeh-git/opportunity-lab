@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-08T00:41:12.381Z",
+ "updatedAt": "2026-10-08T17:46:27.581Z",
  "week": 5,
  "players": {
   "1479": {
@@ -60,7 +60,7 @@
   "4892": {
    "status": "Out",
    "body": "Thumb",
-   "practice": null
+   "practice": "DNP"
   },
   "4983": {
    "status": "Questionable",
@@ -138,7 +138,7 @@
    "practice": null
   },
   "6819": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Foot",
    "practice": null
   },
@@ -275,7 +275,7 @@
   "10225": {
    "status": "Questionable",
    "body": "Illness",
-   "practice": null
+   "practice": "DNP"
   },
   "10226": {
    "status": "IR",
@@ -448,5 +448,9 @@
    "practice": null
   }
  },
- "practice": {}
+ "practice": {
+  "4892": "DNP",
+  "6786": "Full",
+  "10225": "DNP"
+ }
 }
