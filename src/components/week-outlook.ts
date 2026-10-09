@@ -74,9 +74,10 @@ export function useWeekOutlook(
       : null;
   };
   // Ruled-out players have a zeroed projection, so use their matchup-neutral line instead.
+  // A bye week is also zeroed, but there is no game to play: it stays zero.
   const ifPlays = (entry: ResearchEntry) => {
     const p = projectionById.get(entry.id);
-    return entry.weekPoints > 0 || !p
+    return entry.weekPoints > 0 || !p || p.opponent === "BYE"
       ? entry.weekPoints
       : scoreProjectedStats(p.neutralProjected, settings);
   };
