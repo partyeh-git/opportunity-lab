@@ -1,56 +1,8 @@
 {
   "season": 2026,
-  "week": 5,
-  "reviewedAt": "2026-10-13T01:01:42.665231+00:00",
+  "week": 6,
+  "reviewedAt": "2026-10-13T20:04:46.541246+00:00",
   "records": [
-    {
-      "id": "00-0035676",
-      "team": "NE",
-      "reportedStatus": "IR",
-      "injury": "Ankle",
-      "firstMissedWeek": 2,
-      "minimumMissedGames": 4,
-      "publishedDate": "2026-09-12",
-      "sourceUrl": "https://www.patriots.com/news/analysis-patriots-place-wr-a-j-brown-on-injured-reserve-sign-dt-daquan-jones",
-      "sourceTitle": "Patriots: A.J. Brown placed on injured reserve",
-      "note": "Confirmed minimum absence. Eligibility after four missed games does not confirm a return; later projections are conditional on playing."
-    },
-    {
-      "id": "00-0037525",
-      "team": "MIN",
-      "reportedStatus": "IR",
-      "injury": "Thumb",
-      "firstMissedWeek": 2,
-      "minimumMissedGames": 4,
-      "publishedDate": "2026-09-16",
-      "sourceUrl": "https://www.vikings.com/news/jordan-mason-injured-reserve-deejay-dallas-signing-2026",
-      "sourceTitle": "Vikings: Jordan Mason placed on injured reserve",
-      "note": "Minimum four-game IR absence counted against the schedule, excluding byes. Return date remains unconfirmed."
-    },
-    {
-      "id": "00-0040870",
-      "team": "BAL",
-      "reportedStatus": "IR",
-      "injury": "Wrist",
-      "firstMissedWeek": 2,
-      "minimumMissedGames": 4,
-      "publishedDate": "2026-09-16",
-      "sourceUrl": "https://www.baltimoreravens.com/news/jakobi-lane-injured-reserve-wrist-surgery-ravens-rookie-wide-receiver-2026",
-      "sourceTitle": "Ravens: Ja'Kobi Lane placed on injured reserve",
-      "note": "Minimum four-game IR absence. A hoped-for minimum stay is not a confirmed return date."
-    },
-    {
-      "id": "00-0041511",
-      "team": "NYJ",
-      "reportedStatus": "IR",
-      "injury": "Ankle",
-      "firstMissedWeek": 2,
-      "minimumMissedGames": 4,
-      "publishedDate": "2026-09-19",
-      "sourceUrl": "https://www.newyorkjets.com/news/jets-omar-cooper-injured-reserve-09-19-2026",
-      "sourceTitle": "Jets: Omar Cooper Jr. placed on injured reserve",
-      "note": "Minimum four-game IR absence; later projections require a return that has not been confirmed."
-    },
     {
       "id": "00-0040582",
       "team": "NYJ",
@@ -64,12 +16,68 @@
       "note": "Minimum four-game IR absence begins with Week 3. Return date remains unconfirmed."
     },
     {
+      "id": "00-0035676",
+      "team": "NE",
+      "reportedStatus": "IR",
+      "injury": "Ankle",
+      "outWeeks": [
+        6
+      ],
+      "publishedDate": "2026-10-13",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0037525",
+      "team": "MIN",
+      "reportedStatus": "IR",
+      "injury": "Thumb",
+      "outWeeks": [
+        6
+      ],
+      "publishedDate": "2026-10-13",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
       "id": "00-0037557",
       "team": "LA",
       "reportedStatus": "IR",
       "injury": "Calf",
       "outWeeks": [
-        5
+        6
+      ],
+      "publishedDate": "2026-10-13",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0040870",
+      "team": "BAL",
+      "reportedStatus": "IR",
+      "injury": "Wrist",
+      "outWeeks": [
+        6
+      ],
+      "publishedDate": "2026-10-13",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0041511",
+      "team": "NYJ",
+      "reportedStatus": "IR",
+      "injury": "Ankle",
+      "outWeeks": [
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -83,7 +91,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -97,7 +105,7 @@
       "reportedStatus": "IR",
       "injury": "Lower Leg",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -111,7 +119,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -125,7 +133,7 @@
       "reportedStatus": "IR",
       "injury": "Heel",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -139,7 +147,7 @@
       "reportedStatus": "IR",
       "injury": "Thumb",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -153,7 +161,7 @@
       "reportedStatus": "IR",
       "injury": "Neck",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -167,7 +175,7 @@
       "reportedStatus": "IR",
       "injury": "Knee",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -181,7 +189,7 @@
       "reportedStatus": "IR",
       "injury": "Abdomen",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -195,7 +203,7 @@
       "reportedStatus": "IR",
       "injury": "Knee - Meniscus",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -209,7 +217,7 @@
       "reportedStatus": "IR",
       "injury": "Forearm",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -223,7 +231,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -237,7 +245,7 @@
       "reportedStatus": "IR",
       "injury": "Biceps",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -251,7 +259,7 @@
       "reportedStatus": "IR",
       "injury": "Hamstring",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -265,7 +273,7 @@
       "reportedStatus": "IR",
       "injury": "Knee - ACL",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -279,7 +287,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -293,7 +301,7 @@
       "reportedStatus": "IR",
       "injury": "Chest",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -307,7 +315,7 @@
       "reportedStatus": "IR",
       "injury": "Calf",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -321,7 +329,7 @@
       "reportedStatus": "IR",
       "injury": "Foot",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -335,7 +343,7 @@
       "reportedStatus": "IR",
       "injury": "Achilles",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -349,7 +357,7 @@
       "reportedStatus": "IR",
       "injury": "Foot",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -363,7 +371,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -377,7 +385,7 @@
       "reportedStatus": "IR",
       "injury": "Abdomen",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -391,7 +399,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -405,7 +413,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
@@ -419,7 +427,7 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        5
+        6
       ],
       "publishedDate": "2026-10-13",
       "sourceKind": "roster_status",
