@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-17T22:50:48.348Z",
+ "updatedAt": "2026-10-18T14:20:22.067Z",
  "week": 6,
  "players": {
   "2078": {
@@ -10,17 +10,17 @@
   "2216": {
    "status": "Questionable",
    "body": "Ribs",
-   "practice": null
+   "practice": "DNP"
   },
   "2307": {
    "status": "Out",
    "body": "Knee - MCL",
-   "practice": null
+   "practice": "DNP"
   },
   "2449": {
    "status": "Questionable",
    "body": "Hamstring",
-   "practice": null
+   "practice": "Limited"
   },
   "3286": {
    "status": "IR",
@@ -95,7 +95,7 @@
   "5872": {
    "status": "Out",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "5892": {
    "status": "Out",
@@ -335,7 +335,7 @@
   "12533": {
    "status": "Out",
    "body": "Groin",
-   "practice": null
+   "practice": "DNP"
   },
   "12534": {
    "status": "Out",
@@ -377,6 +377,11 @@
    "body": "Ankle",
    "practice": null
   },
+  "13307": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
   "13324": {
    "status": "Out",
    "body": "Hand",
@@ -410,11 +415,16 @@
  },
  "practice": {
   "1479": "Full",
+  "2216": "DNP",
+  "2307": "DNP",
+  "2449": "Limited",
   "2505": "Full",
   "3271": "DNP",
+  "4034": "Full",
   "4035": "Limited",
   "4037": "Full",
   "4046": "Full",
+  "4663": "Limited",
   "4866": "DNP",
   "4881": "DNP",
   "4892": "DNP",
@@ -427,7 +437,9 @@
   "5854": "Limited",
   "5859": "Limited",
   "5870": "Full",
+  "5872": "DNP",
   "5892": "DNP",
+  "5927": "Limited",
   "5967": "Full",
   "6427": "DNP",
   "6786": "Full",
@@ -447,6 +459,8 @@
   "8112": "Limited",
   "8127": "Full",
   "8131": "Full",
+  "8135": "Limited",
+  "8136": "Limited",
   "8144": "Limited",
   "8155": "DNP",
   "8168": "DNP",
@@ -463,6 +477,7 @@
   "10229": "DNP",
   "11560": "Full",
   "11564": "Full",
+  "11566": "Full",
   "11577": "DNP",
   "11597": "DNP",
   "11625": "DNP",
@@ -476,6 +491,7 @@
   "12518": "Limited",
   "12527": "Full",
   "12529": "Limited",
+  "12533": "DNP",
   "12534": "DNP",
   "12545": "Full",
   "13276": "Full",
@@ -486,6 +502,7 @@
   "13324": "DNP",
   "13330": "Full",
   "13346": "Limited",
-  "13380": "Limited"
+  "13380": "Limited",
+  "13414": "DNP"
  }
 }
