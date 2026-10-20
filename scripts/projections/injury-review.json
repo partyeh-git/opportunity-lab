@@ -1,57 +1,17 @@
 {
   "season": 2026,
-  "week": 6,
-  "reviewedAt": "2026-10-19T22:41:23.046761+00:00",
+  "week": 7,
+  "reviewedAt": "2026-10-20T18:19:41.711999+00:00",
   "records": [
-    {
-      "id": "00-0040582",
-      "team": "NYJ",
-      "reportedStatus": "IR",
-      "injury": "Knee",
-      "firstMissedWeek": 3,
-      "minimumMissedGames": 4,
-      "publishedDate": "2026-09-22",
-      "sourceUrl": "https://www.newyorkjets.com/team/transactions/",
-      "sourceTitle": "Jets transactions: September 22 injured-reserve placements",
-      "note": "Minimum four-game IR absence begins with Week 3. Return date remains unconfirmed."
-    },
-    {
-      "id": "00-0037816",
-      "team": "NE",
-      "reportedStatus": "IR",
-      "injury": "Shoulder",
-      "outWeeks": [
-        6
-      ],
-      "publishedDate": "2026-10-19",
-      "sourceKind": "roster_status",
-      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
-      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
-      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
-    },
-    {
-      "id": "00-0040242",
-      "team": "WAS",
-      "reportedStatus": "IR",
-      "injury": "Groin",
-      "outWeeks": [
-        6
-      ],
-      "publishedDate": "2026-10-19",
-      "sourceKind": "roster_status",
-      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
-      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
-      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
-    },
     {
       "id": "00-0037525",
       "team": "MIN",
       "reportedStatus": "IR",
       "injury": "Thumb",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -63,9 +23,9 @@
       "reportedStatus": "IR",
       "injury": "Calf",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -77,9 +37,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -91,9 +51,9 @@
       "reportedStatus": "IR",
       "injury": "Lower Leg",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -105,9 +65,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -119,9 +79,9 @@
       "reportedStatus": "IR",
       "injury": "Heel",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -133,9 +93,9 @@
       "reportedStatus": "IR",
       "injury": "Thumb",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -147,9 +107,9 @@
       "reportedStatus": "IR",
       "injury": "Neck",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -161,9 +121,9 @@
       "reportedStatus": "IR",
       "injury": "Knee",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -175,9 +135,23 @@
       "reportedStatus": "IR",
       "injury": "Abdomen",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0040582",
+      "team": "NYJ",
+      "reportedStatus": "IR",
+      "injury": "Knee",
+      "outWeeks": [
+        7
+      ],
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -189,9 +163,9 @@
       "reportedStatus": "IR",
       "injury": "Knee - Meniscus",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -203,9 +177,9 @@
       "reportedStatus": "IR",
       "injury": "Forearm",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -217,9 +191,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -231,9 +205,9 @@
       "reportedStatus": "IR",
       "injury": "Biceps",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -245,9 +219,9 @@
       "reportedStatus": "IR",
       "injury": "Hamstring",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -259,9 +233,9 @@
       "reportedStatus": "IR",
       "injury": "Knee - ACL",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -273,9 +247,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -287,9 +261,9 @@
       "reportedStatus": "IR",
       "injury": "Chest",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -301,9 +275,9 @@
       "reportedStatus": "IR",
       "injury": "Calf",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -315,9 +289,9 @@
       "reportedStatus": "IR",
       "injury": "Achilles",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -329,9 +303,9 @@
       "reportedStatus": "IR",
       "injury": "Foot",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -343,9 +317,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -357,9 +331,9 @@
       "reportedStatus": "IR",
       "injury": "Abdomen",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -371,9 +345,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -385,9 +359,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -399,9 +373,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -413,9 +387,9 @@
       "reportedStatus": "IR",
       "injury": "Pectoral",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -427,9 +401,23 @@
       "reportedStatus": "IR",
       "injury": "Calf",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0037816",
+      "team": "NE",
+      "reportedStatus": "IR",
+      "injury": "Shoulder",
+      "outWeeks": [
+        7
+      ],
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -441,9 +429,9 @@
       "reportedStatus": "IR",
       "injury": "Ankle",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -455,9 +443,9 @@
       "reportedStatus": "IR",
       "injury": "Finger",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -469,9 +457,23 @@
       "reportedStatus": "IR",
       "injury": "Foot",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
+    {
+      "id": "00-0040242",
+      "team": "WAS",
+      "reportedStatus": "IR",
+      "injury": "Groin",
+      "outWeeks": [
+        7
+      ],
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
@@ -483,9 +485,9 @@
       "reportedStatus": "IR",
       "injury": "Hip",
       "outWeeks": [
-        6
+        7
       ],
-      "publishedDate": "2026-10-19",
+      "publishedDate": "2026-10-20",
       "sourceKind": "roster_status",
       "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
       "sourceTitle": "NFL roster status via Sleeper: injured reserve",
