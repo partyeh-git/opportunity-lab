@@ -1,6 +1,6 @@
 """Turn the dynasty model's CSV into the small JSON file the Dynasty board reads.
 
-Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id>
+Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv]
 Writes public/dynasty-values.json. The model itself lives outside this repo (Drive research
 folder); this only reshapes its output.
 """
@@ -24,6 +24,12 @@ def num(value: str) -> float:
 def main() -> None:
     source, league_id = Path(sys.argv[1]), sys.argv[2]
     rows = list(csv.DictReader(source.open()))
+    # Development score: a guide for young players only; it never changes the value.
+    dev = {}
+    if len(sys.argv) > 3:
+        for d in csv.DictReader(Path(sys.argv[3]).open()):
+            if d["dev_score"]:
+                dev[d["sleeper_id"]] = (round(float(d["dev_score"])), d["trend"] or "flat")
     years = sorted(
         int(col.split("_")[1]) for col in rows[0] if col.startswith("vorp_") and col[5:].isdigit()
     )
@@ -44,6 +50,8 @@ def main() -> None:
                 "pickOwner": row["owner"] if is_pick else None,
                 "byYear": [num(row["ros_2026"])] + [num(row[f"vorp_{y}"]) for y in years],
                 "totals": totals,
+                "dev": dev[row["sleeper_id"]][0] if row["sleeper_id"] in dev else None,
+                "devTrend": dev[row["sleeper_id"]][1] if row["sleeper_id"] in dev else None,
             }
         )
     out = {

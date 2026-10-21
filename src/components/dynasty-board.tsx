@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { GripVertical, Info } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, GripVertical, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,6 +18,9 @@ type DynastyEntry = {
   pickOwner: string | null;
   byYear: number[];
   totals: Record<Plan, number>;
+  /** Development score, 0-100 within position, young players only. A guide, not part of value. */
+  dev?: number | null;
+  devTrend?: "up" | "down" | "flat" | null;
 };
 type DynastyFile = {
   leagueId: string;
@@ -254,6 +257,23 @@ export function DynastyBoard() {
               <th className="px-3 py-2">Player</th>
               <th className="px-3 py-2">Owner</th>
               <th className="px-3 py-2 text-right">Value</th>
+              <th className="px-3 py-2 text-right">
+                <span className="inline-flex items-center gap-1">
+                  Dev
+                  <InfoBubble label="What Dev means">
+                    <p>
+                      Development score for young players (first five NFL seasons), 0 to 100 within
+                      position. It blends expert prospect grades (weighted by each source's track
+                      record), college production, athletic testing and draft slot, and fades toward
+                      real NFL results each season.
+                    </p>
+                    <p>
+                      A guide only: it does not change Value. The arrow shows a move of 3+ points
+                      since the season started.
+                    </p>
+                  </InfoBubble>
+                </span>
+              </th>
               {file.years.map((y) => (
                 <th key={y} className="hidden px-2 py-2 text-right md:table-cell">
                   {y}
@@ -341,6 +361,22 @@ export function DynastyBoard() {
                   </td>
                   <td className="px-3 py-1.5 text-right font-display text-lg tabular-nums">
                     {Math.round(e.totals[plan])}
+                  </td>
+                  <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
+                    {e.dev != null && (
+                      <span className="inline-flex items-center justify-end gap-0.5">
+                        {e.dev}
+                        {e.devTrend === "up" && (
+                          <ArrowUpRight className="h-3.5 w-3.5 text-lime-600" aria-label="rising" />
+                        )}
+                        {e.devTrend === "down" && (
+                          <ArrowDownRight
+                            className="h-3.5 w-3.5 text-red-600"
+                            aria-label="falling"
+                          />
+                        )}
+                      </span>
+                    )}
                   </td>
                   {e.byYear.map((v, i) => (
                     <td
