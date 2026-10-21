@@ -19,7 +19,7 @@ import { Trades } from "@/components/rankings-trades";
 import { PersonalRankings } from "@/components/personal-rankings";
 import { StartSit } from "@/components/start-sit";
 import { WaiversFaab } from "@/components/waivers-faab";
-import { DynastyBoard } from "@/components/dynasty-board";
+import { DynastyScreen } from "@/components/dynasty-board";
 import {
   ConnectBanner,
   LeagueProvider,
@@ -134,7 +134,7 @@ function Index() {
           {screen === "Overall Rankings" ? (
             <PersonalRankings key="rankings" />
           ) : screen === "Dynasty" ? (
-            <DynastyBoard />
+            <DynastyScreen />
           ) : screen === "Weekly Rankings" ? (
             <PersonalRankings key="weekly" weeklyOnly />
           ) : screen === "Start / Sit" ? (

@@ -50,6 +50,12 @@ def main() -> None:
                 "pickOwner": row["owner"] if is_pick else None,
                 "byYear": [num(row["ros_2026"])] + [num(row[f"vorp_{y}"]) for y in years],
                 "totals": totals,
+                # Risk: Balanced-total range across similar past players, plus bust chance.
+                "risk": row.get("risk_label") or None,
+                "range": [num(row["bal_p10"]), num(row["bal_p50"]), num(row["bal_p90"])]
+                if row.get("bal_p50")
+                else None,
+                "bust": round(float(row["bust_chance"]) * 100) if row.get("bust_chance") else None,
                 "dev": dev[row["sleeper_id"]][0] if row["sleeper_id"] in dev else None,
                 "devTrend": dev[row["sleeper_id"]][1] if row["sleeper_id"] in dev else None,
             }

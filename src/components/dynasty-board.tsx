@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLeague } from "@/components/league-context";
+import { TradeIdeas } from "@/components/trade-ideas";
 import { fetchPublicJson } from "@/lib/live-data";
 import { moveToRank, parseOrder, reconcileOrder } from "@/lib/ranking-order";
 
@@ -20,6 +21,10 @@ type DynastyEntry = {
   totals: Record<Plan, number>;
   /** Development score, 0-100 within position, young players only. A guide, not part of value. */
   dev?: number | null;
+  /** Spread of outcomes among similar past players (Balanced total) and bust chance. */
+  risk?: "Low" | "Medium" | "High" | null;
+  range?: [number, number, number] | null;
+  bust?: number | null;
   devTrend?: "up" | "down" | "flat" | null;
 };
 type DynastyFile = {
@@ -39,6 +44,12 @@ const POSITIONS = ["All", "QB", "RB", "WR", "TE", "PICK"] as const;
 const OWNERSHIP = ["All", "My team", "Other teams", "Free agents"] as const;
 const PLAN_KEY = "dynasty-plan-v1";
 const orderKey = (leagueId: string) => `dynasty-order-v1:${leagueId}`;
+
+const riskChip: Record<string, string> = {
+  Low: "bg-lime-100 text-lime-800 dark:bg-lime-400/20 dark:text-lime-200",
+  Medium: "bg-amber-100 text-amber-800 dark:bg-amber-400/20 dark:text-amber-200",
+  High: "bg-red-100 text-red-800 dark:bg-red-400/20 dark:text-red-200",
+};
 
 const positionChip: Record<string, string> = {
   QB: "bg-rose-100 text-rose-800 dark:bg-rose-400/20 dark:text-rose-200",
@@ -257,6 +268,22 @@ export function DynastyBoard() {
               <th className="px-3 py-2">Player</th>
               <th className="px-3 py-2">Owner</th>
               <th className="px-3 py-2 text-right">Value</th>
+              <th className="px-3 py-2">
+                <span className="inline-flex items-center gap-1">
+                  Risk
+                  <InfoBubble label="What Risk means">
+                    <p>
+                      How wide this player's outcomes are, based on what similar past players
+                      actually did. Hover a label for the bad, typical and great case (Balanced
+                      value) and the bust chance: below the starter line in both 2027 and 2028.
+                    </p>
+                    <p>
+                      Two players with the same value can carry very different risk. Low risk = a
+                      solid floor; High = the average leans on a few big hits.
+                    </p>
+                  </InfoBubble>
+                </span>
+              </th>
               <th className="px-3 py-2 text-right">
                 <span className="inline-flex items-center gap-1">
                   Dev
@@ -362,6 +389,23 @@ export function DynastyBoard() {
                   <td className="px-3 py-1.5 text-right font-display text-lg tabular-nums">
                     {Math.round(e.totals[plan])}
                   </td>
+                  <td className="px-3 py-1.5">
+                    {e.risk && (
+                      <span
+                        title={
+                          e.range
+                            ? `Bad ${Math.round(e.range[0])} · Typical ${Math.round(e.range[1])} · Great ${Math.round(e.range[2])}${e.bust != null ? ` · Bust ${e.bust}%` : ""}`
+                            : undefined
+                        }
+                        className={`inline-block rounded-sm px-1.5 py-0.5 text-[11px] font-bold ${riskChip[e.risk] ?? ""}`}
+                      >
+                        {e.risk}
+                        {e.bust != null && (
+                          <span className="ml-1 font-normal opacity-80">{e.bust}%</span>
+                        )}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
                     {e.dev != null && (
                       <span className="inline-flex items-center justify-end gap-0.5">
@@ -396,6 +440,35 @@ export function DynastyBoard() {
         Season columns show points above the worst starter before the team-plan weighting. Updated{" "}
         {new Date(file.generatedAt).toLocaleDateString()}.
       </p>
+    </div>
+  );
+}
+
+/** Dynasty tab: the long-term board, or trade ideas built from the same values. */
+export function DynastyScreen() {
+  const [view, setView] = useState<"board" | "trades">("board");
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-1 rounded-md border p-1 w-fit" role="tablist">
+        {(
+          [
+            ["board", "Board"],
+            ["trades", "Trade ideas"],
+          ] as const
+        ).map(([v, label]) => (
+          <Button
+            key={v}
+            size="sm"
+            role="tab"
+            aria-selected={view === v}
+            variant={view === v ? "default" : "ghost"}
+            onClick={() => setView(v)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+      {view === "board" ? <DynastyBoard /> : <TradeIdeas />}
     </div>
   );
 }
