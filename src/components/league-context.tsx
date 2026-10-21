@@ -15,7 +15,8 @@ export type SleeperLeague = {
   total_rosters: number;
   scoring_settings: Record<string, number>;
   roster_positions: string[];
-  settings?: { waiver_budget?: number };
+  /** type 2 = dynasty, 1 = keeper, 0 = redraft. */
+  settings?: { waiver_budget?: number; type?: number };
 };
 export type SleeperRoster = {
   owner_id: string;

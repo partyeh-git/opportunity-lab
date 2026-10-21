@@ -6,6 +6,7 @@ import {
   ArrowRightLeft,
   BarChart3,
   CalendarDays,
+  Crown,
   ChevronRight,
   Gauge,
   Menu,
@@ -18,7 +19,13 @@ import { Trades } from "@/components/rankings-trades";
 import { PersonalRankings } from "@/components/personal-rankings";
 import { StartSit } from "@/components/start-sit";
 import { WaiversFaab } from "@/components/waivers-faab";
-import { ConnectBanner, LeagueProvider, LeagueSwitcher } from "@/components/league-context";
+import { DynastyBoard } from "@/components/dynasty-board";
+import {
+  ConnectBanner,
+  LeagueProvider,
+  LeagueSwitcher,
+  useLeague,
+} from "@/components/league-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
@@ -50,6 +57,7 @@ export const Route = createFileRoute("/")({
 // Home joins the menu once it is built (no placeholder pages).
 const navItems = [
   ["Overall Rankings", BarChart3],
+  ["Dynasty", Crown],
   ["Weekly Rankings", CalendarDays],
   ["Start / Sit", Scale],
   ["Trades", ArrowRightLeft],
@@ -76,12 +84,16 @@ function SnapshotGate({ children }: { children: ReactNode }) {
 }
 
 function Index() {
-  const [screen, setScreen] = useState<Screen>("Overall Rankings");
+  const [selected, setScreen] = useState<Screen>("Overall Rankings");
+  // Dynasty only exists for dynasty leagues (Sleeper league type 2).
+  const isDynasty = useLeague().selected?.settings?.type === 2;
+  const screen = selected === "Dynasty" && !isDynasty ? "Overall Rankings" : selected;
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground lg:flex">
       <Sidebar
         screen={screen}
+        showDynasty={isDynasty}
         onSelect={(next) => {
           setScreen(next);
           setMobileOpen(false);
@@ -121,6 +133,8 @@ function Index() {
           <ConnectBanner />
           {screen === "Overall Rankings" ? (
             <PersonalRankings key="rankings" />
+          ) : screen === "Dynasty" ? (
+            <DynastyBoard />
           ) : screen === "Weekly Rankings" ? (
             <PersonalRankings key="weekly" weeklyOnly />
           ) : screen === "Start / Sit" ? (
@@ -138,11 +152,13 @@ function Index() {
 
 function Sidebar({
   screen,
+  showDynasty,
   onSelect,
   open,
   onClose,
 }: {
   screen: Screen;
+  showDynasty: boolean;
   onSelect: (s: Screen) => void;
   open: boolean;
   onClose: () => void;
@@ -183,18 +199,20 @@ function Sidebar({
           </Button>
         </div>
         <nav className="flex-1 space-y-1 px-3 py-6">
-          {navItems.map(([label, Icon]) => (
-            <Button
-              key={label}
-              variant="ghost"
-              onClick={() => onSelect(label)}
-              className={`h-auto w-full justify-start px-3 py-2.5 text-left font-medium transition-colors ${screen === label ? "bg-volt text-volt-foreground hover:bg-volt hover:text-volt-foreground" : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"}`}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-              {screen === label && <ChevronRight className="ml-auto h-4 w-4" />}
-            </Button>
-          ))}
+          {navItems
+            .filter(([label]) => showDynasty || label !== "Dynasty")
+            .map(([label, Icon]) => (
+              <Button
+                key={label}
+                variant="ghost"
+                onClick={() => onSelect(label)}
+                className={`h-auto w-full justify-start px-3 py-2.5 text-left font-medium transition-colors ${screen === label ? "bg-volt text-volt-foreground hover:bg-volt hover:text-volt-foreground" : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"}`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+                {screen === label && <ChevronRight className="ml-auto h-4 w-4" />}
+              </Button>
+            ))}
         </nav>
       </aside>
     </>
