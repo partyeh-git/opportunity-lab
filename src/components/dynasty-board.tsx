@@ -21,6 +21,8 @@ type DynastyEntry = {
   totals: Record<Plan, number>;
   /** Projected draft slot for next year's picks, from current standings. */
   slot?: "Early" | "Mid" | "Late" | null;
+  /** Set when Aryeh's judgment override changed the model value; holds his note. */
+  adjusted?: string | null;
   /** Development score, 0-100 within position, young players only. A guide, not part of value. */
   dev?: number | null;
   /** Spread of outcomes among similar past players (Balanced total) and bust chance. */
@@ -393,6 +395,14 @@ export function DynastyBoard() {
                     {mine ? <strong className="text-foreground">You</strong> : o || "Free agent"}
                   </td>
                   <td className="px-3 py-1.5 text-right font-display text-lg tabular-nums">
+                    {e.adjusted && (
+                      <span
+                        title={`Adjusted by judgment: ${e.adjusted}`}
+                        className="mr-1 align-middle font-sans text-[10px] font-bold uppercase text-hot"
+                      >
+                        adj
+                      </span>
+                    )}
                     {Math.round(e.totals[plan])}
                   </td>
                   <td className="px-3 py-1.5">

@@ -1,6 +1,6 @@
 """Turn the dynasty model's CSV into the small JSON file the Dynasty board reads.
 
-Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv] [pick_factors.csv]
+Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv] [pick_factors.csv] [overrides.csv]
 Writes public/dynasty-values.json. The model itself lives outside this repo (Drive research
 folder); this only reshapes its output.
 """
@@ -35,12 +35,20 @@ def main() -> None:
     if len(sys.argv) > 4:
         for f in csv.DictReader(Path(sys.argv[4]).open()):
             factors[f["pick_id"]] = (float(f["factor"]), f["slot"] or None)
+    # Aryeh's judgment overrides: a multiplier on a player's model value, shown as adjusted.
+    overrides = {}
+    if len(sys.argv) > 5:
+        for o in csv.DictReader(Path(sys.argv[5]).open()):
+            overrides[o["sleeper_id"]] = (float(o["multiplier"]), o["note"])
     years = sorted(
         int(col.split("_")[1]) for col in rows[0] if col.startswith("vorp_") and col[5:].isdigit()
     )
     players = []
     for row in rows:
         factor, slot = factors.get(row["sleeper_id"], (1.0, None))
+        override = overrides.get(row["sleeper_id"])
+        if override:
+            factor *= override[0]
         totals = {plan: round(num(row[f"total_{plan}"]) * factor, 1) for plan in PLANS}
         if max(totals.values()) <= 0:
             continue
@@ -59,6 +67,7 @@ def main() -> None:
                     for v in [row["ros_2026"]] + [row[f"vorp_{y}"] for y in years]
                 ],
                 "slot": slot,
+                "adjusted": override[1] if override else None,
                 "totals": totals,
                 # Risk: Balanced-total range across similar past players, plus bust chance.
                 "risk": row.get("risk_label") or None,
