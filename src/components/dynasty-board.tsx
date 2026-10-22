@@ -19,6 +19,8 @@ type DynastyEntry = {
   pickOwner: string | null;
   byYear: number[];
   totals: Record<Plan, number>;
+  /** Projected draft slot for next year's picks, from current standings. */
+  slot?: "Early" | "Mid" | "Late" | null;
   /** Development score, 0-100 within position, young players only. A guide, not part of value. */
   dev?: number | null;
   /** Spread of outcomes among similar past players (Balanced total) and bust chance. */
@@ -378,7 +380,11 @@ export function DynastyBoard() {
                       {e.pos === "PICK" ? "PICK" : e.pos}
                     </span>
                     <span className="ml-2 text-xs font-normal text-muted-foreground">
-                      {[e.team, e.age ? `age ${Math.floor(e.age)}` : ""]
+                      {[
+                        e.team,
+                        e.age ? `age ${Math.floor(e.age)}` : "",
+                        e.slot ? `projected ${e.slot.toLowerCase()}` : "",
+                      ]
                         .filter(Boolean)
                         .join(" · ")}
                     </span>

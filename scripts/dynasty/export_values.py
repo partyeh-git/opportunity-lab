@@ -1,6 +1,6 @@
 """Turn the dynasty model's CSV into the small JSON file the Dynasty board reads.
 
-Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv]
+Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv] [pick_factors.csv]
 Writes public/dynasty-values.json. The model itself lives outside this repo (Drive research
 folder); this only reshapes its output.
 """
@@ -30,12 +30,18 @@ def main() -> None:
         for d in csv.DictReader(Path(sys.argv[3]).open()):
             if d["dev_score"]:
                 dev[d["sleeper_id"]] = (round(float(d["dev_score"])), d["trend"] or "flat")
+    # Pick factors: projected draft slot (from current standings) scales a pick's value.
+    factors = {}
+    if len(sys.argv) > 4:
+        for f in csv.DictReader(Path(sys.argv[4]).open()):
+            factors[f["pick_id"]] = (float(f["factor"]), f["slot"] or None)
     years = sorted(
         int(col.split("_")[1]) for col in rows[0] if col.startswith("vorp_") and col[5:].isdigit()
     )
     players = []
     for row in rows:
-        totals = {plan: num(row[f"total_{plan}"]) for plan in PLANS}
+        factor, slot = factors.get(row["sleeper_id"], (1.0, None))
+        totals = {plan: round(num(row[f"total_{plan}"]) * factor, 1) for plan in PLANS}
         if max(totals.values()) <= 0:
             continue
         is_pick = row["position"] == "PICK"
@@ -48,7 +54,11 @@ def main() -> None:
                 "age": num(row["age"]) if row["age"] else None,
                 # Picks keep the model's owner; players get theirs live from the Sleeper rosters.
                 "pickOwner": row["owner"] if is_pick else None,
-                "byYear": [num(row["ros_2026"])] + [num(row[f"vorp_{y}"]) for y in years],
+                "byYear": [
+                    round(num(v) * factor, 1)
+                    for v in [row["ros_2026"]] + [row[f"vorp_{y}"] for y in years]
+                ],
+                "slot": slot,
                 "totals": totals,
                 # Risk: Balanced-total range across similar past players, plus bust chance.
                 "risk": row.get("risk_label") or None,
