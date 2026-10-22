@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-21T23:53:15.087Z",
+ "updatedAt": "2026-10-22T15:48:49.222Z",
  "week": 7,
  "players": {
   "1466": {
@@ -395,7 +395,7 @@
   "12534": {
    "status": "Out",
    "body": "Toe",
-   "practice": null
+   "practice": "DNP"
   },
   "12539": {
    "status": "IR",
@@ -452,11 +452,21 @@
    "body": "Foot",
    "practice": null
   },
+  "13380": {
+   "status": "Questionable",
+   "body": "Quadriceps",
+   "practice": null
+  },
   "13434": {
    "status": "Questionable",
    "body": "Hamstring",
    "practice": null
   }
  },
- "practice": {}
+ "practice": {
+  "5859": "Full",
+  "11564": "Full",
+  "12529": "Full",
+  "12534": "DNP"
+ }
 }
