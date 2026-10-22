@@ -1,6 +1,6 @@
 """Turn the dynasty model's CSV into the small JSON file the Dynasty board reads.
 
-Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv] [pick_factors.csv] [overrides.csv]
+Usage: python3 scripts/dynasty/export_values.py <dynasty_values.csv> <league_id> [development_scores.csv] [pick_factors.csv] [overrides.csv] [market_values.csv]
 Writes public/dynasty-values.json. The model itself lives outside this repo (Drive research
 folder); this only reshapes its output.
 """
@@ -40,6 +40,11 @@ def main() -> None:
     if len(sys.argv) > 5:
         for o in csv.DictReader(Path(sys.argv[5]).open()):
             overrides[o["sleeper_id"]] = (float(o["multiplier"]), o["note"])
+    # Market price (KeepTradeCut superflex). Only used for the trade calculator's fairness check.
+    market = {}
+    if len(sys.argv) > 6:
+        for m in csv.DictReader(Path(sys.argv[6]).open()):
+            market[m["id"]] = int(m["ktc"])
     years = sorted(
         int(col.split("_")[1]) for col in rows[0] if col.startswith("vorp_") and col[5:].isdigit()
     )
@@ -68,6 +73,7 @@ def main() -> None:
                 ],
                 "slot": slot,
                 "adjusted": override[1] if override else None,
+                "mkt": market.get(row["sleeper_id"]),
                 "totals": totals,
                 # Risk: Balanced-total range across similar past players, plus bust chance.
                 "risk": row.get("risk_label") or None,

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLeague } from "@/components/league-context";
 import { TradeIdeas } from "@/components/trade-ideas";
+import { DynastyTradeCalculator } from "@/components/dynasty-trade";
 import { fetchPublicJson } from "@/lib/live-data";
 import { moveToRank, parseOrder, reconcileOrder } from "@/lib/ranking-order";
 
@@ -462,13 +463,14 @@ export function DynastyBoard() {
 
 /** Dynasty tab: the long-term board, or trade ideas built from the same values. */
 export function DynastyScreen() {
-  const [view, setView] = useState<"board" | "trades">("board");
+  const [view, setView] = useState<"board" | "calc" | "trades">("board");
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-1 rounded-md border p-1 w-fit" role="tablist">
         {(
           [
             ["board", "Board"],
+            ["calc", "Trade calculator"],
             ["trades", "Trade ideas"],
           ] as const
         ).map(([v, label]) => (
@@ -484,7 +486,13 @@ export function DynastyScreen() {
           </Button>
         ))}
       </div>
-      {view === "board" ? <DynastyBoard /> : <TradeIdeas />}
+      {view === "board" ? (
+        <DynastyBoard />
+      ) : view === "calc" ? (
+        <DynastyTradeCalculator />
+      ) : (
+        <TradeIdeas />
+      )}
     </div>
   );
 }
