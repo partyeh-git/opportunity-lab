@@ -54,11 +54,16 @@ function Side({
   ownerOf: (a: Asset) => string;
 }) {
   const [q, setQ] = useState("");
-  const matches = q.trim()
+  // Every word must match the name or the owner, so "zig 2028" finds ZigZag's 2028 picks.
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const matches = words.length
     ? options
-        .filter((a) => a.name.toLowerCase().includes(q.trim().toLowerCase()))
+        .filter((a) => {
+          const text = `${a.name} ${ownerOf(a)}`.toLowerCase();
+          return words.every((w) => text.includes(w));
+        })
         .filter((a) => !assets.some((x) => x.id === a.id))
-        .slice(0, 8)
+        .slice(0, 12)
     : [];
   const bust = packageBust(assets, plan);
   return (
@@ -69,7 +74,7 @@ function Side({
       </div>
       <div className="relative">
         <Input
-          placeholder="Add a player or pick (e.g. 2027 round 1)"
+          placeholder="Add a player or pick (e.g. zig 2027 round 1)"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           aria-label={`Add to ${title}`}
@@ -198,10 +203,10 @@ export function DynastyTradeCalculator() {
       : !marketKnown
         ? "Market price missing for at least one piece."
         : ratio <= 1
-          ? "Market: fair to them or in their favor. A real manager could say yes."
+          ? "By KeepTradeCut prices: fair to them or in their favor. A real manager could say yes."
           : ratio <= 1.35
-            ? "Market: tilted your way. Possible, especially with a QB need."
-            : "Market: a big win for you. Expect a no.";
+            ? "By KeepTradeCut prices: tilted your way. Possible, especially if they need the piece."
+            : "By KeepTradeCut prices: well above market for you. Only likely if they badly need the piece (this league has paid QB premiums).";
   const spots = get.length - give.length;
 
   return (
