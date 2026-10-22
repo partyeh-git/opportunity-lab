@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -161,16 +161,7 @@ export function DynastyTradeCalculator() {
         : [];
     },
   });
-  // Your side only: the calculator uses the team plan you chose on the Board (default Rebuild).
   const [plan, setPlan] = useState<Plan>("rebuild");
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("dynasty-plan-v1") as Plan | null;
-      if (stored && PLANS.some(([p]) => p === stored)) setPlan(stored);
-    } catch {
-      // Storage blocked: stay on Rebuild.
-    }
-  }, []);
   const [give, setGive] = useState<Asset[]>([]);
   const [get, setGet] = useState<Asset[]>([]);
 
@@ -221,10 +212,22 @@ export function DynastyTradeCalculator() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm">
-          Your plan: <strong>{PLANS.find(([p]) => p === plan)?.[1]}</strong>
-          <span className="text-muted-foreground"> (change it on the Board)</span>
-        </span>
+        <div
+          className="flex items-center gap-1 rounded-md border p-1"
+          role="group"
+          aria-label="Team plan"
+        >
+          {PLANS.map(([p, label]) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPlan(p)}
+              className={`rounded px-3 py-1 text-sm ${plan === p ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           className="text-sm text-muted-foreground hover:text-foreground"
