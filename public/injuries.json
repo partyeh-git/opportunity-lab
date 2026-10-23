@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-22T23:51:11.018Z",
+ "updatedAt": "2026-10-23T15:39:36.517Z",
  "week": 7,
  "players": {
   "1466": {
@@ -40,11 +40,6 @@
   "4033": {
    "status": "IR",
    "body": "Lower Leg",
-   "practice": null
-  },
-  "4035": {
-   "status": "Questionable",
-   "body": "Back",
    "practice": null
   },
   "4177": {
@@ -147,6 +142,11 @@
    "body": "Foot",
    "practice": null
   },
+  "6826": {
+   "status": "Out",
+   "body": "Knee",
+   "practice": null
+  },
   "6904": {
    "status": "IR",
    "body": "Calf",
@@ -155,7 +155,7 @@
   "7021": {
    "status": "Questionable",
    "body": "Knee",
-   "practice": null
+   "practice": "Limited"
   },
   "7204": {
    "status": "IR",
@@ -180,7 +180,7 @@
   "7757": {
    "status": "Out",
    "body": "Calf",
-   "practice": null
+   "practice": "DNP"
   },
   "8121": {
    "status": "IR",
@@ -460,6 +460,8 @@
  },
  "practice": {
   "5859": "Full",
+  "7021": "Limited",
+  "7757": "DNP",
   "11564": "Full",
   "12529": "Full",
   "12534": "DNP"
