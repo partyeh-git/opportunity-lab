@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-10-31T00:19:39.457Z",
+ "updatedAt": "2026-10-31T15:58:03.567Z",
  "week": 8,
  "players": {
   "2133": {
@@ -40,12 +40,12 @@
   "4981": {
    "status": "Questionable",
    "body": "Hip",
-   "practice": null
+   "practice": "Full"
   },
   "4983": {
    "status": "Questionable",
    "body": "Shoulder - AC Joint",
-   "practice": null
+   "practice": "Limited"
   },
   "5008": {
    "status": "IR",
@@ -70,7 +70,7 @@
   "5859": {
    "status": "Questionable",
    "body": "Ankle",
-   "practice": null
+   "practice": "DNP"
   },
   "5872": {
    "status": "Out",
@@ -90,7 +90,7 @@
   "5947": {
    "status": "Questionable",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "5973": {
    "status": "IR",
@@ -100,7 +100,7 @@
   "6271": {
    "status": "Questionable",
    "body": "Shoulder",
-   "practice": null
+   "practice": "Limited"
   },
   "6819": {
    "status": "IR",
@@ -120,7 +120,7 @@
   "6865": {
    "status": "Questionable",
    "body": "Ribs",
-   "practice": null
+   "practice": "DNP"
   },
   "6904": {
    "status": "IR",
@@ -135,12 +135,12 @@
   "7525": {
    "status": "Out",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "7526": {
    "status": "Questionable",
    "body": "Undisclosed",
-   "practice": null
+   "practice": "Limited"
   },
   "7543": {
    "status": "IR",
@@ -150,17 +150,17 @@
   "7567": {
    "status": "Questionable",
    "body": "Hip",
-   "practice": null
+   "practice": "Full"
   },
   "7716": {
    "status": "Questionable",
    "body": "Shoulder",
-   "practice": null
+   "practice": "Limited"
   },
   "7757": {
    "status": "Questionable",
    "body": "Calf",
-   "practice": null
+   "practice": "Limited"
   },
   "8121": {
    "status": "IR",
@@ -170,12 +170,12 @@
   "8135": {
    "status": "Questionable",
    "body": "Foot",
-   "practice": null
+   "practice": "Limited"
   },
   "8137": {
    "status": "Questionable",
    "body": "Shoulder",
-   "practice": null
+   "practice": "Limited"
   },
   "8142": {
    "status": "IR",
@@ -185,12 +185,12 @@
   "8154": {
    "status": "Out",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "8155": {
    "status": "Questionable",
    "body": "Quadriceps",
-   "practice": null
+   "practice": "Limited"
   },
   "8167": {
    "status": "Questionable",
@@ -220,7 +220,7 @@
   "8489": {
    "status": "Questionable",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "8676": {
    "status": "Questionable",
@@ -230,7 +230,7 @@
   "8917": {
    "status": "Out",
    "body": "Ribs",
-   "practice": null
+   "practice": "DNP"
   },
   "9225": {
    "status": "IR",
@@ -245,12 +245,12 @@
   "9486": {
    "status": "Out",
    "body": "Ankle",
-   "practice": null
+   "practice": "DNP"
   },
   "9508": {
    "status": "Out",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "10222": {
    "status": "IR",
@@ -265,12 +265,12 @@
   "10236": {
    "status": "Questionable",
    "body": "Chest",
-   "practice": null
+   "practice": "Limited"
   },
   "10871": {
    "status": "Questionable",
    "body": "Groin",
-   "practice": null
+   "practice": "DNP"
   },
   "11370": {
    "status": "IR",
@@ -300,7 +300,7 @@
   "11623": {
    "status": "Questionable",
    "body": "Back",
-   "practice": null
+   "practice": "DNP"
   },
   "11626": {
    "status": "IR",
@@ -335,7 +335,7 @@
   "12483": {
    "status": "IR",
    "body": "Forearm",
-   "practice": null
+   "practice": "Full"
   },
   "12487": {
    "status": "IR",
@@ -345,7 +345,7 @@
   "12489": {
    "status": "Out",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "12492": {
    "status": "IR",
@@ -365,7 +365,7 @@
   "12514": {
    "status": "Out",
    "body": "Foot",
-   "practice": null
+   "practice": "DNP"
   },
   "12517": {
    "status": "Questionable",
@@ -380,7 +380,7 @@
   "12529": {
    "status": "Questionable",
    "body": "Ankle",
-   "practice": null
+   "practice": "DNP"
   },
   "12533": {
    "status": "IR",
@@ -415,7 +415,7 @@
   "13279": {
    "status": "Out",
    "body": "Shoulder",
-   "practice": null
+   "practice": "DNP"
   },
   "13286": {
    "status": "IR",
@@ -430,12 +430,80 @@
   "13380": {
    "status": "Out",
    "body": "Quadriceps",
-   "practice": null
+   "practice": "DNP"
   }
  },
  "practice": {
+  "1466": "Full",
+  "2307": "Full",
+  "2449": "Full",
+  "4037": "Full",
+  "4046": "Full",
+  "4199": "Full",
+  "4866": "Limited",
+  "4881": "Full",
+  "4892": "Full",
+  "4981": "Full",
+  "4983": "Limited",
+  "4995": "Full",
+  "5012": "Full",
+  "5022": "Full",
+  "5859": "DNP",
+  "5947": "DNP",
+  "5967": "Full",
+  "6271": "Limited",
+  "6865": "DNP",
+  "7525": "DNP",
+  "7526": "Limited",
+  "7547": "Full",
+  "7564": "Full",
+  "7567": "Full",
+  "7716": "Limited",
+  "7757": "Limited",
+  "8132": "Limited",
+  "8135": "Limited",
+  "8137": "Limited",
+  "8154": "DNP",
+  "8155": "Limited",
+  "8161": "Full",
+  "8172": "Full",
+  "8489": "DNP",
+  "8917": "DNP",
+  "9221": "Full",
   "9228": "Full",
+  "9479": "Full",
+  "9480": "Full",
+  "9486": "DNP",
+  "9493": "DNP",
+  "9508": "DNP",
+  "10229": "Full",
+  "10232": "Limited",
+  "10236": "Limited",
+  "10871": "DNP",
+  "11056": "Full",
+  "11564": "Full",
+  "11566": "Full",
+  "11575": "Full",
+  "11576": "Full",
+  "11584": "Full",
+  "11610": "Full",
+  "11623": "DNP",
+  "11635": "Full",
+  "11643": "Full",
   "11646": "Full",
-  "12501": "Limited"
+  "11942": "Full",
+  "12483": "Full",
+  "12489": "DNP",
+  "12501": "Limited",
+  "12509": "Full",
+  "12514": "DNP",
+  "12518": "Full",
+  "12529": "DNP",
+  "12544": "Limited",
+  "13279": "DNP",
+  "13287": "Full",
+  "13324": "Full",
+  "13380": "DNP",
+  "13434": "Full"
  }
 }
