@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-01T19:04:42+00:00",
+ "generatedAt": "2026-11-01T19:53:19+00:00",
  "season": 2026,
  "week": 8,
  "source": "Open-Meteo forecast, kickoff hour + 2 hours; display only, not a projection input",
@@ -68,7 +68,7 @@
    "windMph": 2,
    "gustMph": 7,
    "precipIn": 0.0,
-   "precipChance": 9,
+   "precipChance": 7,
    "snowIn": 0.0,
    "opponent": "TEN",
    "home": true
@@ -83,7 +83,7 @@
    "windMph": 2,
    "gustMph": 7,
    "precipIn": 0.0,
-   "precipChance": 9,
+   "precipChance": 7,
    "snowIn": 0.0,
    "opponent": "CIN",
    "home": false
@@ -134,7 +134,7 @@
    "windMph": 11,
    "gustMph": 20,
    "precipIn": 0.0,
-   "precipChance": 22,
+   "precipChance": 19,
    "snowIn": 0.0,
    "opponent": "IND",
    "home": true
@@ -149,7 +149,7 @@
    "windMph": 11,
    "gustMph": 20,
    "precipIn": 0.0,
-   "precipChance": 22,
+   "precipChance": 19,
    "snowIn": 0.0,
    "opponent": "JAX",
    "home": false
@@ -226,7 +226,7 @@
    "windMph": 10,
    "gustMph": 29,
    "precipIn": 0.27,
-   "precipChance": 75,
+   "precipChance": 60,
    "snowIn": 0.0,
    "opponent": "ATL",
    "home": true
@@ -243,7 +243,7 @@
    "windMph": 10,
    "gustMph": 29,
    "precipIn": 0.27,
-   "precipChance": 75,
+   "precipChance": 60,
    "snowIn": 0.0,
    "opponent": "TB",
    "home": false
@@ -301,12 +301,14 @@
    "kickoff": "2026-11-01T16:25",
    "stadium": "Hard Rock Stadium",
    "outdoor": true,
-   "flags": [],
+   "flags": [
+    "rain"
+   ],
    "tempF": 78,
    "windMph": 8,
    "gustMph": 22,
    "precipIn": 0.07,
-   "precipChance": 48,
+   "precipChance": 65,
    "snowIn": 0.0,
    "opponent": "NE",
    "home": true
@@ -316,12 +318,14 @@
    "kickoff": "2026-11-01T16:25",
    "stadium": "Hard Rock Stadium",
    "outdoor": true,
-   "flags": [],
+   "flags": [
+    "rain"
+   ],
    "tempF": 78,
    "windMph": 8,
    "gustMph": 22,
    "precipIn": 0.07,
-   "precipChance": 48,
+   "precipChance": 65,
    "snowIn": 0.0,
    "opponent": "MIA",
    "home": false
