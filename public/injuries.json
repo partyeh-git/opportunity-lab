@@ -1,7 +1,12 @@
 {
- "updatedAt": "2026-11-08T00:09:16.096Z",
+ "updatedAt": "2026-11-08T16:56:25.452Z",
  "week": 9,
  "players": {
+  "829": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
   "2133": {
    "status": "IR",
    "body": "Hamstring",
@@ -18,7 +23,7 @@
    "practice": "Limited"
   },
   "4017": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Concussion",
    "practice": "Limited"
   },
@@ -35,6 +40,16 @@
   "4219": {
    "status": "IR",
    "body": "Foot",
+   "practice": null
+  },
+  "4351": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
+  "4443": {
+   "status": "Out",
+   "body": "Coach's Decision",
    "practice": null
   },
   "4454": {
@@ -65,7 +80,7 @@
   "5849": {
    "status": "Out",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "5859": {
    "status": "Out",
@@ -80,16 +95,26 @@
   "5892": {
    "status": "Out",
    "body": "Groin",
-   "practice": null
+   "practice": "DNP"
   },
   "5927": {
    "status": "IR",
    "body": "Knee",
    "practice": null
   },
+  "5938": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
   "5973": {
    "status": "IR",
    "body": "Biceps",
+   "practice": null
+  },
+  "6271": {
+   "status": "Questionable",
+   "body": "Concussion",
    "practice": null
   },
   "6819": {
@@ -102,10 +127,10 @@
    "body": "Knee",
    "practice": null
   },
-  "6865": {
-   "status": "Questionable",
-   "body": "Ribs",
-   "practice": "Limited"
+  "6828": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
   },
   "6904": {
    "status": "IR",
@@ -115,7 +140,7 @@
   "7049": {
    "status": "Out",
    "body": "Calf",
-   "practice": null
+   "practice": "DNP"
   },
   "7204": {
    "status": "IR",
@@ -132,11 +157,6 @@
    "body": "Hamstring",
    "practice": null
   },
-  "7547": {
-   "status": "Questionable",
-   "body": "Ribs",
-   "practice": "Limited"
-  },
   "7587": {
    "status": "IR",
    "body": "Calf",
@@ -145,17 +165,12 @@
   "7670": {
    "status": "Out",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "7757": {
    "status": "Out",
    "body": "Calf",
    "practice": null
-  },
-  "8110": {
-   "status": "Questionable",
-   "body": "Ankle",
-   "practice": "Limited"
   },
   "8121": {
    "status": "IR",
@@ -173,7 +188,7 @@
    "practice": "DNP"
   },
   "8137": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Hamstring",
    "practice": "Limited"
   },
@@ -248,7 +263,7 @@
    "practice": null
   },
   "10871": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Groin",
    "practice": "Limited"
   },
@@ -277,11 +292,6 @@
    "body": "Knee - ACL",
    "practice": null
   },
-  "11623": {
-   "status": "Questionable",
-   "body": "Back",
-   "practice": "Limited"
-  },
   "11626": {
    "status": "IR",
    "body": "Knee",
@@ -293,7 +303,7 @@
    "practice": null
   },
   "11643": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Quadriceps",
    "practice": "Limited"
   },
@@ -302,18 +312,13 @@
    "body": "Hamstring",
    "practice": null
   },
-  "11729": {
-   "status": "Questionable",
-   "body": "Ankle",
-   "practice": "DNP"
-  },
   "12472": {
    "status": "IR",
    "body": "Hip",
    "practice": null
   },
   "12481": {
-   "status": "Doubtful",
+   "status": "Out",
    "body": "Hamstring",
    "practice": "Limited"
   },
@@ -326,11 +331,6 @@
    "status": "IR",
    "body": "Knee",
    "practice": null
-  },
-  "12492": {
-   "status": "Questionable",
-   "body": "Ankle",
-   "practice": "Full"
   },
   "12508": {
    "status": "IR",
@@ -400,12 +400,17 @@
   "13347": {
    "status": "Out",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "13380": {
    "status": "Doubtful",
    "body": "Quadriceps",
    "practice": "DNP"
+  },
+  "13602": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
   }
  },
  "practice": {
@@ -429,26 +434,32 @@
   "4881": "DNP",
   "4892": "Full",
   "4943": "DNP",
+  "4983": "Limited",
   "4995": "Full",
   "5012": "Full",
   "5022": "Full",
   "5045": "Full",
+  "5849": "DNP",
   "5854": "Limited",
   "5859": "DNP",
   "5872": "DNP",
+  "5892": "DNP",
   "5947": "Limited",
   "5995": "Full",
   "6813": "Full",
   "6865": "Limited",
+  "7049": "DNP",
   "7525": "DNP",
   "7526": "Full",
   "7547": "Limited",
   "7567": "Full",
   "7587": "DNP",
+  "7670": "DNP",
   "7716": "Limited",
   "8110": "Limited",
   "8111": "Full",
   "8122": "DNP",
+  "8134": "Full",
   "8135": "DNP",
   "8137": "Limited",
   "8146": "DNP",
@@ -467,6 +478,7 @@
   "10219": "Limited",
   "10229": "Full",
   "10232": "Limited",
+  "10236": "Full",
   "10871": "Limited",
   "11370": "Limited",
   "11564": "Full",
@@ -476,6 +488,7 @@
   "11597": "Full",
   "11623": "Limited",
   "11632": "Full",
+  "11637": "Limited",
   "11643": "Limited",
   "11729": "DNP",
   "11942": "Full",
@@ -492,6 +505,7 @@
   "13320": "DNP",
   "13324": "Full",
   "13346": "Full",
+  "13347": "DNP",
   "13380": "DNP",
   "13434": "Full"
  }
