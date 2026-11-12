@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-11-12T02:06:00.437Z",
+ "updatedAt": "2026-11-12T18:44:21.273Z",
  "week": 10,
  "players": {
   "1737": {
@@ -30,7 +30,7 @@
   "3214": {
    "status": "Questionable",
    "body": "Foot",
-   "practice": null
+   "practice": "Limited"
   },
   "4033": {
    "status": "IR",
@@ -100,7 +100,7 @@
   "5859": {
    "status": "Questionable",
    "body": "Knee",
-   "practice": null
+   "practice": "Limited"
   },
   "5872": {
    "status": "Questionable",
@@ -165,7 +165,7 @@
   "7204": {
    "status": "IR",
    "body": "Ankle",
-   "practice": null
+   "practice": "Limited"
   },
   "7525": {
    "status": "Out",
@@ -195,7 +195,7 @@
   "7611": {
    "status": "Doubtful",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "7670": {
    "status": "IR",
@@ -385,7 +385,7 @@
   "11942": {
    "status": "Out",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "12472": {
    "status": "IR",
@@ -435,7 +435,7 @@
   "12529": {
    "status": "Out",
    "body": "Illness",
-   "practice": null
+   "practice": "DNP"
   },
   "12533": {
    "status": "IR",
@@ -513,5 +513,21 @@
    "practice": null
   }
  },
- "practice": {}
+ "practice": {
+  "3214": "Limited",
+  "5859": "Limited",
+  "7090": "Full",
+  "7204": "Limited",
+  "7611": "DNP",
+  "7716": "Full",
+  "8135": "DNP",
+  "8210": "Full",
+  "11564": "Full",
+  "11566": "Full",
+  "11597": "Full",
+  "11632": "Full",
+  "11942": "DNP",
+  "12481": "Full",
+  "12529": "DNP"
+ }
 }
