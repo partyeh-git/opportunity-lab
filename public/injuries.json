@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-11-13T01:38:35.709Z",
+ "updatedAt": "2026-11-13T18:25:50.796Z",
  "week": 10,
  "players": {
   "1737": {
@@ -21,11 +21,6 @@
    "status": "Questionable",
    "body": "Ankle",
    "practice": null
-  },
-  "3214": {
-   "status": "Questionable",
-   "body": "Foot",
-   "practice": "Limited"
   },
   "3271": {
    "status": "Questionable",
@@ -175,7 +170,7 @@
   "7547": {
    "status": "Questionable",
    "body": "Ribs",
-   "practice": null
+   "practice": "Limited"
   },
   "7571": {
    "status": "Questionable",
@@ -190,7 +185,7 @@
   "7611": {
    "status": "Questionable",
    "body": "Knee",
-   "practice": "DNP"
+   "practice": "Limited"
   },
   "7670": {
    "status": "IR",
@@ -205,11 +200,6 @@
   "8121": {
    "status": "IR",
    "body": "Shoulder",
-   "practice": null
-  },
-  "8122": {
-   "status": "Questionable",
-   "body": "Concussion",
    "practice": null
   },
   "8137": {
@@ -251,6 +241,11 @@
    "status": "IR",
    "body": "Thumb",
    "practice": null
+  },
+  "8210": {
+   "status": "Questionable",
+   "body": "Back",
+   "practice": "Full"
   },
   "8917": {
    "status": "Questionable",
@@ -375,7 +370,7 @@
   "11729": {
    "status": "Questionable",
    "body": "Ankle",
-   "practice": null
+   "practice": "DNP"
   },
   "11942": {
    "status": "Out",
@@ -462,18 +457,13 @@
    "body": "Ankle",
    "practice": null
   },
-  "13276": {
-   "status": "Questionable",
-   "body": "Ankle",
-   "practice": null
-  },
   "13277": {
    "status": "Questionable",
    "body": "Shoulder",
    "practice": null
   },
   "13279": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Shoulder",
    "practice": null
   },
@@ -483,7 +473,7 @@
    "practice": null
   },
   "13311": {
-   "status": "Questionable",
+   "status": "Doubtful",
    "body": "Knee",
    "practice": null
   },
@@ -514,11 +504,13 @@
   }
  },
  "practice": {
+  "3163": "Full",
   "3214": "Limited",
   "5859": "Limited",
   "7090": "Full",
   "7204": "Limited",
-  "7611": "DNP",
+  "7547": "Limited",
+  "7611": "Limited",
   "7716": "Full",
   "8135": "DNP",
   "8210": "Full",
@@ -526,6 +518,7 @@
   "11566": "Full",
   "11597": "Full",
   "11632": "Full",
+  "11729": "DNP",
   "11942": "DNP",
   "12481": "Full",
   "12529": "DNP"
