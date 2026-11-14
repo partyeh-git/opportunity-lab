@@ -1,18 +1,18 @@
 {
   "season": 2026,
   "week": 10,
-  "reviewedAt": "2026-11-14T01:58:54.201544+00:00",
+  "reviewedAt": "2026-11-14T18:59:58.088083+00:00",
   "coverage": {
     "latestInjuryReportWeek": 10,
-    "currentWeekReports": 300,
-    "flaggedPlayers": 125,
-    "officiallyReviewedPlayers": 48,
+    "currentWeekReports": 345,
+    "flaggedPlayers": 131,
+    "officiallyReviewedPlayers": 49,
     "note": "Public-feed flags plus selected official-source reviews; not comprehensive current-week game-day clearance."
   },
   "sourceHashes": {
-    "sleeper_players.json": "87bf6efdc826b57fce655e79d818a3183ba2054d7774719cf368e68f5dc18512",
-    "injuries_2026.csv": "40d98f1fa0a07159c9271ecb167611876e234f643e33ff55358d3d81adb34edb",
-    "injury-review.json": "b2c3917c7720a3d6f2eab38b5da5deb2460fa17f4c9a979e30d169ed0a3cae05"
+    "sleeper_players.json": "55f6176415d0b62969a86f7e331f75a05926b4a29c42ceec2483beccfc0133f6",
+    "injuries_2026.csv": "1a0242ef9bbb956233928c66a8977fbde46c45e84d7c368b911f5dca23541754",
+    "injury-review.json": "fd28b5b406dbeab64ed69b220c459737b1ace0f0f188357eeb93f98f6ba92524"
   },
   "players": [
     {
@@ -26,7 +26,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 2 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 2
         }
       ],
@@ -43,7 +43,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -51,7 +58,7 @@
     {
       "id": "00-0038134",
       "team": "KC",
-      "reportedStatus": "Questionable",
+      "reportedStatus": "Out",
       "injury": "Groin",
       "outWeeks": [],
       "sources": [
@@ -59,7 +66,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -75,7 +89,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 5 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 5
         }
       ],
@@ -92,7 +106,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ],
@@ -109,7 +123,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -125,8 +146,31 @@
           "kind": "weekly_report",
           "title": "nflverse Week 3 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 3
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0035228",
+      "team": "MIN",
+      "reportedStatus": "Out",
+      "injury": "Hamstring",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -142,7 +186,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -159,7 +203,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 8 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 8
         }
       ],
@@ -176,13 +220,36 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 10 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0031408",
+      "team": "SF",
+      "reportedStatus": "Out",
+      "injury": "Achilles",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 10
         }
       ],
@@ -199,13 +266,13 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 10 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 10
         }
       ],
@@ -222,23 +289,31 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
     },
     {
-      "id": "00-0031408",
-      "team": "SF",
+      "id": "00-0035700",
+      "team": "GB",
       "reportedStatus": "Out",
-      "injury": "Achilles",
+      "injury": "Finger",
       "outWeeks": [],
       "sources": [
         {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -254,24 +329,8 @@
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0041037",
-      "team": "CLE",
-      "reportedStatus": "Questionable",
-      "injury": "Toe",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -287,7 +346,83 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0041037",
+      "team": "CLE",
+      "reportedStatus": "Questionable",
+      "injury": "Toe",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0038994",
+      "team": "MIN",
+      "reportedStatus": "Questionable",
+      "injury": "Thumb",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0035685",
+      "team": "HOU",
+      "reportedStatus": "Out",
+      "injury": "Groin",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -303,7 +438,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -319,23 +461,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0035685",
-      "team": "HOU",
-      "reportedStatus": "Questionable",
-      "injury": "Groin",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -351,41 +477,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0039373",
-      "team": "NO",
-      "reportedStatus": "Out",
-      "injury": "Thigh",
-      "outWeeks": [],
-      "sources": [
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
         {
           "kind": "weekly_report",
-          "title": "nflverse Week 1 injury report: Out",
+          "title": "nflverse Week 10 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 1
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0036894",
-      "team": "PIT",
-      "reportedStatus": "Questionable",
-      "injury": "Calf",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "weekly_report",
-          "title": "nflverse Week 6 injury report: Questionable",
-          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 6
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -401,8 +500,48 @@
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0039373",
+      "team": "NO",
+      "reportedStatus": "Out",
+      "injury": "Thigh",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 1 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 1
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0036894",
+      "team": "PIT",
+      "reportedStatus": "Questionable",
+      "injury": "Illness",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 6 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 6
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -418,7 +557,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -435,40 +574,8 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0038994",
-      "team": "MIN",
-      "reportedStatus": "Questionable",
-      "injury": "Thumb",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0038041",
-      "team": "DAL",
-      "reportedStatus": "Out",
-      "injury": "Knee",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -484,8 +591,31 @@
           "kind": "weekly_report",
           "title": "nflverse Week 4 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 4
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0038041",
+      "team": "DAL",
+      "reportedStatus": "Out",
+      "injury": "Knee",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -501,7 +631,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
         }
       ],
@@ -518,13 +648,13 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 10 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 10
         }
       ],
@@ -541,7 +671,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -557,7 +687,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -573,7 +710,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -589,7 +733,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -605,7 +756,41 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0038394",
+      "team": "IND",
+      "reportedStatus": "Questionable",
+      "injury": "Hamstring",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0037120",
+      "team": "DAL",
+      "reportedStatus": "Out",
+      "injury": "Ankle",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -621,7 +806,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -638,7 +823,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 8 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 8
         }
       ],
@@ -655,7 +840,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Doubtful",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -671,7 +863,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -687,7 +886,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -703,7 +909,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ],
@@ -712,15 +918,54 @@
     {
       "id": "00-0033217",
       "team": "IND",
-      "reportedStatus": "Out",
+      "reportedStatus": "IR",
       "injury": "Groin",
+      "outWeeks": [
+        10
+      ],
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays.",
+      "sources": [
+        {
+          "kind": "roster_status",
+          "title": "NFL roster status via Sleeper: injured reserve",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "publishedDate": "2026-11-14",
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
+        },
+        {
+          "kind": "status_feed",
+          "title": "Sleeper player status (game week unspecified)",
+          "url": "https://api.sleeper.app/v1/players/nfl",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ]
+    },
+    {
+      "id": "00-0036259",
+      "team": "MIN",
+      "reportedStatus": "Out",
+      "injury": "Calf",
       "outWeeks": [],
       "sources": [
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -736,7 +981,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ],
@@ -753,24 +998,8 @@
           "kind": "weekly_report",
           "title": "nflverse Week 5 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 5
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0036259",
-      "team": "MIN",
-      "reportedStatus": "Out",
-      "injury": "Calf",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -786,7 +1015,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -802,7 +1038,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 8 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 8
         }
       ],
@@ -819,7 +1055,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -835,7 +1078,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 8 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 8
         }
       ],
@@ -852,7 +1095,14 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -868,7 +1118,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ],
@@ -885,14 +1135,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
-        },
-        {
-          "kind": "weekly_report",
-          "title": "nflverse Week 9 injury report: Doubtful",
-          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 9
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -908,8 +1151,25 @@
           "kind": "weekly_report",
           "title": "nflverse Week 2 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 2
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0037004",
+      "team": "ARI",
+      "reportedStatus": "Questionable",
+      "injury": "Knee",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -925,58 +1185,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 5 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 5
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0040078",
-      "team": "KC",
-      "reportedStatus": "Out",
-      "injury": "Hamstring",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "weekly_report",
-          "title": "nflverse Week 7 injury report: Out",
-          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 7
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0038824",
-      "team": "MIA",
-      "reportedStatus": "Questionable",
-      "injury": "Hip",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "weekly_report",
-          "title": "nflverse Week 3 injury report: Questionable",
-          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 3
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0041069",
-      "team": "CIN",
-      "reportedStatus": "Questionable",
-      "injury": "Knee",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "weekly_report",
-          "title": "nflverse Week 5 injury report: Questionable",
-          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 5
         }
       ],
@@ -993,8 +1202,93 @@
           "kind": "weekly_report",
           "title": "nflverse Week 5 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 5
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0040078",
+      "team": "KC",
+      "reportedStatus": "Out",
+      "injury": "Hamstring",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 7 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 7
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0038824",
+      "team": "MIA",
+      "reportedStatus": "Questionable",
+      "injury": "Hip",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 3 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 3
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0041069",
+      "team": "CIN",
+      "reportedStatus": "Questionable",
+      "injury": "Knee",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 5 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 5
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0040959",
+      "team": "KC",
+      "reportedStatus": "Questionable",
+      "injury": "Hamstring",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
+        }
+      ],
+      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
+    },
+    {
+      "id": "00-0036556",
+      "team": "HOU",
+      "reportedStatus": "Out",
+      "injury": "Finger",
+      "outWeeks": [],
+      "sources": [
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -1010,13 +1304,13 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 10 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 10
         }
       ],
@@ -1037,20 +1331,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
-        },
-        {
-          "kind": "weekly_report",
-          "title": "nflverse Week 9 injury report: Doubtful",
-          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
-          "reportWeek": 9
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1069,19 +1356,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 10 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 10
         }
       ]
@@ -1101,19 +1388,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 3 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 3
         }
       ]
@@ -1133,13 +1420,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Doubtful",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1158,19 +1452,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 3 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 3
         }
       ]
@@ -1190,13 +1484,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1215,13 +1516,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Doubtful",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1240,13 +1548,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1265,13 +1573,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1290,13 +1598,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1315,13 +1623,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1340,13 +1655,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1365,13 +1680,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Out",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1390,13 +1712,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1415,19 +1737,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 5 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 5
         }
       ]
@@ -1447,13 +1769,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1472,13 +1794,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1497,13 +1819,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1522,13 +1851,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1543,13 +1872,13 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -1566,7 +1895,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -1586,13 +1915,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1611,19 +1940,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ]
@@ -1643,13 +1972,20 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
+        },
+        {
+          "kind": "weekly_report",
+          "title": "nflverse Week 10 injury report: Questionable",
+          "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
+          "reportWeek": 10
         }
       ]
     },
@@ -1664,7 +2000,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 3 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 3
         }
       ],
@@ -1685,19 +2021,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ]
@@ -1717,19 +2053,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ]
@@ -1749,19 +2085,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ]
@@ -1781,13 +2117,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1806,13 +2142,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1831,19 +2167,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ]
@@ -1863,13 +2199,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1888,13 +2224,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -1909,13 +2245,13 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -1936,19 +2272,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
         }
       ]
@@ -1968,19 +2304,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ]
@@ -2000,13 +2336,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2021,13 +2357,13 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -2048,13 +2384,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2073,13 +2409,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2098,13 +2434,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2123,13 +2459,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2148,19 +2484,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 8 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 8
         }
       ]
@@ -2180,13 +2516,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2205,19 +2541,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ]
@@ -2237,19 +2573,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ]
@@ -2265,7 +2601,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -2285,19 +2621,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ]
@@ -2317,19 +2653,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ]
@@ -2345,7 +2681,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -2366,13 +2702,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2387,7 +2723,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -2403,7 +2739,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
         }
       ],
@@ -2424,13 +2760,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2449,13 +2785,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2474,13 +2810,13 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ]
     },
@@ -2499,19 +2835,19 @@
           "title": "NFL roster status via Sleeper: injured reserve",
           "url": "https://api.sleeper.app/v1/players/nfl",
           "publishedDate": "2026-11-14",
-          "retrievedAt": "2026-11-14T01:58:54.201544+00:00"
+          "retrievedAt": "2026-11-14T18:59:58.088083+00:00"
         },
         {
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         },
         {
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ]
@@ -2527,7 +2863,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 6 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 6
         }
       ],
@@ -2544,7 +2880,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 1 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 1
         }
       ],
@@ -2561,7 +2897,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -2578,7 +2914,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
@@ -2595,7 +2931,7 @@
           "kind": "status_feed",
           "title": "Sleeper player status (game week unspecified)",
           "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -2611,7 +2947,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
         }
       ],
@@ -2628,24 +2964,8 @@
           "kind": "weekly_report",
           "title": "nflverse Week 7 injury report: Questionable",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 7
-        }
-      ],
-      "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
-    },
-    {
-      "id": "00-0035228",
-      "team": "MIN",
-      "reportedStatus": "Out",
-      "injury": "Hamstring",
-      "outWeeks": [],
-      "sources": [
-        {
-          "kind": "status_feed",
-          "title": "Sleeper player status (game week unspecified)",
-          "url": "https://api.sleeper.app/v1/players/nfl",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00"
         }
       ],
       "note": "Source flag requires a current-week availability check. A prior-week or week-unspecified Out flag does not establish a new absence. Points are conditional on playing."
@@ -2661,7 +2981,7 @@
           "kind": "weekly_report",
           "title": "nflverse Week 9 injury report: Out",
           "url": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_2026.csv",
-          "retrievedAt": "2026-11-14T01:58:53.788935+00:00",
+          "retrievedAt": "2026-11-14T18:59:57.572601+00:00",
           "reportWeek": 9
         }
       ],
