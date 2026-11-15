@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-11-14T16:52:35.675Z",
+ "updatedAt": "2026-11-15T00:41:38.826Z",
  "week": 10,
  "players": {
   "1737": {
@@ -23,7 +23,7 @@
    "practice": null
   },
   "4054": {
-   "status": "Out",
+   "status": "IR",
    "body": "Groin",
    "practice": "DNP"
   },
@@ -73,7 +73,7 @@
    "practice": "Limited"
   },
   "5892": {
-   "status": "Questionable",
+   "status": "Out",
    "body": "Groin",
    "practice": "Full"
   },
@@ -113,8 +113,8 @@
    "practice": "DNP"
   },
   "7204": {
-   "status": "IR",
-   "body": "Ankle",
+   "status": "Questionable",
+   "body": "Knee",
    "practice": "Limited"
   },
   "7525": {
@@ -128,7 +128,7 @@
    "practice": null
   },
   "7543": {
-   "status": "IR",
+   "status": "Questionable",
    "body": "Hamstring",
    "practice": "Full"
   },
@@ -140,6 +140,11 @@
   "7587": {
    "status": "IR",
    "body": "Calf",
+   "practice": null
+  },
+  "7600": {
+   "status": "Questionable",
+   "body": "Illness",
    "practice": null
   },
   "7611": {
@@ -188,7 +193,7 @@
    "practice": null
   },
   "8168": {
-   "status": "IR",
+   "status": "Questionable",
    "body": "Ankle",
    "practice": "Limited"
   },
@@ -232,11 +237,6 @@
    "body": "Knee",
    "practice": "Full"
   },
-  "9511": {
-   "status": "Questionable",
-   "body": "Hip",
-   "practice": null
-  },
   "9756": {
    "status": "Questionable",
    "body": "Thumb",
@@ -268,7 +268,7 @@
    "practice": null
   },
   "11370": {
-   "status": "IR",
+   "status": "Questionable",
    "body": "Ankle",
    "practice": "Limited"
   },
@@ -298,7 +298,7 @@
    "practice": "Full"
   },
   "11626": {
-   "status": "IR",
+   "status": "Questionable",
    "body": "Knee",
    "practice": "Full"
   },
@@ -363,7 +363,7 @@
    "practice": null
   },
   "12529": {
-   "status": "Out",
+   "status": "IR",
    "body": "Illness",
    "practice": "DNP"
   },
@@ -433,8 +433,8 @@
    "practice": null
   },
   "13380": {
-   "status": "Questionable",
-   "body": "Quadriceps",
+   "status": "Doubtful",
+   "body": "Hamstring",
    "practice": null
   }
  },
