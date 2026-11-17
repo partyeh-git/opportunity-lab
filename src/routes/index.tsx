@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { loadSnapshots } from "@/lib/snapshots";
+import { loadSnapshots, newerSnapshotAvailable } from "@/lib/snapshots";
 import {
   ArrowRightLeft,
   BarChart3,
@@ -65,6 +65,36 @@ const navItems = [
 ] as const;
 type Screen = (typeof navItems)[number][0];
 
+// A tab left open keeps the projections it started with, so the site checks GitHub for a newer
+// build every 10 minutes and whenever the tab comes back into view. Coming back to the tab reloads
+// straight away (nothing on screen to lose); while you are looking, it offers a button instead.
+function useNewerSnapshot(ready: boolean) {
+  const [newer, setNewer] = useState(false);
+  useEffect(() => {
+    if (!ready) return;
+    let lastCheck = Date.now();
+    let cancelled = false;
+    const check = async (returning: boolean) => {
+      if (Date.now() - lastCheck < 60_000 && !returning) return;
+      lastCheck = Date.now();
+      if (!(await newerSnapshotAvailable()) || cancelled) return;
+      if (returning) window.location.reload();
+      else setNewer(true);
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastCheck > 60_000) check(true);
+    };
+    const timer = window.setInterval(() => check(false), 10 * 60_000);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [ready]);
+  return newer;
+}
+
 // The weekly projections load from GitHub at startup (lib/snapshots); screens read them after.
 function SnapshotGate({ children }: { children: ReactNode }) {
   const snapshots = useQuery({
@@ -73,7 +103,22 @@ function SnapshotGate({ children }: { children: ReactNode }) {
     staleTime: Infinity,
     retry: 2,
   });
-  if (snapshots.isSuccess) return <>{children}</>;
+  const newer = useNewerSnapshot(snapshots.isSuccess);
+  if (snapshots.isSuccess)
+    return (
+      <>
+        {children}
+        {newer && (
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-md border border-volt bg-background px-4 py-2 text-sm text-foreground shadow-lg"
+          >
+            New projections are out. Tap to load them.
+          </button>
+        )}
+      </>
+    );
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 text-sm text-muted-foreground">
       {snapshots.isError

@@ -49,3 +49,25 @@ export async function loadSnapshots() {
     next && next.season === players.season && next.week === players.week + 1 ? next : players;
   return true;
 }
+
+/**
+ * Has GitHub got a newer weekly build than the one this page loaded? The small DST file is rebuilt
+ * in the same job as the player file, so its build time stands in for both (saves pulling 3MB).
+ */
+export async function newerSnapshotAvailable(): Promise<boolean> {
+  if (!defensesSnapshot) return false;
+  try {
+    const response = await fetch(
+      "https://raw.githubusercontent.com/partyeh-git/opportunity-lab/main/src/data/dst-current.json",
+      { cache: "no-store" },
+    );
+    if (!response.ok) return false;
+    const latest = (await response.json()) as DefensesSnapshot;
+    return (
+      typeof latest?.generatedAt === "string" &&
+      latest.generatedAt > (defensesSnapshot.generatedAt ?? "")
+    );
+  } catch {
+    return false;
+  }
+}
