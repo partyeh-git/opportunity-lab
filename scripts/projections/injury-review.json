@@ -1,8 +1,22 @@
 {
   "season": 2026,
   "week": 11,
-  "reviewedAt": "2026-11-17T20:48:17.789910+00:00",
+  "reviewedAt": "2026-11-17T22:00:35.057136+00:00",
   "records": [
+    {
+      "id": "00-0038117",
+      "team": "TEN",
+      "reportedStatus": "IR",
+      "injury": "Ankle",
+      "outWeeks": [
+        11
+      ],
+      "publishedDate": "2026-11-17",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
     {
       "id": "00-0037664",
       "team": "IND",
