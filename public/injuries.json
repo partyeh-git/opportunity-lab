@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-11-19T02:13:55.752Z",
+ "updatedAt": "2026-11-19T19:23:48.984Z",
  "week": 11,
  "players": {
   "829": {
@@ -310,7 +310,7 @@
   "11628": {
    "status": "Out",
    "body": "Hamstring",
-   "practice": null
+   "practice": "DNP"
   },
   "11630": {
    "status": "IR",
@@ -350,7 +350,7 @@
   "12474": {
    "status": "Out",
    "body": "Concussion",
-   "practice": null
+   "practice": "DNP"
   },
   "12487": {
    "status": "IR",
@@ -453,5 +453,9 @@
    "practice": null
   }
  },
- "practice": {}
+ "practice": {
+  "5892": "Full",
+  "11628": "DNP",
+  "12474": "DNP"
+ }
 }
