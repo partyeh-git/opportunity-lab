@@ -1,8 +1,22 @@
 {
   "season": 2026,
   "week": 11,
-  "reviewedAt": "2026-11-21T02:59:17.707949+00:00",
+  "reviewedAt": "2026-11-21T20:26:06.451207+00:00",
   "records": [
+    {
+      "id": "00-0039032",
+      "team": "TEN",
+      "reportedStatus": "IR",
+      "injury": "Knee",
+      "outWeeks": [
+        11
+      ],
+      "publishedDate": "2026-11-21",
+      "sourceKind": "roster_status",
+      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
+      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
+      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
+    },
     {
       "id": "00-0037664",
       "team": "IND",
@@ -218,20 +232,6 @@
       "team": "PHI",
       "reportedStatus": "IR",
       "injury": "Calf",
-      "outWeeks": [
-        11
-      ],
-      "publishedDate": "2026-11-21",
-      "sourceKind": "roster_status",
-      "sourceUrl": "https://api.sleeper.app/v1/players/nfl",
-      "sourceTitle": "NFL roster status via Sleeper: injured reserve",
-      "note": "On a list he cannot play from this week. Return date not confirmed; later weeks assume he plays."
-    },
-    {
-      "id": "00-0039739",
-      "team": "PIT",
-      "reportedStatus": "IR",
-      "injury": "Finger",
       "outWeeks": [
         11
       ],
