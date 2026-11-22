@@ -1,8 +1,13 @@
 {
- "updatedAt": "2026-11-22T00:53:56.252Z",
+ "updatedAt": "2026-11-22T18:17:43.101Z",
  "week": 11,
  "players": {
   "829": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
+  "1737": {
    "status": "Out",
    "body": "Coach's Decision",
    "practice": null
@@ -15,11 +20,6 @@
   "2216": {
    "status": "Questionable",
    "body": "Achilles",
-   "practice": "Limited"
-  },
-  "2505": {
-   "status": "Questionable",
-   "body": "Knee",
    "practice": "Limited"
   },
   "4054": {
@@ -41,11 +41,6 @@
    "status": "IR",
    "body": "Thumb",
    "practice": null
-  },
-  "4892": {
-   "status": "Questionable",
-   "body": "Lower Leg",
-   "practice": "Limited"
   },
   "4943": {
    "status": "Out",
@@ -92,6 +87,11 @@
    "body": "Knee",
    "practice": null
   },
+  "6828": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
   "6904": {
    "status": "IR",
    "body": "Calf",
@@ -111,11 +111,6 @@
    "status": "IR",
    "body": "Hamstring",
    "practice": null
-  },
-  "7694": {
-   "status": "Questionable",
-   "body": "Knee",
-   "practice": "Limited"
   },
   "8110": {
    "status": "Out",
@@ -145,7 +140,7 @@
   "8136": {
    "status": "Questionable",
    "body": "Heel",
-   "practice": null
+   "practice": "DNP"
   },
   "8142": {
    "status": "IR",
@@ -240,7 +235,7 @@
   "10226": {
    "status": "IR",
    "body": "Thumb",
-   "practice": null
+   "practice": "Full"
   },
   "10232": {
    "status": "IR",
@@ -248,13 +243,8 @@
    "practice": null
   },
   "10236": {
-   "status": "Doubtful",
+   "status": "Out",
    "body": "Thumb",
-   "practice": "DNP"
-  },
-  "10871": {
-   "status": "Questionable",
-   "body": "Illness",
    "practice": "DNP"
   },
   "11435": {
@@ -266,11 +256,6 @@
    "status": "Out",
    "body": "Ankle",
    "practice": null
-  },
-  "11577": {
-   "status": "Questionable",
-   "body": "Foot",
-   "practice": "DNP"
   },
   "11583": {
    "status": "IR",
@@ -297,11 +282,6 @@
    "body": "Hamstring",
    "practice": "DNP"
   },
-  "11630": {
-   "status": "Questionable",
-   "body": "Hand",
-   "practice": "Full"
-  },
   "11635": {
    "status": "Questionable",
    "body": "Back",
@@ -311,11 +291,6 @@
    "status": "IR",
    "body": "Hamstring",
    "practice": null
-  },
-  "11729": {
-   "status": "Questionable",
-   "body": "Ankle",
-   "practice": "Limited"
   },
   "12048": {
    "status": "Out",
@@ -365,7 +340,7 @@
   "12533": {
    "status": "IR",
    "body": "Groin",
-   "practice": null
+   "practice": "Full"
   },
   "12536": {
    "status": "IR",
@@ -387,14 +362,14 @@
    "body": "Ankle",
    "practice": "DNP"
   },
-  "13279": {
-   "status": "Questionable",
-   "body": "Shoulder",
-   "practice": "Full"
-  },
   "13287": {
    "status": "IR",
    "body": "Ankle",
+   "practice": null
+  },
+  "13288": {
+   "status": "Out",
+   "body": "Coach's Decision",
    "practice": null
   },
   "13320": {
@@ -427,6 +402,7 @@
   "1373": "Full",
   "1466": "Full",
   "2216": "Limited",
+  "2449": "DNP",
   "2505": "Limited",
   "4034": "Full",
   "4035": "Full",
@@ -441,6 +417,8 @@
   "5892": "Full",
   "5947": "Limited",
   "5967": "Full",
+  "6770": "Full",
+  "6801": "Full",
   "6819": "Full",
   "7049": "Full",
   "7525": "Full",
@@ -448,10 +426,14 @@
   "7527": "Limited",
   "7594": "Full",
   "7694": "Limited",
+  "7716": "Full",
   "8110": "DNP",
   "8111": "Full",
   "8127": "Limited",
+  "8135": "Full",
+  "8136": "DNP",
   "8151": "DNP",
+  "8210": "Full",
   "9228": "Full",
   "9479": "Full",
   "9486": "Limited",
@@ -459,9 +441,11 @@
   "9756": "DNP",
   "10219": "Full",
   "10225": "DNP",
+  "10226": "Full",
   "10229": "Full",
   "10236": "DNP",
   "10871": "DNP",
+  "11566": "Full",
   "11575": "Full",
   "11577": "DNP",
   "11583": "Full",
@@ -472,10 +456,12 @@
   "11635": "Limited",
   "11637": "Full",
   "11729": "Limited",
+  "11942": "Full",
   "12467": "Limited",
   "12474": "DNP",
   "12490": "Limited",
   "12519": "Full",
+  "12533": "Full",
   "12534": "Full",
   "12544": "Limited",
   "13276": "DNP",
