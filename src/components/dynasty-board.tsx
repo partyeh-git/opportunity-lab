@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useLeague } from "@/components/league-context";
 import { TradeIdeas } from "@/components/trade-ideas";
 import { DynastyTradeCalculator } from "@/components/dynasty-trade";
+import { RookieBoard } from "@/components/rookie-board";
 import { fetchPublicJson } from "@/lib/live-data";
 import { moveToRank, parseOrder, reconcileOrder } from "@/lib/ranking-order";
 
@@ -56,7 +57,7 @@ const riskChip: Record<string, string> = {
   High: "bg-red-100 text-red-800 dark:bg-red-400/20 dark:text-red-200",
 };
 
-const positionChip: Record<string, string> = {
+export const positionChip: Record<string, string> = {
   QB: "bg-rose-100 text-rose-800 dark:bg-rose-400/20 dark:text-rose-200",
   RB: "bg-lime-100 text-lime-800 dark:bg-lime-400/20 dark:text-lime-200",
   WR: "bg-sky-100 text-sky-800 dark:bg-sky-400/20 dark:text-sky-200",
@@ -64,7 +65,7 @@ const positionChip: Record<string, string> = {
   PICK: "bg-violet-100 text-violet-800 dark:bg-violet-400/20 dark:text-violet-200",
 };
 
-function InfoBubble({ label, children }: { label: string; children: ReactNode }) {
+export function InfoBubble({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Popover>
       <PopoverTrigger
@@ -461,9 +462,9 @@ export function DynastyBoard() {
   );
 }
 
-/** Dynasty tab: the long-term board, or trade ideas built from the same values. */
+/** Dynasty tab: the long-term board, trade tools built from the same values, and the rookie board. */
 export function DynastyScreen() {
-  const [view, setView] = useState<"board" | "calc" | "trades">("board");
+  const [view, setView] = useState<"board" | "calc" | "trades" | "rookies">("board");
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-1 rounded-md border p-1 w-fit" role="tablist">
@@ -472,6 +473,7 @@ export function DynastyScreen() {
             ["board", "Board"],
             ["calc", "Trade calculator"],
             ["trades", "Trade ideas"],
+            ["rookies", "Rookie draft"],
           ] as const
         ).map(([v, label]) => (
           <Button
@@ -490,6 +492,8 @@ export function DynastyScreen() {
         <DynastyBoard />
       ) : view === "calc" ? (
         <DynastyTradeCalculator />
+      ) : view === "rookies" ? (
+        <RookieBoard />
       ) : (
         <TradeIdeas />
       )}
