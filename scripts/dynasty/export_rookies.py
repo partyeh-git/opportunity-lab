@@ -27,10 +27,10 @@ def num(v, nd=0):
 players = []
 for r in d.itertuples():
     flag = None
-    if bool(r.no_board):
-        flag = "On no NFL draft board yet (may stay in school). Draft slot is a guess."
+    if "capital_from_college" in d.columns and bool(r.capital_from_college):
+        flag = "Not on NFL draft boards yet, so the draft slot is estimated from college production and age (rough)."
     elif bool(r.dt_missing):
-        flag = "Missing from the deep DraftTek board (may stay in school). Slot from Walter only."
+        flag = "On one NFL draft board only (Walter), so the draft slot comes from that board alone."
     players.append(
         {
             "id": slug(r.name, r.pos),

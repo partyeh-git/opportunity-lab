@@ -281,8 +281,8 @@ export function RookieBoard() {
         </table>
       </div>
       <p className="text-xs text-muted-foreground">
-        Amber triangle: not on every NFL board yet (may return to school), so the draft slot is
-        shakier. Scored {new Date(file.generatedAt).toLocaleDateString()}.
+        Amber triangle: thinner draft-slot info (on one NFL board, or none yet). Everyone listed is
+        assumed to enter the draft. Scored {new Date(file.generatedAt).toLocaleDateString()}.
       </p>
     </div>
   );
