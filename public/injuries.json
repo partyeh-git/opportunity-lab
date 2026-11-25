@@ -1,35 +1,20 @@
 {
- "updatedAt": "2026-11-25T03:55:50.172Z",
+ "updatedAt": "2026-11-25T20:23:42.075Z",
  "week": 12,
  "players": {
-  "829": {
-   "status": "Out",
-   "body": "Coach's Decision",
-   "practice": null
-  },
-  "1737": {
-   "status": "Out",
-   "body": "Coach's Decision",
-   "practice": null
-  },
   "2133": {
    "status": "IR",
    "body": "Hamstring",
    "practice": null
   },
+  "2216": {
+   "status": "Questionable",
+   "body": "Achilles",
+   "practice": null
+  },
   "3198": {
    "status": "Questionable",
    "body": "Concussion",
-   "practice": null
-  },
-  "3286": {
-   "status": "Out",
-   "body": "Coach's Decision",
-   "practice": null
-  },
-  "4033": {
-   "status": "Questionable",
-   "body": "Shoulder",
    "practice": null
   },
   "4054": {
@@ -47,34 +32,19 @@
    "body": "Lower Leg",
    "practice": null
   },
-  "4866": {
-   "status": "Questionable",
-   "body": "Arm",
-   "practice": null
-  },
   "4881": {
    "status": "IR",
    "body": "Thumb",
    "practice": null
   },
   "4943": {
-   "status": "Out",
-   "body": "Quadriceps",
-   "practice": null
-  },
-  "4983": {
    "status": "Questionable",
-   "body": "Knee",
+   "body": "Quadriceps",
    "practice": null
   },
   "5008": {
    "status": "IR",
    "body": "Achilles",
-   "practice": null
-  },
-  "5022": {
-   "status": "Questionable",
-   "body": "Shin",
    "practice": null
   },
   "5409": {
@@ -83,23 +53,18 @@
    "practice": null
   },
   "5849": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Hamstring",
    "practice": null
   },
   "5859": {
-   "status": "Out",
+   "status": "Doubtful",
    "body": "Hamstring",
    "practice": null
   },
   "5927": {
    "status": "IR",
    "body": "Knee",
-   "practice": null
-  },
-  "5938": {
-   "status": "Out",
-   "body": "Coach's Decision",
    "practice": null
   },
   "5973": {
@@ -125,11 +90,6 @@
   "6826": {
    "status": "IR",
    "body": "Knee",
-   "practice": null
-  },
-  "6828": {
-   "status": "Out",
-   "body": "Coach's Decision",
    "practice": null
   },
   "6904": {
@@ -167,11 +127,6 @@
    "body": "Knee",
    "practice": null
   },
-  "8112": {
-   "status": "Questionable",
-   "body": "Head",
-   "practice": null
-  },
   "8121": {
    "status": "IR",
    "body": "Shoulder",
@@ -185,11 +140,6 @@
   "8142": {
    "status": "IR",
    "body": "Heel",
-   "practice": null
-  },
-  "8150": {
-   "status": "Questionable",
-   "body": "Toe",
    "practice": null
   },
   "8151": {
@@ -210,6 +160,11 @@
   "8168": {
    "status": "Questionable",
    "body": "Ankle",
+   "practice": "Limited"
+  },
+  "8183": {
+   "status": "Questionable",
+   "body": "Ankle",
    "practice": null
   },
   "8188": {
@@ -220,7 +175,7 @@
   "8204": {
    "status": "Questionable",
    "body": "Thigh",
-   "practice": null
+   "practice": "Limited"
   },
   "8208": {
    "status": "IR",
@@ -263,7 +218,7 @@
    "practice": null
   },
   "9756": {
-   "status": "Out",
+   "status": "Doubtful",
    "body": "Thumb",
    "practice": null
   },
@@ -273,7 +228,7 @@
    "practice": null
   },
   "10225": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Ankle",
    "practice": null
   },
@@ -288,28 +243,13 @@
    "practice": null
   },
   "10236": {
-   "status": "Out",
-   "body": "Thumb",
-   "practice": null
-  },
-  "10859": {
    "status": "Questionable",
-   "body": "Ankle",
-   "practice": null
-  },
-  "11435": {
-   "status": "Out",
-   "body": "Coach's Decision",
+   "body": "Thumb",
    "practice": null
   },
   "11564": {
    "status": "Out",
    "body": "Ankle",
-   "practice": null
-  },
-  "11577": {
-   "status": "Questionable",
-   "body": "Illness",
    "practice": null
   },
   "11583": {
@@ -323,7 +263,7 @@
    "practice": null
   },
   "11608": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Ribs",
    "practice": null
   },
@@ -333,13 +273,8 @@
    "practice": null
   },
   "11628": {
-   "status": "Out",
-   "body": "Hamstring",
-   "practice": null
-  },
-  "11646": {
    "status": "Questionable",
-   "body": "Undisclosed",
+   "body": "Hamstring",
    "practice": null
   },
   "11655": {
@@ -358,14 +293,14 @@
    "practice": null
   },
   "12474": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Concussion",
    "practice": null
   },
   "12487": {
    "status": "IR",
    "body": "Ankle",
-   "practice": null
+   "practice": "DNP"
   },
   "12489": {
    "status": "IR",
@@ -408,7 +343,7 @@
    "practice": null
   },
   "13276": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Ankle",
    "practice": null
   },
@@ -417,24 +352,9 @@
    "body": "Ankle",
    "practice": null
   },
-  "13288": {
-   "status": "Out",
-   "body": "Coach's Decision",
-   "practice": null
-  },
-  "13311": {
-   "status": "Questionable",
-   "body": "Chest",
-   "practice": null
-  },
   "13320": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Hamstring",
-   "practice": null
-  },
-  "13329": {
-   "status": "Out",
-   "body": "Coach's Decision",
    "practice": null
   },
   "13346": {
@@ -448,7 +368,7 @@
    "practice": null
   },
   "13380": {
-   "status": "Out",
+   "status": "Questionable",
    "body": "Hamstring",
    "practice": null
   },
@@ -456,12 +376,16 @@
    "status": "Out",
    "body": "Hamstring",
    "practice": null
-  },
-  "13602": {
-   "status": "Out",
-   "body": "Coach's Decision",
-   "practice": null
   }
  },
- "practice": {}
+ "practice": {
+  "421": "Full",
+  "3271": "Full",
+  "6865": "Full",
+  "8150": "Full",
+  "8168": "Limited",
+  "8204": "Limited",
+  "10214": "Full",
+  "12487": "DNP"
+ }
 }
