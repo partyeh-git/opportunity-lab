@@ -1,7 +1,12 @@
 {
- "updatedAt": "2026-11-26T03:21:13.900Z",
+ "updatedAt": "2026-11-26T20:00:12.877Z",
  "week": 12,
  "players": {
+  "1737": {
+   "status": "Out",
+   "body": "Coach's Decision",
+   "practice": null
+  },
   "2133": {
    "status": "IR",
    "body": "Hamstring",
@@ -21,6 +26,11 @@
    "status": "Questionable",
    "body": "Concussion",
    "practice": null
+  },
+  "3271": {
+   "status": "Out",
+   "body": "Chest",
+   "practice": "Full"
   },
   "4033": {
    "status": "Questionable",
@@ -95,12 +105,7 @@
   "6806": {
    "status": "Sus",
    "body": "Personal",
-   "practice": null
-  },
-  "6819": {
-   "status": "IR",
-   "body": "Foot",
-   "practice": null
+   "practice": "DNP"
   },
   "6826": {
    "status": "IR",
@@ -138,19 +143,19 @@
    "practice": null
   },
   "7757": {
-   "status": "Questionable",
+   "status": "IR",
    "body": "Calf",
    "practice": null
   },
   "7828": {
    "status": "Questionable",
    "body": "Ribs",
-   "practice": null
+   "practice": "Full"
   },
   "8110": {
    "status": "Out",
    "body": "Knee",
-   "practice": null
+   "practice": "DNP"
   },
   "8119": {
    "status": "Questionable",
@@ -185,7 +190,7 @@
   "8151": {
    "status": "Out",
    "body": "Groin",
-   "practice": null
+   "practice": "DNP"
   },
   "8154": {
    "status": "IR",
@@ -198,8 +203,8 @@
    "practice": null
   },
   "8167": {
-   "status": "Questionable",
-   "body": "Thigh",
+   "status": "Out",
+   "body": "Concussion",
    "practice": null
   },
   "8183": {
@@ -215,12 +220,7 @@
   "8208": {
    "status": "IR",
    "body": "Thumb",
-   "practice": null
-  },
-  "8489": {
-   "status": "Questionable",
-   "body": "Knee",
-   "practice": null
+   "practice": "Full"
   },
   "9225": {
    "status": "IR",
@@ -285,7 +285,7 @@
   "10225": {
    "status": "Out",
    "body": "Ankle",
-   "practice": null
+   "practice": "DNP"
   },
   "10226": {
    "status": "IR",
@@ -300,7 +300,7 @@
   "10236": {
    "status": "Questionable",
    "body": "Thumb",
-   "practice": null
+   "practice": "Limited"
   },
   "11201": {
    "status": "Questionable",
@@ -382,6 +382,11 @@
    "body": "Knee - Meniscus",
    "practice": null
   },
+  "12517": {
+   "status": "Out",
+   "body": "Knee",
+   "practice": null
+  },
   "12521": {
    "status": "IR",
    "body": "Shoulder",
@@ -456,11 +461,27 @@
  "practice": {
   "421": "Full",
   "3271": "Full",
+  "3294": "Full",
+  "4046": "Full",
+  "4866": "Full",
+  "5022": "Full",
+  "6806": "DNP",
   "6865": "Full",
+  "7525": "Full",
+  "7828": "Full",
+  "8110": "DNP",
   "8150": "Full",
+  "8151": "DNP",
   "8168": "Limited",
   "8204": "Limited",
+  "8208": "Full",
   "10214": "Full",
-  "12487": "DNP"
+  "10225": "DNP",
+  "10229": "Full",
+  "10236": "Limited",
+  "10859": "Full",
+  "11577": "Limited",
+  "12487": "DNP",
+  "12492": "Full"
  }
 }
